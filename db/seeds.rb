@@ -6,17 +6,17 @@
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
 
-p '      Creada Facultad!    '.center(200, '=') if fau = Faculty.create(code: 'FAU', name: 'Facultad de Arquitectura y Urbanismo')
+p '      Creada Facultad!    '.center(200, '=') if faco = Faculty.create(code: 'FACO', name: 'Facultad de Odontología')
 
 p '      Creado Primer Usuario!    '.center(200, '=') if user = User.create!(email: 'moros.daniel@gmail.com', first_name: 'Daniel Josué', last_name: 'Moros Castillo', ci: '15573230', password: 123123)
 
-p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :super, env_authorizable: fau)
+p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :super, env_authorizable: faco)
 
 p '      Creado Segundo Usuario!    '.center(200, '=') if user = User.create!(email: 'saavedraazuaje73@gmail.com', first_name: 'Carlos Alberto', last_name: 'Saavedra Azuaje', ci: '10264009', password: 123123)
 
-p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :super, env_authorizable: fau)
+p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :super, env_authorizable: faco)
 
-p '      Creada Escuela!    '.center(200, '=') if escuela = School.create(code: 'EACRV', name: 'Escuela de Arquitectura Carlos Raúl Villanueva', faculty: fau)
+p '      Creada Escuela!    '.center(200, '=') if escuela = School.create(code: 'FACO', name: 'Escuela de Odontología', faculty: faco)
 
 p '      Creados Primeros Tipos de Períodos!    '.center(200, '=') if PeriodType.create([{code: 'I', name: 'Primero'}, {code: 'II', name: 'Segundo'}, {code: 'U', name: 'Único'}, {code: 'E', name: 'Especial (Intensivo)'}])
 

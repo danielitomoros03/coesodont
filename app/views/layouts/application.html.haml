@@ -2,7 +2,7 @@
 %html{ lang: "#{I18n.locale}"}
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
-    %title Coesfau
+    %title Coesfaco
     %meta{:content => "width=device-width, initial-scale=1, shrink-to-fit=no", :name => "viewport"}/
     = csrf_meta_tags
     = csp_meta_tag
@@ -10,7 +10,7 @@
     = stylesheet_link_tag "fontawesome", "data-turbo-track": "reload"
     =# stylesheet_link_tag "style", "data-turbo-track": "reload", id: 'style-switch'
     = javascript_include_tag "application", "data-turbo-track": "reload", defer: true
-    = favicon_link_tag 'ico_logo.png'
+    = favicon_link_tag 'banner_logo.jpg'
 
   %body
     %main
