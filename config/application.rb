@@ -7,7 +7,7 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module Coesfau
+module Coesfaco
   class Application < Rails::Application
     config.generators do |generate|
       generate.assets false

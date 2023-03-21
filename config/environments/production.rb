@@ -85,7 +85,7 @@ Rails.application.configure do
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter     = :resque
-  # config.active_job.queue_name_prefix = "coesfau_production"
+  # config.active_job.queue_name_prefix = "coesfaco_production"
 
   config.action_mailer.perform_caching = false
 
@@ -101,7 +101,7 @@ Rails.application.configure do
   #  authentication:     'plain',
   #  enable_starttls_auto: true
   #}
-  #config.action_mailer.default_url_options = { host: 'https://coesfau.com'}
+  #config.action_mailer.default_url_options = { host: 'https://coesfaco.com'}
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
