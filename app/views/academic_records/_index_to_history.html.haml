@@ -1,0 +1,23 @@
+- logged_as_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
+%table.table.table-condensed.table-striped.table-hover
+  %thead
+    %tr
+      %th Código
+      %th Asignatura
+      %th Créd
+      %th Tipo
+      %th Sec
+      %th Cal
+      %th Opc
+
+  %tbody
+    - academic_records.by_subjects.each do |academic_record|
+      - subject = academic_record.subject
+      %tr{class: academic_record.tr_class_by_status_q}
+        %td= link_to_if logged_as_admin, subject.code, "/admin/subject/#{subject.id}"
+        %td= subject.name
+        %td= subject.unit_credits
+        %td= subject.modality_initial_letter
+        %td= link_to_if logged_as_admin, academic_record.section.code, "/admin/section/#{academic_record.section.id}"
+        %td= academic_record.final_q_to_02i
+        %td.align-middle= render partial: 'academic_records/options', locals: {academic_record: academic_record}

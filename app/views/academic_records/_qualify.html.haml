@@ -1,25 +1,31 @@
 
 %table.table.table-condensed.table-striped.table-hover.border.table-bordered.table-sm.table-responsive
   %thead
-    %tr
-      %th #
-      %th CI
+    %tr.text-center
+      %th{style: 'width: 30px'} #
+      - if false #(current_user and current_user.admin? and current_user.admin.yo?)
+        %th AcRe ID
+        %th Sec ID
+        %th EnrollID
+        %th Period
+      %th{style: 'width: 80px'} CI
+      %th{style: 'width: 100px'} Estado Insc
       %th Estudiante
       
       - if section.subject.numerica?
-        %th PI
-        %th Cal. Final
+        %th.text-center PI
+        %th.text-center Cal. Final
         - if false
           %th CD
           %th CR
           %th Cal. Repar
       - else
-        %th Cal. Final
-      %th Descripción
-      %th Estado
+        %th.text-center Cal. Final
+      %th{style: 'width: 150px'} Descripción
+      %th{style: 'width: 120px'} Estado
 
 
-  %tbody
+  %tbody.align-middle.align-items-center
     - section.academic_records.joins(:user).order('users.last_name ASC, users.first_name ASC').each_with_index do |acre, i|
       - user = acre.user
       - id = acre.id
@@ -28,9 +34,15 @@
       - disable_row = (retirado || acre.pi? || preinscrito)
       - status = acre.status
       %tr{id: "acRe#{acre.id}", class: acre.tr_class_by_status_q}
-        %td= i+1
-        %td= user.ci
-        %td
+        %td.text-center= i+1
+        - if false #current_user and current_user.admin? and current_user.admin.yo?
+          %td= acre.id
+          %td= acre.section.id
+          %td= acre.enroll_academic_process_id
+          %td= acre.period.name
+        %td.text-center= user.ci
+        %td.text-center= acre.enroll_academic_process.label_status
+        %td{title: user.reverse_name}
           - if current_user.admin? and session[:rol].eql? 'admin'
             %a{href: "/admin/student/#{acre.student.id}"}= user.reverse_name 
           - else
@@ -41,7 +53,7 @@
           - @academic_record = acre
           = render partial: '/academic_records/form_qualify', locals: {academic_record: acre, disable_row: disable_row, status: status, id: id, preinscrito: preinscrito}
         = render partial: '/academic_records/qualification_to_s', locals: {academic_record: acre, id: id}
-        %td
+        %td.text-center
           .badge.bg-info{id: "labelStatus#{acre.id}"}= status.titleize
 
 :javascript
@@ -93,6 +105,19 @@
 
   }
 
+  function valor_a_letras(value, ar_id) {
+
+    console.log(value);
+    let clase = 'table-success'
+    if (value == 'aplazado') clase = 'table-danger'
+
+    $(`#acRe${ar_id}`).removeClass().addClass(clase);
+    $(`#_${ar_id}qualfication_to_s`).val(value.toUpperCase());
+    value = value.replace('a', value.charAt(0).toUpperCase());
+    $(`#labelStatus${ar_id}`)[0].innerHTML = value;
+
+  }
+
   function pi(ele) {
     let id = $(ele).attr('id_obj');
     let status;
@@ -103,13 +128,23 @@
     sendData('pi', ele, id, url, values);
   }
 
+  function sendAbsolute(ele) {
+    let elem = $(ele);
+    let id = elem.attr('id_obj');
+    let val = elem.val();
+    let url = `/academic_records/${id}`
+    let values = `{"academic_record": {"status": "${val}"}}`;
+    console.log("VAL despues de values: "+val);
+    sendData('absolute', val, id, url, values);    
+  }
+
   function sendQualification(ele, val2) {
     let elem = $(ele);
     let id = elem.attr('id_obj');
     let tipo = elem.attr('type_q');
     let val = elem.val();
-    val = parseInt(val)
-    let url = `/qualifications/${id}`
+    val = parseInt(val);
+    let url = `/qualifications/${id}`;
     let values = `{"qualification": {"value": ${val}, "type_q": "${tipo}"}}`;
     console.log("VAL despues de values: "+val);
     sendData('qualifiable', val, id, url, values, val2);
@@ -128,11 +163,13 @@
       done: function(json) {
         if (tipo == 'pi') {desactivar_por_pi(ele, id)}
         if (tipo == 'qualifiable') {numero_a_letras(ele, id)}
+        if (tipo == 'absolute') {valor_a_letras(ele, id)}
         messageSendData(json.type, json.data);
       },
       success: function(json) {
         if (tipo == 'pi') {desactivar_por_pi(ele, id)}
         if (tipo == 'qualifiable') {numero_a_letras(ele, id)}
+        if (tipo == 'absolute') {valor_a_letras(ele, id)}
         if (val2 != undefined) {numero_a_letras(val2, id)}
         messageSendData(json.type, json.data);
       },
@@ -146,12 +183,12 @@
   }
 
   function messageSendData(clase, msg) {
-    let elem = $('#message')
+    let elem = $('#message');
 
-    elem.removeClass('alert-danger alert-success')
+    elem.removeClass('alert-danger alert-success');
 
-    elem.addClass(`alert-${clase}`)
-    elem.html(msg)
+    elem.addClass(`alert-${clase}`);
+    elem.html(msg);
     
     elem.fadeIn(0);
     elem.fadeOut(4000);

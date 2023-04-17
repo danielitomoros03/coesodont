@@ -1,0 +1,16 @@
+= hidden_field_tag 'total_credits', totalCreditsReserved
+= hidden_field_tag 'total_subjects', totalSubjectsReserved
+- tableColor = (totalCreditsReserved > limitCredits or totalSubjectsReserved > limitSubjects) ? 'table-danger' : 'table-success'
+
+%table.table.table-sm.responsive-table
+  %tbody
+    %tr{class: tableColor}
+      %td{style: 'width: 66%;text-align:right;'} Total Créditos Seleccionados:
+      %td
+        %b.text-right#totalNumberOfCredits= totalCreditsReserved
+        = "de #{limitCredits} permitidos."
+    %tr{class: tableColor}
+      %td{style: 'width: 66%;text-align:right;'} Total Asignaturas Seleccionadas:
+      %td
+        %b.text-right#totalNumberOfSubjects= totalSubjectsReserved
+        = "de #{limitSubjects} permitidas."

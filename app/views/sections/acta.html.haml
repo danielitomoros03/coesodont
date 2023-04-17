@@ -1,76 +1,31 @@
-.text-center.py-2
-  = image_tag wicked_pdf_asset_base64('logo_ucv.png'), class: 'img-fluid mb-2' 
-  %p UNIVERSIDAD CENTRAL DE VENEZUELA
-  %p= "CONTROL DE ESTUDIO #{@school.type_entity.upcase}"
-  %p= @school.name.upcase
-  %p PLANILLA DE EXAMEN
+= render 'acta_header'
+= render 'acta_title'
+= render 'acta_description'
+= render 'acta_academic_records'
 
-%table.table.table-sm.table-bordered
-  %thead
-    %tr
-      %td
-        %b FECHA DE EMISIÓN:
-        = Date.today.strftime('%d/%m/%Y %I:%M %p')
-      %td
-        %b ACTA NO.:
-        = @section.number_acta
-    %tr
-      %td
-        %b EJERCICIO:
-        = @section.period.name
-      %td
-        %b PERIODO ACADÉMICO:
-        = @period.name
-    %tr
-      %td
-        %b FACULTAD:
-        = @section.faculty.name
-      %td
-        %b TIPO DE CONVOCATORIA:
-        = @section.conv_type
-    %tr
-      %td
-        %b ESCUELA:
-        = @school.name
-      %td
-%br
-
-%table.table.table-borderless.table-sm.text-center
-  %thead
-    %tr 
-      %th ASIGNATURA
-      %th COD ASIG
-      %th UNI. CRÉDITOS
-      %th TIPO
-      %th SECCIÓN
-      %th DURACIÓN
-
-  %tbody
-    %tr
-      %td= @subject.name
-      %td= @subject.code.upcase
-      %td= @subject.unit_credits
-      %td= @subject.modality_initial_letter
-      %td= @section.code.upcase
-      %td= @section.conv_long
-
-
-%table.table.table-sm.table-striped
-  %thead
-    %tr
-      - @section.subject.conv_header.each do |header| 
-        %th= header.html_safe
-
-  %tbody
-    - @section.academic_records.each_with_index do |ar, i| 
-      - if ar.post_q?
-        %tr
-          %td= i+1
-          - conv_descrip = ar.conv_descrip true
-          - conv_descrip.each do |desc|
-            %td= desc
+.signatures
+  .font-title.text-center FACULTAD
+  %table.no_border
+    %thead
       %tr
-        %td= i+1
-        - ar.conv_descrip.each do |desc|
-          %td= desc
-
+        %th.text-center{style: 'width: 500px'} JURADO EXAMINADOR
+        %th.text-center{style: 'width: 500px'} SECRETARÍA
+  %br
+  %table.no_border
+    %thead
+      %tr
+        %th APELLIDOS Y NOMBRES
+        %th FIRMAS
+        %th 
+      %tr{style: 'height:30px'}
+        %th _________________________________
+        %th ______________________
+        %th NOMBRE ______________________        
+      %tr{style: 'height:30px'}
+        %th _________________________________
+        %th ______________________
+        %th FIRMA _______________________
+      %tr{style: 'height:30px'}
+        %th _________________________________
+        %th ______________________
+        %th FECHA _______________________

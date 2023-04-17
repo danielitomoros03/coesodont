@@ -33,7 +33,7 @@ WickedPdf.config = {
 WickedPdf.config ||= {}
 WickedPdf.config.merge!({
   layout: "layouts/pdf",
-  orientation: "Landscape", # Portrait
+  orientation: "Portrait", # Landscape
   page_size: "letter",
   lowquality: true,
   zoom: 1,

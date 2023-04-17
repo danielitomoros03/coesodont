@@ -331,7 +331,7 @@ class ImportCsv
 							row['nombre_periodo'].strip!
 							row['nombre_periodo'].upcase!
 
-							if period = Period.find_by_name(row['nombre_periodo']).first
+							if period = Period.find_by(name: row['nombre_periodo'])
 								periodo_id = period.id
 								p "   PERIODO: #{periodo_id}    ".center(200, "=")
 							else 

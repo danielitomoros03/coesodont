@@ -1,0 +1,11 @@
+.text-center.py-2.font-sm
+  = image_tag wicked_pdf_asset_base64('logo_ucv.png'), class: 'img-fluid mb-2', width: '50px' 
+  %br
+  .font-title UNIVERSIDAD CENTRAL DE VENEZUELA
+  = @school.name.upcase
+  %br  
+  = "CONTROL DE ESTUDIO #{@school.type_entity.upcase}"
+  %br 
+  PLANILLA DE EXAMENES
+  %br
+  = "TIPO DE EXAMEN: #{@period.period_type.name.upcase} #{@section.academic_process.modality.upcase}"

@@ -15,6 +15,8 @@ class Grade < ApplicationRecord
   belongs_to :student, primary_key: :user_id
   belongs_to :study_plan
   belongs_to :admission_type
+  belongs_to :enabled_enroll_process, foreign_key: 'enabled_enroll_process_id', class_name: 'AcademicProcess', optional: true
+
   has_one :school, through: :study_plan
   
   has_many :enroll_academic_processes, dependent: :destroy
@@ -25,6 +27,7 @@ class Grade < ApplicationRecord
 
   # ENUMERIZE:
   enum registration_status: [:universidad, :facultad, :escuela]
+  enum enrollment_status: [:preinscrito, :asignado, :confirmado]
   enum graduate_status: [:no_graduable, :tesista, :posible_graduando, :graduando, :graduado]
 
   #SCOPES:
@@ -40,11 +43,26 @@ class Grade < ApplicationRecord
   # scope :with_enrollments_in_period, -> (period_id) { joins(academic_records: {section: {course: :academic_process}}).where('academic_processes.period_id = ?', period_id).group(:'enroll_academic_processes.id').having('COUNT(*) > 0').count}
 
   # ATENCIÓN: EL UNIQ DEBO HACERLO EN EL LLAMADO DEL SCOPE ANTERIOR YA QUE DE LO CONTRARIO DEVUELVE LA CANTIDAD DE REGISTROS VINCULADOS A LAS enroll_academic_processes
-  scope :enrolled_in_academic_process, -> (academic_process_id) { joins(:enroll_academic_processes, :academic_processes).where('academic_processes.id': academic_process_id) }
+
+  scope :enrolled_in_academic_process, -> (academic_process_id) { joins(:academic_processes).where('academic_processes.id': academic_process_id) }
+
+  scope :not_enrolled_in_academic_process, -> (academic_process_id) { joins(:enroll_academic_processes, :academic_processes).where.not("academic_processes.id": academic_process_id) }
 
   scope :sort_by_numbers, -> () {order([efficiency: :desc, simple_average: :desc, weighted_average: :desc])}
   
   scope :total_with_enrollments_in_period, -> (period_id) { with_enrollments_in_period(period_id).uniq.count }
+
+  scope :with_academic_records, -> { where('(SELECT COUNT(*) FROM  "grades" INNER JOIN "enroll_academic_processes" ON "enroll_academic_processes"."grade_id" = "grades"."id" INNER JOIN "academic_records" ON "academic_records"."enroll_academic_process_id" = "enroll_academic_processes"."id") > 0') }
+
+  scope :with_academic_records, -> {joins(:academic_records)}
+  
+  scope :without_academic_records, -> { where('(SELECT COUNT(*) FROM  "grades" INNER JOIN "enroll_academic_processes" ON "enroll_academic_processes"."grade_id" = "grades"."id" INNER JOIN "academic_records" ON "academic_records"."enroll_academic_process_id" = "enroll_academic_processes"."id") IS NULL') }
+
+  scope :without_enroll_academic_processes, -> {left_joins(:enroll_academic_processes).where('enroll_academic_processes.grade_id': nil)}
+
+  # AVANCES EN PIGGLY-SCOPE
+  # scope :without_enroll_in_academic_processes, -> (academic_process_id) {left_joins(:enroll_academic_processes).where('enroll_academic_processes.grade_id': nil, 'enroll_academic_processes.academic_process_id': academic_process_id)}
+
 
 
   # VALIDATIONS:
@@ -56,6 +74,24 @@ class Grade < ApplicationRecord
 
   # FUNCTIONS:
 
+  # TO CSV:
+
+  def appointment_from_to
+    if self.appointment_time and self.appointment_slot_time
+      aux = (I18n.localize(self.appointment_time, format: "%A, %d de %B de %Y de %I:%M%p")) 
+      aux += (I18n.localize(self.appointment_slot_time, format: "a %I:%M%p,"))
+      return aux
+    end
+  end
+
+  def appointment_from
+    I18n.l(self.appointment_time, format: "%I:%M %p") if self.appointment_time
+  end
+
+  def appointment_to
+    I18n.l(self.appointment_time+self.duration_slot_time.minutes, format: "%I:%M %p") if (self.appointment_time and self.duration_slot_time.minutes)
+  end
+
   def label_status_enroll_academic_process(academic_process_id)
     if iep = self.enroll_academic_processes.of_academic_process(academic_process_id).first
       iep.label_status
@@ -64,6 +100,54 @@ class Grade < ApplicationRecord
     end
   end
 
+  def subjects_approved
+    self.academic_records.aprobado.joins(:subject).select('subjects.id')
+  end
+
+  def subjects_offer_by_dependent
+    # Buscamos los ids de las asignaturas aprobadas
+    aprobadas_ids = subjects_approved.ids
+
+    # Buscamos por ids de las asignaturas que dependen de las aprobadas
+    subjects_dependients_ids = Dependency.where('subject_parent_id IN (?)', aprobadas_ids).map{|dep| dep.subject_dependent_id}
+
+    ids_subjects_positives = []
+
+    # Ahora por cada asignatura habilitada miramos sus respectivas dependencias a ver si todas están aprobadas
+
+    subjects_dependients_ids.each do |subj_id|
+      ids_aux = Dependency.where(subject_dependent_id: subj_id).map{|dep| dep.subject_parent_id}
+      ids_aux.reject!{|id| aprobadas_ids.include? id}
+      ids_subjects_positives << subj_id if (ids_aux.eql? []) #Si aprobó todas las dependencias
+    end
+
+    # Buscamos las asignaturas sin prelación
+    ids_subjects_independients = self.school.subjects.independents.ids
+
+    # Sumamos todas las ids ()
+    asignaturas_disponibles_ids = ids_subjects_positives + ids_subjects_independients
+
+    Subject.where(id: asignaturas_disponibles_ids)
+  end
+
+
+
+  # APPOINTMENT_TIME:
+  def appointment_slot_time
+    (self.appointment_time and self.duration_slot_time) ? self.appointment_time+self.duration_slot_time.minutes : nil    
+  end
+
+  def is_new?
+    !enroll_academic_processes.any?
+  end
+
+  def academic_records_any?
+    self.academic_records.any?
+  end
+
+  def can_enroll_by_apponintment? #puede_inscribir?
+    ((self.appointment_time and self.duration_slot_time) and (Time.zone.now > self.appointment_time) and (Time.zone.now < self.appointment_time+self.duration_slot_time.minutes) ) ? true : false
+  end
 
   def appointment_time_desc
     if (appointment_time and duration_slot_time)
@@ -83,7 +167,7 @@ class Grade < ApplicationRecord
   end
 
   def description
-    "Plan de Estudio: #{study_plan.name}, Admitido vía: #{admission_type.name}, Estado de Inscripción: #{registration_status.titleize}" if study_plan and admission_type and registration_status
+    "Plan de Estudio: #{study_plan.name}, Admitido vía: #{admission_type.name}, Estado de Inscripción: #{registration_status.titleize}" if (study_plan and admission_type and registration_status)
   end
 
   def numbers
@@ -101,15 +185,30 @@ class Grade < ApplicationRecord
     end
 
     show do
-      field :student
+      fields :student, :enroll_academic_processes, :enabled_enroll_process
       field :numbers
       field :description
-      field :enroll_academic_processes
-      # field :academic_records 
+    end
+
+    update do
+      fields :study_plan, :admission_type, :registration_status, :enabled_enroll_process, :enrollment_status
+      field :appointment_time do
+        label 'Fecha y Hora Cita Horaria'
+      end
+      field :duration_slot_time do 
+        label 'Duración Cita Horaria (minutos)'
+      end
     end
 
     edit do
       fields :study_plan, :admission_type, :registration_status
+      field :enrollment_status
+      field :appointment_time do
+        label 'Fecha y Hora Cita Horaria'
+      end
+      field :duration_slot_time do 
+        label 'Duración Cita Horaria (minutos)'
+      end      
     end
 
     export do
@@ -120,20 +219,36 @@ class Grade < ApplicationRecord
 
   # NUMBERSTINY:
 
-  def total_credits_coursed periods_ids = nil
-    if periods_ids
-      academic_records.total_credits_coursed_on_periods periods_ids
+  def total_credits_coursed process_ids = nil
+    if process_ids
+      academic_records.total_credits_coursed_on_process process_ids
     else
       academic_records.total_credits_coursed
     end
   end
 
-  def total_credits_approved periods_ids = nil
-    if periods_ids
-      academic_records.total_credits_approved_on_periods periods_ids
+  def total_subjects_coursed
+    academic_records.total_subjects_coursed
+  end
+
+  def total_subjects_approved
+    academic_records.total_subjects_approved
+  end  
+
+  def total_credits_approved process_ids = nil
+    if process_ids
+      academic_records.total_credits_approved_on_process process_ids
     else
       academic_records.total_credits_approved
     end
+  end
+
+  def total_credits_approved_without_equivalence
+    academic_records.without_equivalence.total_credits_approved
+  end
+
+  def total_credits_approved_by_equivalence
+    self.academic_records.by_equivalence.total_credits
   end
 
   def total_credits
@@ -184,7 +299,7 @@ class Grade < ApplicationRecord
     end
     cursados = self.total_credits_coursed periods_ids
 
-    (cursados > 0 and aux and aux.is_a? BigDecimal) ? (aux.to_f/cursados.to_f).round(4) : 0.0
+    (cursados > 0 and aux) ? (aux.to_f/cursados.to_f).round(4) : 0.0
   end
 
   def calculate_weighted_average_approved
@@ -199,9 +314,6 @@ class Grade < ApplicationRecord
     aux = self.academic_records.promedio_approved
     (aux and aux.is_a? BigDecimal) ? aux.round(4) : 0.0
   end
-
-
-
 
   after_initialize do
     if new_record?

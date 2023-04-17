@@ -1,3 +1,4 @@
+require 'same_period_validator'
 RailsAdmin.config do |config|
   config.asset_source = :webpack
 
@@ -17,7 +18,7 @@ RailsAdmin.config do |config|
   # config.authorize_with :pundit
 
   ## == PaperTrail ==
-  # config.audit_with :paper_trail, 'User', 'PaperTrail::Version' # PaperTrail >= 3.0.0
+  config.audit_with :paper_trail, 'User', 'PaperTrail::Version' # PaperTrail >= 3.0.0
 
   ### More at https://github.com/railsadminteam/rails_admin/wiki/Base-configuration
 
@@ -40,36 +41,54 @@ RailsAdmin.config do |config|
     config.rollback_on_error = false
   end
 
+  # config.navigation_static_links = {
+  #   'Cambiar Período' => 'http://www.google.com'
+  # }
+  # config.navigation_static_label = "Opciones"
 
   config.actions do
     dashboard                     # mandatory
+    require_relative '../../lib/rails_admin/config/actions/dashboard'
     index do                         # mandatory
 
       except [SectionTeacher, Profile, Address, EnrollmentDay, Qualification, Dependency]
       # except [Address, SectionTeacher, Profile, User, StudyPlan, Period, Course, Faculty]
 
     end
-    new
-    export
-    bulk_delete
+    new do
+      except [School, Faculty]
+    end
+    export do
+      except [School]
+
+    end
+    bulk_delete do
+      except [AcademicProcess, Subject]
+    end
     show
     edit
-    delete
+    delete do
+      except [School, StudyPlan, Faculty, EnrollAcademicProcess]
+    end
     import do
       only [User, Student, Teacher, Subject, Section, AcademicRecord]
     end
     # show_in_app
 
     ## With an audit adapter, you can add:
-    # history_index
-    # history_show
+    history_index
+    history_show
   end
 
 
 
-  # config.model "ActionText::RichText" do
-  #   visible false
-  # end
+  config.model "ActionText::EncryptedRichText" do
+    visible false
+  end
+
+  config.model "ActionText::RichText" do
+    visible false
+  end  
 
   # config.model 'User' do
   #   configure :preview do

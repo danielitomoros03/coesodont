@@ -1,0 +1,24 @@
+%h6.fw-bold.text-center Totales
+%table.table.table-sm.border
+	%tr
+		%td.text-end Asignaturas Cursadas:
+		%td.text-start.fw-bold= grade.total_subjects_coursed
+	%tr
+		%td.text-end Asignaturas Aprobadas:
+		%td.text-start.fw-bold= grade.total_subjects_approved
+	%tr
+		%td.text-end Créditos Inscritos:
+		%td.text-start.fw-bold= grade.total_credits
+	%tr
+		%td.text-end Créditos Cursados:
+		%td.text-start.fw-bold= grade.total_credits_coursed
+	%tr
+		%td.text-end Créditos Aprobados (Sin Equivalencias):
+		%td.text-start.fw-bold= grade.total_credits_approved_without_equivalence
+	%tr
+		%td.text-end Créditos Equivalencia:
+		%td.text-start.fw-bold= grade.total_credits_approved_by_equivalence
+	%tr
+		%td.text-end Total Créditos Aprobados:
+		%td.text-start.fw-bold= grade.total_credits_approved
+

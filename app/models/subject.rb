@@ -10,12 +10,19 @@ class Subject < ApplicationRecord
   # t.bigint "area_id", null: false  
   # t.boolean "force_absolute", default: false  
 
+  # HISTORY:
+  has_paper_trail on: [:create, :destroy, :update]
+
+  before_create :paper_trail_create
+  before_destroy :paper_trail_destroy
+  before_update :paper_trail_update
+
   # ASSOCIATIONS:
   belongs_to :area
   has_one :school, through: :area
 
   has_many :courses, dependent: :destroy
-
+  has_many :sections, through: :courses
 
   has_many :parents, foreign_key: :subject_dependent_id, class_name: 'Dependency'
   has_many :subject_parents, through: :parents
@@ -23,8 +30,6 @@ class Subject < ApplicationRecord
 
   has_many :dependencies, foreign_key: :subject_parent_id, class_name: 'Dependency', dependent: :delete_all
   has_many :subject_dependents, through: :dependencies
-
-
 
   # ENUMS:
   enum qualification_type: [:numerica, :absoluta]
@@ -40,7 +45,12 @@ class Subject < ApplicationRecord
   validates :area, presence: true
 
   # SCOPES: 
+
+  scope :todos, -> {where('0 = 0')}
+
   scope :custom_search, -> (keyword) {joins([:area]).where("subjects.name ILIKE ? or subjects.code ILIKE ? or areas.name ILIKE ?", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%")} 
+
+  scope :independents, -> {joins('LEFT JOIN dependencies ON dependencies.subject_dependent_id = subjects.id').where('dependencies.subject_dependent_id IS NULL')}
 
   # CALLBACKS:
   before_save :clean_values
@@ -53,20 +63,16 @@ class Subject < ApplicationRecord
     self.code.strip!
     self.name.upcase!
     self.code.upcase!
+    self.code = "0#{self.code}" if self.code[0] != '0' 
   end
 
+  # GENERALS FUNCTIONS: 
   # DEPENDENCIES FUNCTIONS:
-
-  # def subject_dependents #asignaturas
-  #   depen_ids = asi.dependencias.map{|dep| dep.asignatura_dependiente_id}
-  #   Asignatura.where('id IN (?)', depen_ids)
-  # end
 
   def full_dependency_tree_ids
     aux = []
     aux << prelation_tree_ids
     aux << dependency_tree_ids
-    p "      AUX FLATTEN: #{aux.flatten.uniq}      ".center(500, "#")
     return aux.flatten.uniq
   end
 
@@ -86,19 +92,42 @@ class Subject < ApplicationRecord
     end
   end
 
-
-
-  # GENERALS FUNCTIONS: 
-  def as_absolute?
-    self.absoluta? or self.force_absolute?
-  end
+  # DESCRIPTIONS TYPES:
 
   def desc
     "#{self.code}: #{self.name}"
   end
 
+  def desc_confirm_enroll
+    "- #{self.name} - #{self.unit_credits}"
+  end
+
+  def description_code
+    desc
+  end
+
+  def description_id_with_credits
+    "#{description_code} (#{unit_credits} Unidades de Créditos)"
+  end
+
+  def desc_to_select
+    "- #{self.description_code} - #{self.unit_credits}"
+  end
+
+  def description_code_with_school
+    "#{description_code} <span class='badge badge-success'>#{self.school.code}</span>".html_safe
+  end
+
+  def description_complete
+    "#{description_code} - #{self.area.name}"
+  end
+
+  def as_absolute?
+    self.absoluta? or self.force_absolute?
+  end
+
   def conv_header
-    data = ["N°", "CÉDULA DE IDENTIDAD", "APELLIDOS Y NOMBRES", "COD. PLAN", "CALIF. DESCR.", "TIPO", "CALIF. EN LETRAS"]
+    data = ["N°", "CÉDULA", "APELLIDOS Y NOMBRES", "PLAN", "CALIF. DESCR.", "TIPO", "CALIF. EN LETRAS"]
 
     data.insert(6, "CALIF. NUM.") unless self.as_absolute?
 
@@ -106,18 +135,30 @@ class Subject < ApplicationRecord
 
   end
 
+  def label_modality
+    return ApplicationController.helpers.label_status("bg-info", self.modality.titleize)
+
+  end
 
   def modality_initial_letter
     case modality
     when 'obligatoria'
-      'OB'
+      'B'
     when 'electiva'
-      'E'
+      'O'
     when 'optativa'
-      'OP'
+      'L'
     when 'proyecto'
       'P'
     end      
+  end
+
+  def total_dependencies
+    self.dependencies.count
+  end
+
+  def total_courses
+    courses.count
   end
 
   rails_admin do
@@ -130,6 +171,7 @@ class Subject < ApplicationRecord
     end
 
     list do
+      scopes [:todos, :obligatoria, :electiva, :optativa]
       search_by :custom_search
 
       field :code do
@@ -142,19 +184,39 @@ class Subject < ApplicationRecord
       end
 
       field :area do
-        column_width 300
+        column_width 200
         searchable :name
       end
-
       field :unit_credits do 
         label 'Crédi'
-        column_width 10
+        column_width 20
       end
-      fields :unit_credits, :ordinal, :qualification_type, :modality, :created_at, :updated_at
+
+      field :total_courses do
+        label 'Cursos'
+        column_width 20
+      end
+
+      field :modality_label do
+        label 'Modalidad'
+        column_width 20
+        searchable 'modality'
+        filterable 'modality'
+        sortable 'modality'
+        formatted_value do
+          bindings[:object].label_modality
+        end        
+      end
+
+
+      field :total_dependencies do
+        label 'Depends'
+        column_width 20
+      end
     end
 
     show do
-      fields :area, :code, :name, :unit_credits, :ordinal, :qualification_type, :modality, :created_at, :updated_at, :subject_parents, :subject_dependents
+      fields :area, :code, :name, :unit_credits, :ordinal, :qualification_type, :modality, :created_at, :updated_at, :subject_parents, :subject_dependents, :courses, :sections
     end
 
     edit do
@@ -187,11 +249,11 @@ class Subject < ApplicationRecord
         inline_edit false
         help 'Asignatura(s) que prela directamente esta Asignatura. El estudiante debe aprobar la(s) asignatura(s) seleccionada(s) a continuación para que esta asignatura sea ofertada.'
       end
-      field :subject_dependents do
-        inline_add false
-        inline_edit false
-        help 'Asignatura(s) que dependen directamente de esta asignatura. Si el estudiante aprueba esta asignatura, la(s) asignatura(s) seleccionada(s) a continuación podrán ser ofertadas.'
-      end
+      # field :subject_dependents do
+      #   inline_add false
+      #   inline_edit false
+      #   help 'Asignatura(s) que dependen directamente de esta asignatura. Si el estudiante aprueba esta asignatura, la(s) asignatura(s) seleccionada(s) a continuación podrán ser ofertadas.'
+      # end
     end
 
     export do
@@ -239,7 +301,7 @@ class Subject < ApplicationRecord
     modality = fields['modality']
     if row[4]
       aux = row[4].strip.downcase
-      modality = aux if Subject.modalities.values.include? aux
+      modality = aux if Subject.modalities.keys.include? aux
     end
     
     subject.modality = modality
@@ -262,5 +324,25 @@ class Subject < ApplicationRecord
 
     return [total_newed, total_updated, no_registred]
   end
+
+  private
+
+
+    def paper_trail_update
+      # changed_fields = self.changes.keys - ['created_at', 'updated_at']
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      # self.paper_trail_event = "¡#{object} actualizado en #{changed_fields.to_sentence}"
+      self.paper_trail_event = "¡#{object} actualizada!"
+    end  
+
+    def paper_trail_create
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡#{object} registrada!"
+    end  
+
+    def paper_trail_destroy
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡Asignatura eliminada!"
+    end
 
 end

@@ -3,6 +3,26 @@
   %head
     %meta{:content => "text/html; charset=utf-8", "http-equiv" => "Content-Type"}/
     :css
-      /* Email styles need to be inline */
-  %body
-    = yield
+      h4 { color: #f00; }
+      ul { list-style: none; }
+      body {background: #f2f2f2, padding-top: 40px;}
+  %body{style: "font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;"}
+
+    %div{style: "background-image: url('https://coesfau.nyc3.cdn.digitaloceanspaces.com/own%2Fbg_banner_main.png'); background-position: center center; background-size: auto auto; background-repeat: no-repeat; ext-align: center;background-color: #E8EFFD;bs-bg-opacity: 0.1;"}
+      .my-2.p-1{style: 'letter-spacing: 1px;padding: 0.25rem !important;margin-top: 0.5rem !important;margin-bottom: 0.5rem !important;text-align: center;'}
+        %p{style: 'margin-bottom: 0 !important;'} UNIVERSIDAD CENTRAL DE VENEZUELA
+        %p{style: 'margin-bottom: 0 !important;'}= Faculty.first.name.titleize if Faculty.any?
+        %p{style: 'margin-bottom: 0 !important;'}= School.first.name.titleize if School.any?
+        %p{style: 'font-weight: 400 !important;'} Sistema de Control de Estudios COES-FAU
+
+
+
+    %div{style: "margin:10px;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;text-align: justify;"}
+      = yield
+
+    %div{style: 'background-color: #42a2b9'}
+      %div{style: "color: #d6e3fc;text-align: center;"}
+        %h4{style: "margin: 0px;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;"} UCV La casa que vence la sombra
+        %h4{style: "margin: 0px;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;"} COES-FAU - UCV 
+
+    %h4{style: "font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;"}= "IMPORTANTE: No dude en contactarnos  por controlestfheucv@gmail.com si requiere de algún tipo de apoyo."

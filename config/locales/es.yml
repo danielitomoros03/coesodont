@@ -1,9 +1,12 @@
 es:
+  edit: Editar
   new: Nuevo
   index: Listado
   show: Detalle
   import: Importar
   export: Generar Reporte
+  history_index: Bitácora
+  history_show: Bitácora
 
   dashboard: Escritorio
   diferido: ND
@@ -29,10 +32,19 @@ es:
   sin_calificar: SC
 
   admin:
+    misc:
+      more: 'Más'
+      count: Total
     table_headers:
       model_name: 'Entidad'
       last_created: 'Último Creado'
       records: 'Registros'
+      created_at: 'Fecha de Acción'
+      username: 'Usuario'
+      item: '¿A quién?'
+      message: 'Acción Realizada'
+      changes: 'Acción Realizada'    
+
     actions:
       index:
         title: 'Listado'
@@ -182,7 +194,7 @@ es:
     links:
       back: "Atrás"
       cancel: "Cancelar"
-      confirm: "Esta acción es irreversible, ¿Estas Seguro?"
+      confirm: "Esta acción es irreversible, ¿Estás Seguro?"
       destroy: "Eliminar"
       new: "Nuevo"
       edit: "Editar"
@@ -264,6 +276,8 @@ es:
           attributes:
             final_q:
               in: 'Debe estar entre 0 y 20'
+            enroll_academic_process:
+              required: requerido
         academic_process:
           attributes:
             period:
@@ -329,6 +343,9 @@ es:
       bank_account:
         one: 'Cuenta Bancaria'
         other: 'Cuentas Bancarias'
+      billboard:
+        one: 'Cartelera'
+        other: 'Carteleras'
       course:
         one: 'Oferta Académica'
         other: 'Ofertas Académicas'
@@ -397,7 +414,7 @@ es:
         process_before: Proceso Anterior
         enrollment_days: Jornadas de Inscripción por Cita Horaria
       academic_record:
-        section: 'Sección'
+        section: 'Oferta Docente'
         enroll_academic_process: 'Inscripción en Proceso Académico'
         first_q: 'Primera Calificación'
         second_q: 'Segunda Calificación'
@@ -413,7 +430,10 @@ es:
         academic_process: 'Proceso Académico'
         period_type: 'Tipo de Período'
         user: 'Usuario'
+        status: Estado
         subject: 'Asignatura'
+        study_plan: Plan de Estudio
+        qualifications: Calificaciones
       academic_record/status_q:
         sin_calificar: 'Sin Calificar'
         aprobado: 'Aprobados'
@@ -446,6 +466,11 @@ es:
         bank: 'Banco'
         account_type: 'Tipo de Cuenta'
         school: 'Escuela'
+      billboard:
+        active: 'Activa'
+        created_at: 'Fecha de Creación'
+        updated_at: 'Fecha de Edición'
+        content: 'Contenido de Cartelera'
       course:
         period: Período
         school: Escuela
@@ -483,6 +508,8 @@ es:
         simple_average: 'Promedio Simple'
         appointment_time: Cita Horaria
         duration_slot_time: Duración Franja Horaria
+        enabled_enroll_process: 'Permiso especial para inscribir en'
+        enrollment_status: 'Estado de Inscripción en la Facultad'
       address:
         state: 'Estado'
         municipality: 'Municipio'
@@ -521,14 +548,15 @@ es:
         enable_subject_retreat: 'Activar retiro de Asignturas'
         enable_change_course: 'Activar cambio de Sección'
         enable_dependents: 'Activar Dependencias'
-        period_active_id: 'Identificador de Período Activo '
-        period_enroll_id: 'Identidicador de Período Inscripción'
+        active_process: Proceso Académico Activo
+        enroll_process: Abrir Inscripción en Proceso Académico 
         faculty: 'Facultad'
         periods: 'Períodos'
         areas: 'Áreas'
         bank_accounts: Cuentas Bancarias
         study_plans: Planes de Estudio
         admission_types: Tipos de Admisión
+        boss_name: Nombre del Jefe de Control Estudio
       schedule:
         day: Día
         starttime: Hora Inicio
@@ -554,6 +582,8 @@ es:
         students: Estudiantes
         schedules: Horarios
         classroom: 'Áula'
+        created_at: Fecha Creación
+        updated_at: Fecha Última Actualización
       student:
         active: 'Activo'
         disability: 'Discapacidad'
@@ -568,7 +598,7 @@ es:
         grades: Grados
         study_plans: Planes de Estudio
         admission_types: Tipos de Admisión
-        grade_title: Título Optenido
+        grade_title: Título Obtenido
         grade_university: Universidad
         graduate_year: Año de Graduado
       study_plan:

@@ -1,13 +1,193 @@
--# frozen_string_literal: true
-= simple_form_for(@enroll_academic_process) do |f|
-  = f.error_notification
-  = f.error_notification message: f.object.errors[:base].to_sentence if f.object.errors[:base].present?
+- school = grade.school
+- academic_process = school.enroll_process
+- courses_offer = academic_process.courses
 
-  .form-inputs
-    = f.association :grade
-    = f.association :academic_process
-    = f.input :enroll_status
-    = f.input :permanence_status
+- if school.enable_dependents?
+  - subjects_offer_by_dependency = grade.subjects_offer_by_dependent
+  - courses_offer = courses_offer.where(subject_id: subjects_offer_by_dependency)
 
-  .form-actions
-    = f.button :submit
+- courses_offer = courses_offer.order_by_subject_code
+
+- limitCredits = academic_process.max_credits
+- limitSubjects = academic_process.max_subjects
+#message.alert.alert-info{style: 'display: none;'}
+
+.alert.alert-warning.text-center.alert-dismissible.fase.show{role: :alert}
+  = msgDanger.html_safe
+  %button.btn-close{"aria-label": "Close", "data-bs-dismiss": :alert, type: :button}
+= form_tag('/enroll_academic_processes/enroll', id: "#{grade.id}Form", class: 'form-horizontal', multipart: true) do
+  .border.p-2{style: 'overflow-y:scroll;max-height:280px'}
+    = hidden_field_tag 'grade_id', grade.id
+    = hidden_field_tag 'academic_process_id', academic_process.id
+
+
+    = render partial: 'enroll_academic_processes/courses_offer', locals: {courses: courses_offer, pcis: false, grade: grade}
+
+    - pcis = academic_process.courses.pcis.order_by_subject_code
+    - if pcis.any?
+      %hr
+      %h4 Asignaturas PCI 
+      = render partial: 'enroll_academic_processes/courses_offer', locals: {courses: pcis, pcis: true, grade: grade}
+
+  = render partial: 'enroll_academic_processes/total_credits', locals: {limitCredits: limitCredits, limitSubjects: limitSubjects, totalCreditsReserved: totalCreditsReserved, totalSubjectsReserved: totalSubjectsReserved }
+  .modal-footer
+    / %a.btn.btn-sm.btn-outline-light{data: {dismiss: 'modal'}} Cancelar
+    - enableSubmit = (totalCreditsReserved > 0 and totalCreditsReserved <= limitCredits and totalSubjectsReserved > 0 and totalSubjectsReserved <= limitSubjects)
+
+    - disabledClass = enableSubmit ? '' : 'disabled'
+    = submit_tag 'Preinscribirse', class: "#{disabledClass} btn btn-success btn-sm", id: 'submitBtn', 'data-disable-with': 'Enviando', disabled: !enableSubmit, onclick: 'completeEnroll(this);'
+
+:javascript
+  function filterSections(ele){
+    console.log(ele.value);
+    var keyword = ele.value;
+    keyword = keyword.toUpperCase();
+    var table_1 = document.getElementById("courses_offer");
+    var all_tr = table_1.getElementsByTagName("tr");
+
+    for(var i=0; i<all_tr.length; i++){
+        var name_column = all_tr[i].getElementsByTagName("td")[1];
+        if(name_column){
+            var name_value = name_column.textContent || name_column.innerText;
+            name_value = name_value.toUpperCase();
+            if(name_value.indexOf(keyword) > -1){
+                all_tr[i].style.display = ""; // show
+            }else{
+                all_tr[i].style.display = "none"; // hide
+            }
+        }
+    }    
+
+  }
+
+  function reserve(url, ev, el) {
+
+    let opcion = el.children("option:selected");
+    $.ajax({
+    url: url,
+    type: 'POST',
+    dataType: 'json',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+    },
+    // beforeSend: function() {
+    //   $('#loading').modal({keyboard: false, show: true, backdrop: 'static'})
+    // },
+    complete: function(json){
+      if (json["responseJSON"].status == 'success'){
+        console.log(json);
+        toastr.success(json["responseJSON"].data);
+
+        totalizar();
+        let trParent = el.closest('tr');
+        if (opcion.val() == '')
+          trParent.removeClass('table-success');
+        else{
+          let cantidad = opcion.text()
+          trParent.addClass('table-success');
+        }
+
+
+      }else{
+        toastr.error(json["responseJSON"].data);
+        ev.preventDefault();
+      }
+      toastr.success(json["responseJSON"].data);
+      console.log('responseJSON: '+json["responseJSON"].data);
+      opcion.text(json["responseJSON"].cupo);
+      let msg = $("#message");
+      msg.text(json["responseJSON"].data);
+      // msg.toggleClass('none');
+      msg.show(500);
+      setTimeout(function() {msg.hide(500);}, 3000);
+      
+      // msg.text('');
+
+      // $('#cargando').modal('hide');
+    }
+    });
+  }
+
+
+
+  function totalizar() {
+
+    let selecteds = $(".selectInscripcion option:selected");
+
+    let totalCredSel = 0;
+    let totalSubjSel = 0
+    let totalCred = $('#totalNumberOfCredits');
+    let totalSubj = $('#totalNumberOfSubjects');
+
+    selecteds.each(function(){
+      if ($(this).val() != ''){
+        totalSubjSel += 1;
+        totalCredSel += Number($(this).parent().attr('credits'));
+      }
+    });
+
+    totalCred.text(totalCredSel);
+    totalSubj.text(totalSubjSel);
+
+    $('#total_credits').val(totalCred.text());
+    $('#total_subjects').val(totalSubj.text());
+    let limiteCreditos = Number(#{limitCredits})
+    let limiteAsignaturas = Number(#{limitSubjects})
+    let submitBtn = $('#submitBtn');
+
+    let activo = ((totalSubjSel > 0) & (totalSubjSel <= limiteAsignaturas) & (totalCredSel <= limiteCreditos)),
+    tr = totalCred.closest('tr');
+    tr2 = totalSubj.closest('tr');
+
+    submitBtn.toggleClass('disabled', !activo);
+    submitBtn.prop('disabled', !activo);
+
+    tr.toggleClass('table-success', activo);
+    tr.toggleClass('table-danger', !activo);
+    tr2.toggleClass('table-success', activo);
+    tr2.toggleClass('table-danger', !activo);
+  }
+  
+
+  function selected(ele) {
+    let elem = $(ele);
+    let gradeId = elem.attr('gradeId');
+    let pci = elem.attr('pci');
+    let courseId = elem.attr('courseId');
+
+    reserve(`/enroll_academic_processes/reserve_space?section_id=${ele.value}&course_id=${courseId}&grade_id=${gradeId}&pci=${pci}`, event, elem);    
+  }
+
+  function completeEnroll(ele){
+    let elem = $(ele);
+    let selected = '\n';
+    let selecteds = $(".selectInscripcion option:selected");
+    let msg;
+    let total = 0;
+    let selectedEle;
+    selecteds.each(function(){
+      selectedEle = $(this);
+      if (selectedEle.val() != ''){
+        total += 1;
+        selected += '\n';
+        selected += selectedEle.parent().attr('title');
+      }
+    });
+
+    if (total == 0){
+      event.preventDefault();
+      alert('ATENCIÓN: DEBE SELECCIONAR AL MENOS UNA ASIGNATURA A INSCRIBIR');
+
+    }else{
+      msg = `${total} Asignaturas a preinscribir en el período académico #{academic_process.period.name} de #{grade.school.name}:`;
+      msg += selected;
+      msg += '\n';
+      msg += '\n';
+      msg += "RECUERDE QUE SU ELECCIÓN ES DEFINITIVA Y NO PODRÁ SER CAMBIADA. ¿Está seguro?" 
+      if (window.confirm(msg) == false) {
+        event.preventDefault();
+      }
+    }
+
+  }
+

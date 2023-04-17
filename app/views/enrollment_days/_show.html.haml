@@ -2,8 +2,9 @@
   %thead
     %tr
       %th.text-center= "Estado Insc #{academic_process.period.name}"
+      %th.text-center Ciudad
       %th Cédula
-      %th.col-4{width: '300px'} Nombre y Apellido
+      %th.col-4{width: '300px'} Apellidos, Nombres
       %th.col-4.text-center Desde
       %th.col-4.text-center Hasta
       %th.col-1 Eficiencia
@@ -11,12 +12,16 @@
       %th.col-1 Ponderado
   %tbody
     - grades.each do |grade, i|
+      - student = grade.student
+      - reverse_name = student.user.reverse_name
       %tr
         %td.text-center= grade.label_status_enroll_academic_process(academic_process.id)
-        %td= grade.student.user_ci
-        %td= link_to grade.user.reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
-        %td.text-center= I18n.l(grade.appointment_time, format: "%I:%M %p")
-        %td.text-center= I18n.l(grade.appointment_time+grade.duration_slot_time.minutes, format: "%I:%M %p")
+        - address = student.address ? student.address.city_and_state : ''
+        %td{title: address}= address
+        %td= student.user_ci
+        %td{title: reverse_name}= link_to reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
+        %td.text-center= grade.appointment_from 
+        %td.text-center= grade.appointment_to
         %td= grade.efficiency
         %td= grade.simple_average
         %td= grade.weighted_average

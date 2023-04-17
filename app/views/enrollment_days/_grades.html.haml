@@ -1,12 +1,12 @@
 %table.table.table-striped.table-sm.table-hover.table-bordered.responsive-table.tableDataMia
   %thead
     %tr
-      - if false
-        %th.text-center.align-middle= "Estado Insc #{academic_process.period.name}"
+
+      %th.text-center.align-middle= "Estado Insc #{academic_process.period.name}"
       - if false
         %th.text-center.align-middle Reglamento
       %th Cédula
-      %th Nombre y Apellido
+      %th Apellidos, Nombres 
       %th Eficiencia
       %th Promedio
       %th Ponderado
@@ -14,8 +14,8 @@
     -# anterior_cita = nil
     - grades.each do |grade, i|
       %tr
-        - if false
-          %td.text-center.align-middle= grade.label_status_enroll_academic_process(academic_process.id)
+
+        %td.text-center.align-middle= grade.label_status_enroll_academic_process(academic_process.id)
         %td= grade.student.user_ci
         %td= link_to grade.user.reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
         %td= grade.efficiency

@@ -1,15 +1,15 @@
 // Entry point for the build script in your package.json
 
-
 import "@hotwired/turbo-rails";
 
 import jquery from 'jquery';
 window.jQuery = jquery;
 window.$ = jquery;
 
+import * as toastr from "toastr";
+window.toastr = toastr;
 import * as bootstrap from 'bootstrap';
 window.bootstrap = bootstrap;
-// window.bootstrap = bootstrap;
 
 // import "./eduport/eduport";
 // import "./eduport/functions";
@@ -23,3 +23,12 @@ var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggl
 var popoverList = popoverTriggerList.map(function(popoverTriggerEl) {
 return new bootstrap.Popover(popoverTriggerEl)
 })
+
+
+/* For Rich Tech in Billboards */
+import "trix"
+import "@rails/actiontext"
+
+//= require jquery3
+//= require popper
+//= require bootstrap-sprockets

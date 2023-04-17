@@ -1,0 +1,14 @@
+- grade.update(efficiency: grade.calculate_efficiency, simple_average: grade.calculate_average, weighted_average: grade.calculate_weighted_average)
+
+=# render partial: '/admin/grados/opciones_descargables'
+.mb-3
+	%h4.text-center.bg-info.py-2 Resumen Académico:
+	
+	= render partial: '/grades/general', locals: {grade: grade}
+	.container
+		.row
+			.col
+				= render partial: '/grades/total_table', locals: {grade: grade}
+			.col
+				= render partial: '/grades/numbers_table', locals: {grade: grade}
+%br

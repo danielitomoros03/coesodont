@@ -22,7 +22,7 @@ class Qualification < ApplicationRecord
   after_destroy :update_academic_record_status
   def update_academic_record_status
     definitive_q_value = self.academic_record.definitive_q_value
-    if definitive_q_value and 
+    if definitive_q_value and !self.academic_record.pi?
       status = (definitive_q_value >= 10) ? :aprobado : :aplazado
       self.academic_record.update(status: status)
     end
@@ -44,6 +44,20 @@ class Qualification < ApplicationRecord
     end
   end
 
+  def desc_conv
+    if self.final?
+      if self.academic_record.pi?
+        'PI'
+      elsif self.academic_record.retirado?
+        'RT'
+      else
+        I18n.t(self.type_q)
+      end
+    else
+      I18n.t(self.type_q)
+    end
+  end
+
   def is_valid_numeric_value?
     !value.blank? and (value.is_a? Integer or value.is_a? Float)
   end
@@ -56,6 +70,12 @@ class Qualification < ApplicationRecord
     status = approved? ? :aprobado : :repproved
     academic_record.update(status: status)
     self.grade.update(efficiency: self.grade.calculate_efficiency, simple_average: self.grade.calculate_average, weighted_average: self.grade.calculate_weighted_average)
+  end
+
+  rails_admin do
+    export do
+      fields :value, :type_q
+    end
   end
 
 end

@@ -1,3 +1,4 @@
+
 %ul.nav.nav-tabs
 	- student.grades.each_with_index do |g,i|
 		- active = (i.eql? 0) ? 'active' : ''
@@ -7,25 +8,7 @@
 .tab-content
 	- student.grades.each_with_index do |g,i|
 		- active = (i.eql? 0) ? 'active' : ''
-		.tab-pane.fade.show{class: active, id: "grade#{g.id}", role: :tabpanel, 'aria-labelledby': "grade-#{g.id}-tab"}
-			.text-center.p-3
-				%h5 Resumen Académico
+		- show = (i.eql? 0) ? 'show' : ''
+		.tab-pane.fade{class: "#{active} #{show}", id: "grade#{g.id}", role: :tabpanel, 'aria-labelledby': "grade-#{g.id}-tab"}
 
-				- if student.user.profile_picture and student.user.profile_picture.attached?
-					= image_tag student.user.profile_picture_as_thumb
-
-				%table.table.table-sm.border.m-3
-					%tr
-						%td Total Asignaturas Inscritas
-						%td= g.academic_records.count
-					%tr
-						%td Eficiencia
-						%td= g.efficiency
-					%tr
-						%td Promedio
-						%td= g.simple_average
-					%tr
-						%td Ponderado
-						%td= g.weighted_average
-
-
+			= render template: 'grades/show', locals: {grade: g}

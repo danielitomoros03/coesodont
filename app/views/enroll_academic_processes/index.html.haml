@@ -1,27 +1,26 @@
-%h1 Listing enroll_academic_processes
+%h4.text-center.mt-2.bg-info.py-2 Historial Académico
 
-%table
-  %thead
-    %tr
-      %th Grade
-      %th Academic process
-      %th Enroll status
-      %th Permanence state
-      %th
-      %th
-      %th
+- enroll_academic_processes.sort_by_period.each do |enroll_academic_process|
+  .border.m-3.p-4
+    %table.table.table-condensed
+      %thead
+        %tr
+          %th.text-center Período
+          %th.text-center Estado Inscripción
+          %th.text-center Estado de Permanencia
+          %th.text-center Total inscripciones
+          %th.text-center Opciones
 
-  %tbody
-    - @enroll_academic_processes.each do |enroll_academic_process|
-      %tr
-        %td= enroll_academic_process.grade
-        %td= enroll_academic_process.academic_process
-        %td= enroll_academic_process.enroll_status
-        %td= enroll_academic_process.permanence_status
-        %td= link_to 'Show', enroll_academic_process
-        %td= link_to 'Edit', edit_enroll_academic_process_path(enroll_academic_process)
-        %td= link_to 'Destroy', enroll_academic_process, method: :delete, data: { confirm: 'Are you sure?' }
+      %tbody
+        %tr
+          %td.text-center= enroll_academic_process.academic_process.period.name
+          %td.text-center
+            .badge.bg-info= enroll_academic_process.enroll_status
+          %td.text-center
+            .badge.bg-info= enroll_academic_process.permanence_status
+          %td.text-center= enroll_academic_process.academic_records.count
+          %td.text-center
+            = render partial: 'enroll_academic_processes/options', locals: {enroll_academic_process: enroll_academic_process}
 
-%br
-
-= link_to 'New Enroll academic process', new_enroll_academic_process_path
+        %tr
+          = render partial: 'academic_records/index_to_history', locals: {academic_records: enroll_academic_process.academic_records}

@@ -17,19 +17,16 @@
       %span.navbar-toggler-icon
     #navbarSupportedContent.collapse.navbar-collapse
       %ul.navbar-nav.me-auto.d-flex
-        - if false
-          %li.nav-item
-          %li.nav-item.dropdown
-            - if current_user and current_user.profile_picture and current_user.profile_picture.attached?
-              = image_tag current_user.profile_picture, class: "avatar dropdown-toggle", id: "navbarDropdown", data: { bs_toggle: "dropdown" }, 'aria-haspopup': true, 'aria-expanded': false, size: '50x50'
-              =# image_tag current_user.profile_picture_as_thumb, class: "avatar dropdown-toggle", id: "navbarDropdown", data: { bs_toggle: "dropdown" }, 'aria-haspopup': true, 'aria-expanded': false
-            - else
-              = image_tag 'foto_perfil_default_35.png'
-            .dropdown-menu.dropdown-menu-end{"aria-labelledby" => "navbarDropdown"}
-              = link_to "Editar Perfil", "#", class: "dropdown-item"
-              = link_to "Log out", destroy_user_session_path, data: {turbo_method: :delete}, class: "dropdown-item"
 
     - if user_signed_in?
+
+      .text-muted.mr-3= current_user.name
+      - if current_user and current_user.profile_picture and current_user.profile_picture.attached?
+        = image_tag current_user.profile_picture, class: "avatar", size: '35x35'
+      - else
+        = image_tag 'foto_perfil_default_35.png'
+
+
       = link_to destroy_user_session_path, data: {turbo_method: :delete}, class: 'float-end mx-3 my-1 btn btn-sm btn-warning' do
         %i.fa.fa-right-from-bracket
         Cerrar sessión

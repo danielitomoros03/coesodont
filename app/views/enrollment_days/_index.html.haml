@@ -1,7 +1,8 @@
-- if (current_user.admin? and session[:rol].eql? 'admin')
+- logged_as_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
+- if logged_as_admin and grades_without_appointment.any?
   - id = 'newEnrollmentDayModal'
-  %button.btn.btn-primary.float-end{"data-bs-target": "##{id}", "data-bs-toggle": :modal, type: :button}
-    .fa.fa-star
+  %button.btn.btn-success.float-end{"data-bs-target": "##{id}", "data-bs-toggle": :modal, type: :button}
+    .fa.fa-plus
     Nueva Jornada por Cita Horaria
 
   - title = 'Nueva Jornada por Cita Horaria'
@@ -16,7 +17,7 @@
     %li.nav-item{role: "presentation"}
       %button.nav-link{"aria-controls": "day#{day.id}", "aria-selected": false, "data-bs-target": "#day#{day.id}", "data-bs-toggle": :tab, role: :tab, type: :button, id: "#day#{day.id}Tab"}
         = I18n.l(day.start, format: "%d/%m/%Y")
-        .badge.bg-dark= day.own_grades_orders.count
+        .badge.bg-dark= day.own_grades_count
 
 #myTabContent.tab-content
   #withoutAppointment.tab-pane.fade.show.active{"aria-labelledby": "withoutAppointment-tab", role: "tabpanel"}
@@ -32,9 +33,12 @@
   - enrollment_days.each do |day|
     .tab-pane.fade{"aria-labelledby": "#day#{day.id}Tab", role: "tabpanel", id: "day#{day.id}"}
 
-      = link_to "/enrollment_days/#{day.id}", class: 'btn btn-danger float-end mt-3', method: :delete, 'data-confirm': 'Esta acción es irreversible ¿Está completamente seguro? Se limpiarán las citas horarias respectivas' do
+      = link_to "/enrollment_days/#{day.id}", class: 'btn btn-danger float-end my-3', method: :delete, 'data-confirm': 'Esta acción es irreversible ¿Está completamente seguro? Se limpiarán las citas horarias respectivas' do
         .fa.fa-trash
         Eliminar Jornada del
         = I18n.l(day.start, format: "%d/%m/%Y")
 
-      = render partial: '/enrollment_days/show', locals: {grades: day.own_grades_orders, academic_process: academic_process }
+      = link_to "/enrollment_days/#{day.id}/export.xls", class: 'btn btn-info float-end m-3' do
+        .fa.fa-download
+        Descargar
+      = render partial: '/enrollment_days/show', locals: {grades: day.own_grades_sort_by_appointment, academic_process: academic_process }

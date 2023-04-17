@@ -23,6 +23,16 @@ class User < ApplicationRecord
   # ENUMERIZE:
   enum sex: [:Femenino, :Masculino]
 
+  # VALIDATION PASSWORD:
+  before_update :set_updated_password
+
+  # HISTORY:
+  has_paper_trail on: [:create, :destroy, :update]
+  
+  before_create :paper_trail_create
+  before_destroy :paper_trail_destroy
+  before_update :paper_trail_update
+
   # ASSOCIATIONS:
   has_one :admin, inverse_of: :user, foreign_key: :user_id, dependent: :destroy
   accepts_nested_attributes_for :admin
@@ -39,11 +49,18 @@ class User < ApplicationRecord
   end
 
   def profile_picture_as_thumb
-    profile_picture.variant(resize_to_limit: [100, 100]).processed
+    begin
+      profile_picture.variant(resize_to_limit: [100, 100]).processed
+    rescue Exception => e
+      
+    end
   end
 
   def ci_image_as_thumb
-    ci_image.variant(resize_to_limit: [100, 100]).processed
+    begin
+      ci_image.variant(resize_to_limit: [100, 100]).processed
+    rescue Exception => e
+    end
   end  
 
   attr_accessor :remove_profile_picture
@@ -91,7 +108,6 @@ class User < ApplicationRecord
   end
 
   before_save :set_clean_values
-
   # HOOKS:
   def after_import_save(record)
     # called on the model after it is saved
@@ -157,22 +173,25 @@ class User < ApplicationRecord
 
   # SEXO
   def sexo_to_s
-    aux = 'Mujer' if femenino?
-    aux = 'Hombre' if masculino?
+    aux = 'Mujer' if self.Femenino?
+    aux = 'Hombre' if self.Masculino?
     return aux.blank? ? 'Indefinido' : aux
   end
 
   def la_el
-    femenino? ? 'la' : 'el'
+    self.Femenino? ? 'la' : 'el'
   end
 
   def genero
     gen = "@"
-    gen = "a" if self.femenino?
-    gen = "o" if self.masculino?
+    gen = "a" if self.Femenino?
+    gen = "o" if self.Masculino?
     return gen
   end
 
+  def short_name
+    "#{first_name} #{last_name.first}."
+  end
   def nick_name
     first_name.split(" ").first
   end
@@ -195,6 +214,13 @@ class User < ApplicationRecord
 
   def description
     "#{self.ci} (#{self.email}): #{self.first_name} #{self.last_name}"
+  end
+
+  def email_desc
+    compile = last_name ? "#{last_name.titleize} " : "" 
+    compile += "#{first_name.titleize} " if first_name
+    compile += "<#{email}>"
+    compile
   end
 
   def ci_fullname
@@ -220,6 +246,16 @@ class User < ApplicationRecord
     aux += 1 if teacher?    
     return aux
   end
+
+  # def profile_set
+  #   # "<img src='/assets/foto_perfil_default_35.png' class='img-thumbnail' />"
+  #   if self.profile_picture and self.profile_picture.attached? and self.profile_picture.representable?
+  #     ActionController::Base.helpers.image_tag(Object.new.extend(ActionView::Helpers::AssetUrlHelper).image_url(self.profile_picture, class: "img-thumbnail"))
+
+  #     # "<img src='#{Object.new.extend(ActionView::Helpers::AssetUrlHelper).image_url(self.profile_picture)}' class='img-thumbnail' />"
+      
+  #   end
+  # end
 
 
   # INTENTOS FALLIDOS REGEXP, AHORA INCLUYE Ñ PERO FALTA EL ACENTO
@@ -266,7 +302,7 @@ class User < ApplicationRecord
       end
 
       field :password do
-        read_only true
+        # read_only true
         aux = 'Si está creando un nuevo usuario, la contraseña será igual a la cédula de identidad. Posteriormente, el usuario mismo podrá cambiarla al iniciar sesión. Si está editando un usuario ya creado, podrá autogestionar su contraseña mediante la opción "Recuperar contraseña" del inicio de sesión.'
         help aux
 
@@ -353,5 +389,32 @@ class User < ApplicationRecord
     end
 
   end
+
+  private
+
+    def paper_trail_update
+      # changed_fields = self.changes.keys - ['created_at', 'updated_at']
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      # self.paper_trail_event = "¡#{object} actualizado en #{changed_fields.to_sentence}"
+      self.paper_trail_event = "¡#{object} actualizado!"
+    end  
+
+    def paper_trail_create
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡#{object} registrado!"
+    end  
+
+    def paper_trail_destroy
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡Usuario eliminado!"
+    end
+
+  private
+    def set_updated_password
+      chagebles = self.changes.keys - ['updated_at']
+      if (chagebles.count.eql? 1 and chagebles.include? "encrypted_password")
+        self.updated_password = true
+      end
+    end
 
 end

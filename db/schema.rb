@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
+ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -23,6 +23,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.datetime "updated_at", null: false
     t.integer "modality", default: 0, null: false
     t.bigint "process_before_id"
+    t.string "name"
     t.index ["period_id"], name: "index_academic_processes_on_period_id"
     t.index ["process_before_id"], name: "index_academic_processes_on_process_before_id"
     t.index ["school_id"], name: "index_academic_processes_on_school_id"
@@ -36,6 +37,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.integer "status", default: 0
     t.index ["enroll_academic_process_id"], name: "index_academic_records_on_enroll_academic_process_id"
     t.index ["section_id"], name: "index_academic_records_on_section_id"
+  end
+
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "body"
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -129,12 +140,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "billboards", force: :cascade do |t|
+    t.boolean "active", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "courses", force: :cascade do |t|
     t.bigint "academic_process_id", null: false
     t.bigint "subject_id", null: false
     t.boolean "offer_as_pci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name"
     t.index ["academic_process_id"], name: "index_courses_on_academic_process_id"
     t.index ["subject_id"], name: "index_courses_on_subject_id"
   end
@@ -190,7 +208,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.datetime "updated_at", null: false
     t.datetime "appointment_time"
     t.integer "duration_slot_time"
+    t.integer "enrollment_status", default: 0, null: false
+    t.bigint "enabled_enroll_process_id"
     t.index ["admission_type_id"], name: "index_grades_on_admission_type_id"
+    t.index ["enabled_enroll_process_id"], name: "index_grades_on_enabled_enroll_process_id"
     t.index ["student_id", "study_plan_id"], name: "index_grades_on_student_id_and_study_plan_id", unique: true
     t.index ["student_id"], name: "index_grades_on_student_id"
     t.index ["study_plan_id"], name: "index_grades_on_study_plan_id"
@@ -222,6 +243,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "period_type_id"
+    t.string "name"
     t.index ["period_type_id"], name: "index_periods_on_period_type_id"
   end
 
@@ -257,15 +279,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.boolean "enable_subject_retreat"
     t.boolean "enable_change_course"
     t.boolean "enable_dependents"
-    t.bigint "period_active_id"
-    t.bigint "period_enroll_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "faculty_id"
     t.string "contact_email", default: "coes.fau@gmail.com", null: false
+    t.bigint "active_process_id"
+    t.bigint "enroll_process_id"
+    t.string "boss_name", default: ""
+    t.index ["active_process_id"], name: "index_schools_on_active_process_id"
+    t.index ["enroll_process_id"], name: "index_schools_on_enroll_process_id"
     t.index ["faculty_id"], name: "index_schools_on_faculty_id"
-    t.index ["period_active_id"], name: "index_schools_on_period_active_id"
-    t.index ["period_enroll_id"], name: "index_schools_on_period_enroll_id"
   end
 
   create_table "sections", force: :cascade do |t|
@@ -279,6 +302,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.datetime "updated_at", null: false
     t.bigint "teacher_id"
     t.string "classroom"
+    t.index ["code", "course_id"], name: "index_sections_on_code_and_course_id", unique: true
     t.index ["course_id"], name: "index_sections_on_course_id"
     t.index ["teacher_id"], name: "index_sections_on_teacher_id"
   end
@@ -356,9 +380,21 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
     t.datetime "updated_at", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
+    t.boolean "updated_password", default: false, null: false
     t.index ["ci"], name: "index_users_on_ci", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  create_table "versions", force: :cascade do |t|
+    t.string "item_type", null: false
+    t.bigint "item_id", null: false
+    t.string "event", null: false
+    t.string "whodunnit"
+    t.text "object"
+    t.datetime "created_at"
+    t.text "object_changes"
+    t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
   add_foreign_key "academic_processes", "academic_processes", column: "process_before_id"
@@ -382,14 +418,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_16_201902) do
   add_foreign_key "enroll_academic_processes", "academic_processes"
   add_foreign_key "enroll_academic_processes", "grades"
   add_foreign_key "enrollment_days", "academic_processes"
+  add_foreign_key "grades", "academic_processes", column: "enabled_enroll_process_id"
   add_foreign_key "grades", "admission_types"
   add_foreign_key "grades", "students", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "grades", "study_plans"
   add_foreign_key "payment_reports", "banks", column: "origin_bank_id"
   add_foreign_key "qualifications", "academic_records"
   add_foreign_key "schedules", "sections"
-  add_foreign_key "schools", "periods", column: "period_active_id"
-  add_foreign_key "schools", "periods", column: "period_enroll_id"
+  add_foreign_key "schools", "academic_processes", column: "active_process_id"
+  add_foreign_key "schools", "academic_processes", column: "enroll_process_id"
   add_foreign_key "sections", "courses"
   add_foreign_key "sections", "teachers", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "sections_teachers", "sections"

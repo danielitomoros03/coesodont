@@ -9,12 +9,37 @@ Rails.application.routes.draw do
   match "/importer/subjects" => "importer#subjects" , :as => "importer_subjects", :via => [:get, :post]
   match "/importer/academic_records" => "importer#academic_records" , :as => "importer_academic_records", :via => [:get, :post]
 
+  resources :validar, only: :index do
+    member do
+      get 'constancias'
+    end
+  end
   resources :page, only: :show
   resources :qualifications, only: :update
   resources :period_types
-  resources :enroll_academic_processes, :academic_records, :periods, :profiles, :sections, :courses
+  resources :academic_records, :periods, :profiles, :sections, :courses
+  
+  resources :sections do
+    member do
+      get 'export'
+    end     
+  end
 
-  resources :enrollment_days, only: [:create, :destroy]
+
+  resources :enroll_academic_processes do
+    collection do
+      post :reserve_space
+      post :enroll
+    end
+  end
+
+
+
+  resources :enrollment_days, only: [:create, :destroy] do
+    member do
+      get 'export'
+    end 
+  end
 
   resources :academic_processes do
     member do
@@ -27,9 +52,9 @@ Rails.application.routes.draw do
 
   resources :users, only: [:edit, :update] do
     member do
-      get 'edit_images'
+      get :edit_images
+      get :edit_password
     end
-
   end
   resources :students do
     collection do

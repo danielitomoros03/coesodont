@@ -1,5 +1,9 @@
-- width ||= 'auto'
-- bg_color ||= ' bg-primary bg-opacity-10'
+
+- include_school = true if include_school.nil?
+
+
+- width = 'auto' if width.nil?
+- bg_color = ' bg-primary bg-opacity-10' if bg_color.nil?
 #imageMain.text-center{style: "background-size: #{width} auto", class: bg_color}
   .my-2.p-1{style: 'letter-spacing: 1px;'}
     %p.mb-0.h6 UNIVERSIDAD CENTRAL DE VENEZUELA

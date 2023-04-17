@@ -1,0 +1,55 @@
+- school = enroll_academic_process.school
+- enabled_to_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
+
+- if false #enabled_to_admin
+  - msg = 'Ver detalle inscripción'
+  %div{'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip"}
+    = link_to "/admin/enroll_academic_process/#{enroll_academic_process.id}", class: 'btn btn-primary btn-sm m-2 align-middle' do
+
+      .fa-solid.fa-search
+
+- if (school.active_process.eql? enroll_academic_process.academic_process or school.enroll_process.eql? enroll_academic_process.academic_records)
+
+  - if !enroll_academic_process.any_permanence_articulo?
+    - msg = 'Generar Constancia de Estudio'
+    %div{'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip"}
+      = link_to "/enroll_academic_processes/#{enroll_academic_process.id}.pdf?study='true'", class: 'btn btn-info btn-sm align-middle', target: '_blank', rel: "noopener noreferrer" do
+        .fa.fa-download
+        .fa-solid.fa-graduation-cap
+        .fa-solid.fa-clock
+
+  - else 
+    - msg = "No se puede generar la constancia de Estudio. Condición de permanencia: #{enroll_academic_process.permanence_status.titleize}"
+    %div{'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip"}
+      = link_to nil, class: 'btn btn-secondary btn-sm align-middle', disabled: true do
+        .fa.fa-download
+        .fa-solid.fa-graduation-cap
+        .fa-solid.fa-clock
+
+  - if enroll_academic_process.confirmado?
+    - msg = 'Generar Constancia de Inscripción'
+    %div{'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip"}
+      = link_to "/enroll_academic_processes/#{enroll_academic_process.id}.pdf", class: 'btn btn-info btn-sm m-2 align-middle', target: '_blank', rel: "noopener noreferrer" do
+        .fa.fa-download
+        .fa-solid.fa-graduation-cap
+        .fa-solid.fa-check
+
+  - elsif enabled_to_admin
+    - msg = 'Confirmar Proceso de Inscripción'
+
+    = form_tag "/enroll_academic_processes/#{enroll_academic_process.id}", method: :put do
+      = hidden_field_tag '[enroll_academic_process]enroll_status', :confirmado
+      = button_tag(class: 'btn btn-success btn-sm m-2 align-middle', 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip", type: :submit, 'data-confirm': '¿Confirmar Inscripción? Se enviará un correo de notificación al estudiante con el resumen de la inscripción') do
+        .fa-solid.fa-graduation-cap
+        .fa.fa-check
+
+
+- elsif enabled_to_admin
+
+  - msg = 'Atención: Para generar las constancias debe estar activo el proceso académico o la inscripción de éste período'
+
+  .disableOption{'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip"}
+    = button_to nil, class: 'btn btn-secondary btn-sm align-middle', disabled: true do
+      .fa.fa-download
+      .fa-solid.fa-graduation-cap
+

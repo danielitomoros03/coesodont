@@ -4,7 +4,7 @@ $fa-font-path: ".";
 @import "config/colors";
 @import "config/bootstrap_variables";
 @import "rails_admin/src/rails_admin/styles/base";
-
+@import "custom_style";
 
 .label-default {
     --bs-bg-opacity: 1;

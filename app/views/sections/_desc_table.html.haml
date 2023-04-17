@@ -1,38 +1,45 @@
 
 %table.table.table-sm
   %thead
-    %tr
-      %td Sec
+    %tr.text-center
+      %td.col-1 Período
+      %td.col-1 Sec
       %td Asignatura
-      %td Período
       %td Profesor
-      %td Créd
-      %td.text-center Capac
-      %td.col-1.text-center Calif
+      %td Horario
+      %td.col-1 Créditos
+      %td.col-1 Cupos
+      %td.col-1 Calif
   %tbody
-    %tr
+    %tr.text-center
+      %td= section.period.name if section.period
       %td= section.code
-      %td
+      %td{title: section.subject.desc}
         - if section.subject
           - if current_user.admin? and session[:rol].eql? 'admin'
             %a{href: "/admin/subject/#{section.subject_id}"}= section.subject.desc 
           - else
             = section.subject.desc
 
-      %td= section.period.name if section.period
-      %td
+      - teacher_desc = section.teacher.desc if section.teacher
+      %td{title: teacher_desc}
         - if section.teacher 
           - if current_user.admin? and session[:rol].eql? 'admin'
             %a{href: "/admin/teacher/#{section.teacher_id}"}= section.teacher.desc 
           - else
             = section.teacher.desc
 
-      %td.text-center= section.subject.unit_credits
-      %td.text-center
+      - if section.schedules
+        %td{title: section.schedule_name}
+          = section.schedule_short_name
+      -else 
+        %td
+      %td= section.subject.unit_credits
+      %td
         .badge.bg-secondary= section.total_academic_records
         de
         .badge.bg-info= section.capacity
-      %td.text-center
+      %td
         - if section.qualified?
           .fa.fa-check
         - else

@@ -1,0 +1,3 @@
+%h1.text-center.bg-success Validador de Documentos
+
+.alert.alert-warning.text-justify= "Mediante la presente página validamos que para #{@item.user.la_el} estudiante <b>#{@item.user.reverse_name}</b>, ci: <b>#{@item.user.ci}</b>, #{@version.event} del período <b>#{@item.period.name}</b> el día #{I18n.l(@version.created_at, format: '%d de %B de %Y')}.".html_safe

@@ -6,4 +6,8 @@ class UserMailerPreview < ActionMailer::Preview
     UserMailer.welcome
   end
 
+  def enroll_confirmation
+    UserMailer.enroll_confirmation(EnrollAcademicProcess.first.id)
+  end
+
 end

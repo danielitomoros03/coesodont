@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!
+  before_action :set_paper_trail_whodunnit
 
   helper_method :logged_as_teacher?, :logged_as_student?, :logged_as_admin?, :current_admin, :current_teacher, :current_student
 
@@ -47,31 +48,35 @@ class ApplicationController < ActionController::Base
   end
 
   def set_session_id_if_multirols
-    session[:rol] = params[:rol] if (params[:rol] and current_user and session[:rol].nil?)
+    session[:rol] = params[:rol] if (params[:rol] and current_user)
   end 
 
 
   def after_sign_in_path_for(resource)
-    # dashboard_index_path
-    rols = []
-    rols << :admin if current_user.admin
-    rols << :student if current_user.student
-    rols << :teacher if current_user.teacher
 
-    if rols.count > 1
-      pages_multirols_path(roles: rols)
-    elsif current_user.admin?
-      session[:rol] = 'admin'
-      rails_admin_path
-    elsif current_user.student?
-      session[:rol] = 'student'
-      student_session_dashboard_path
-    elsif current_user.teacher?
-      session[:rol] = 'teacher'
-      teacher_session_dashboard_path
+    if (current_user and !current_user.updated_password?)
+      edit_password_user_path(current_user)
     else
-      flash[:warning] = "No posee un rol asignado. Por favor diríjase a la Administración para cambiar dicha situación"
-      root_path 
+      rols = []
+      rols << :admin if current_user.admin
+      rols << :student if current_user.student
+      rols << :teacher if current_user.teacher
+      if rols.count > 1
+        pages_multirols_path(roles: rols)
+      elsif current_user.admin?
+        session[:rol] = 'admin'
+        session[:academic_processes_id] = School.first.academic_processes.first.id 
+        rails_admin_path
+      elsif current_user.student?
+        session[:rol] = 'student'
+        student_session_dashboard_path
+      elsif current_user.teacher?
+        session[:rol] = 'teacher'
+        teacher_session_dashboard_path
+      else
+        flash[:warning] = "No posee un rol asignado. Por favor diríjase a la Administración para cambiar dicha situación"
+        root_path 
+      end
     end
   end
 
@@ -109,5 +114,39 @@ class ApplicationController < ActionController::Base
       redirect_to root_path      
     end
   end
+
+  def administrator_filter
+		unless session[:administrador_id]
+			reset_session
+			flash[:danger] = "Debe iniciar sesión como Administrador"  
+			redirect_to root_path
+			return false
+		end
+	end
+
+  def log_filter
+		unless session[:usuario_ci]
+			reset_session
+			flash[:danger] = "Debe iniciar sesión"
+			redirect_to root_path
+			return false
+		end
+	end
+
+  def authorized_filter
+		accion = (!(controller_name.eql? 'secciones') and (action_name.eql? 'show')) ? 'index' : action_name
+		funcion = Restringida.where(controlador: controller_name, accion: accion).first
+
+		if funcion and current_usuario and (current_admin and !current_admin.maestros?) and not(current_usuario.autorizado?(controller_name, accion))
+			msg = 'No posee los privilegios para ejecutar la acción solicitada'
+			respond_to do |format|
+				format.html do 
+					flash[:danger] = msg
+					redirect_back fallback_location: index2_secciones_path
+				end
+				format.json {render json: {data: msg, status: :success, type: :error} }
+			end
+		end
+	end
 
 end

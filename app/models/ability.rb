@@ -17,12 +17,12 @@ class Ability
       can :access, :rails_admin
       can :manage, :dashboard
       cannot :import, :all
-      can :import, [User, Student, Teacher, Subject, Period, AcademicRecord]
+      can :import, [User, Student, Teacher, Subject, Period, AcademicRecord, Billboard]
 
       if user.admin.yo?
         can :manage, :all
       elsif user.admin.jefe_control_estudio?
-        can :manage, [Admin, Student, Teacher, Area, Subject, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, Dependency]
+        can :manage, [Admin, Student, Teacher, Area, Subject, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, Dependency, Schedule, EnrollmentDay, Billboard]
         can :crue, [School, User, Faculty]
       else
         cannot :manage, [User, Admin, Student, Teacher, Area, Subject, School, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address]

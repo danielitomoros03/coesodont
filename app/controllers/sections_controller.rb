@@ -1,9 +1,15 @@
 class SectionsController < ApplicationController
-  before_action :set_section, only: %i[ show update ]
+  before_action :set_section, only: %i[ show update export ]
 
   # GET /sections or /sections.json
   def index
     @sections = Section.all
+  end
+
+  def export
+    respond_to do |format|
+      format.xls {send_file @section.excel_list, filename: "Listado_Sec_#{@section.name_to_file}.xls", disposition: 'inline'}
+    end
   end
 
   # GET /sections/1 or /sections/1.json
@@ -12,12 +18,15 @@ class SectionsController < ApplicationController
       @subject = @section.subject
       @period = @section.period
       @school = @section.school
-      @academic_records = @section.academic_records
+      @academic_records = @section.academic_records.sort_by_user_name
+
       respond_to do |format|
         format.html
         format.pdf do
-          render pdf: "ACTA#{@section.number_acta}", template: "sections/acta", formats: [:html], page_size: 'letter'
+          render pdf: "ACTA#{@section.number_acta}", template: "sections/acta", formats: [:html], page_size: 'letter', footer: {center: "Página: [page] de [topage]", font_size: '8'}
+          # , header: {content: render_to_string('sections/acta_header')} 
         end
+
       end
     else
       flash[:warning] = 'Sección no asignada'

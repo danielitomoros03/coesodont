@@ -1,0 +1,63 @@
+
+-# academic_process = AcademicProcess.find session[:academic_processes_id]
+-# @period_name = academic_process.period.name if (academic_process and academic_process.period)
+
+.mb-0= render partial: 'layouts/main_banner', locals: {bg_color: 'bg-info bg-opacity-20 '}
+
+.row
+	- School.all.each do |school|
+		- @period_name = nil
+		- ap = school.academic_processes.first
+		- @period_name = ap.period.name if (ap and ap.period)
+		- @query = "?query=#{@period_name}" unless @period_name.blank?
+
+		.col.mx-3
+			.row
+				- object = I18n.t("activerecord.models.academic_record.other")
+				= link_to "/admin/academic_record#{@query}", class: 'btn btn-primary' do
+					%h1.fa.fa-calendar
+					%h4.text-center= "#{object.upcase} #{@period_name}"
+			.row
+				- object = I18n.t("activerecord.models.section.one")
+				= link_to "/admin/section#{@query}", class: 'btn btn-primary' do
+					%h1.fa.fa-list
+					%h4.text-center= "#{object.upcase} #{@period_name}"
+			.row
+				- object = I18n.t("activerecord.models.enroll_academic_process.one")
+				= link_to "/admin/enroll_academic_process#{@query}", class: 'btn btn-primary' do
+					%h1.fa.fa-signature
+					%h4.text-center= "#{object.upcase} #{@period_name}"
+- if false
+	.mt-4.align-middle.align-items-center{style: 'width:100%'}
+		.row
+			- School.all.each do |school|
+				%h5.col.text-center= school.name
+		.row
+			- School.all.each do |school|
+				- @period_name = nil
+				- ap = school.academic_processes.first
+				- @period_name = ap.period.name if (ap and ap.period)
+				%h5.col.text-center= @period_name
+
+		- ['academic_record', 'section', 'enroll_academic_process'].each do |elem|
+			- object = I18n.t("activerecord.models.#{elem}.one")
+			.row
+				- School.all.each do |school|
+					- @period_name = nil
+					- ap = school.academic_processes.first
+					- @period_name = ap.period.name if (ap and ap.period)
+					- @query = "?query=#{@period_name}" unless @period_name.blank?
+					.col.text-center
+						%h1
+							= link_to "/admin/#{elem}#{@query}", class: 'btn btn-primary btn-lg' do
+								%span.fa.fa-calendar
+								= "#{object.upcase} #{@period_name}"	
+
+- if false
+	:javascript
+
+		document.addEventListener("rails_admin.dom_ready", function() {
+
+			$('[data-bs-toggle="collapse"]').click();
+
+		});

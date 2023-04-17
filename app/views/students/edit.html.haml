@@ -6,12 +6,12 @@
     .border.p-3
       = simple_form_for @student, html: {novalidate: false } do |f|
         %h5.text-center.bg-dark.text-info.p-1 REGISTRO DE DATOS
-        %h5.text-center.bg-info.p-1 Origen, Civiles, Discapacidad y Grados:
+        %h5.text-center.bg-info.p-1 PASO 3: INFORMACIÓN IMPORTANTE COMPLEMENTARIA:
         - # Origins
         = render partial: 'form_origins', locals: {f: f}
 
         - # Birth Date
-        = f.input :birth_date, as: :date, start_year: Date.today.year - 20,
+        = f.input :birth_date, as: :date, start_year: Date.today.year - 16,
                               end_year: Date.today.year - 100
 
         - # Nacionality:

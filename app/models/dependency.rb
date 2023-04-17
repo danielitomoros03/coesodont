@@ -1,5 +1,7 @@
 class Dependency < ApplicationRecord
-  # belongs_to :subject
+  # t.bigint "subject_parent_id", null: false
+  # t.bigint "subject_dependent_id", null: false
+
   belongs_to :subject_parent, class_name: 'Subject', foreign_key: :subject_parent_id
   belongs_to :subject_dependent, class_name: 'Subject', foreign_key: :subject_dependent_id
 

@@ -21,8 +21,6 @@ es:
         enable_subject_retreat: 'Activar Retiro de Asignaturas'
         enable_change_course: 'Activar Cambio de Cursos'
         enable_dependents: 'Activar Dependencias'
-        period_active: 'Periodo Activo'
-        period_enroll: 'Periodo de Inscripción'
       plan:
         code: 'Código'
         name: 'Nombre'        

@@ -16,8 +16,12 @@ class Address < ApplicationRecord
   belongs_to :student, primary_key: :user_id
 
 
+  def city_and_state
+    "#{state.titleize} - #{city.titleize}" if (state and city)
+  end
+
   def description
-    "#{city} - #{state}: #{municipality}. #{sector}: #{street}, #{house_type} #{house_name}"
+    "#{city_and_state}: #{municipality}. #{sector}: #{street}, #{house_type} #{house_name}"
   end
 
   # VALIDATIONS:

@@ -22,23 +22,33 @@ class Student < ApplicationRecord
   enum disability: DISCAPACIDADES
   enum marital_status: ESTADOS_CIVILES
 
+  # HISTORY:
+  has_paper_trail on: [:create, :destroy, :update]
+
+  before_create :paper_trail_create
+  before_destroy :paper_trail_destroy
+  before_update :paper_trail_update
+
   # ASSOCIATIONS:
   #belons_to
   belongs_to :user
   # accepts_nested_attributes_for :user
   # has_one
-  has_one :address
+  has_one :address, dependent: :destroy
   accepts_nested_attributes_for :address
   # has_many
-  has_many :grades
-  accepts_nested_attributes_for :grades
+  has_many :grades, dependent: :destroy
+  accepts_nested_attributes_for :grades, reject_if: proc { |attributes| attributes['study_plan_id'].blank? }
+# creates avatar_attributes=
 
   has_many :study_plans, through: :grades
   has_many :admission_types, through: :grades
-
+  has_many :enroll_academic_processes, through: :grades
+  has_many :academic_records, through: :enroll_academic_processes
 
   # VALIDATIONS:
   validates :user, presence: true, uniqueness: true
+  validates :grades, presence: true
   # validates :nacionality, presence: true, unless: :new_record?
   # validates :marital_status, presence: true, unless: :new_record?
   # validates :origin_country, presence: true, unless: :new_record?
@@ -82,20 +92,11 @@ class Student < ApplicationRecord
   end
 
   def name
-    user.description if user
+    user.ci_fullname if user
   end
 
   def user_ci
     self.user.ci if self.user
-  end
-
-  def user_profile
-    if user.profile_picture and user.profile_picture.attached? and user.profile_picture.representable?
-      # "<img href='#{Object.new.extend(ActionView::Helpers::AssetUrlHelper).image_url(user.profile_picture_as_thumb) }' />"
-      # image_tag user.profile_picture_as_thumb
-      ActionController::Base.helpers.image_tag(Object.new.extend(ActionView::Helpers::AssetUrlHelper).image_url(user.profile_picture_as_thumb))
-      
-    end
   end
 
   # CALLBACKS:
@@ -151,43 +152,35 @@ class Student < ApplicationRecord
     navigation_icon 'fa-regular fa-user-graduate'
     weight 4
 
-    edit do
-      # field :user do
-      #   # searchable :full_name
-      # end
+    update do
       field :user
-      # field :nacionality do
-      #   formatted_value do 
-      #     value.to_s.upcase
-      #   end
-      # end
 
-      field :grades do
-        # inline_add false
-        associated_collection_scope do
-          student = bindings[:object]
-
-          proc { |scope| scope.where(student_id: student.id) }
-        end
+      fields :grades, :address do
+        inline_add false
       end
 
       fields :nacionality, :origin_country, :origin_city, :birth_date, :marital_status, :grade_title, :grade_university, :graduate_year
 
+    end
 
-      # field :address do
-      #   # inline_add false
-      #   associated_collection_scope do
-      #     student = bindings[:object]
+    edit do
+      field :user
 
-      #     proc { |scope| scope.where(student_id: student.id) }
-      #   end
-      # end
+      field :grades
+
+      fields :nacionality, :origin_country, :origin_city, :birth_date, :marital_status, :grade_title, :grade_university, :graduate_year
 
     end
 
     show do
-      field :description do
-        label 'Descripción'
+      field :user_personal_data do
+        label 'Datos Personales'
+        formatted_value do
+          bindings[:view].render(partial: 'users/personal_data', locals: {user: bindings[:object].user})
+        end        
+      end
+      field :description_grades do
+        label 'Registro Académico'
         formatted_value do
           bindings[:view].render(partial: 'students/show', locals: {student: bindings[:object]})
         end
@@ -198,11 +191,17 @@ class Student < ApplicationRecord
     list do
       search_by :custom_search
 
-      field :user_profile do
-        label 'Perfile'
-        formatted_value do # used in form views
-          value.html_safe if value
-        end        
+      field :user_image_profile do
+        label 'Perfil'
+
+        formatted_value do
+          if (bindings[:object].user and bindings[:object].user.profile_picture and bindings[:object].user.profile_picture.attached? and bindings[:object].user.profile_picture.representable?)
+            bindings[:view].render(partial: "layouts/set_image", locals: {image: bindings[:object].user.profile_picture, size: '30x30', alt: "foto perfil #{bindings[:object].user.nick_name}"})
+          else
+            false
+          end
+        end
+
       end
 
       field :user_ci do
@@ -219,7 +218,7 @@ class Student < ApplicationRecord
       field :user_first_name do
         label 'Nombres'
       end
-      field :address_state do
+      field :address_short do
         label 'Ciudad'
       end
 
@@ -271,8 +270,8 @@ class Student < ApplicationRecord
   def user_email
     user.email if user
   end
-  def address_state
-    address.state.titleize if address and address.state
+  def address_short
+    address.city_and_state if address
   end
   def grade_admission_type
     grades.map{|g| g.admission_type.name if g.admission_type}.to_sentence
@@ -317,8 +316,8 @@ class Student < ApplicationRecord
     if row[4]
       row[4].strip!
       row[4].delete! '^A-Za-z'
-      row[4] = :masculino if row[4].upcase.eql? 'M'
-      row[4] = :femenino if row[4].upcase.eql? 'F'
+      row[4] = :Masculino if row[4].upcase.eql? 'M'
+      row[4] = :Femenino if row[4].upcase.eql? 'F'
       usuario.sex = row[4] 
     end
 
@@ -352,5 +351,24 @@ class Student < ApplicationRecord
     [total_newed, total_updated, no_registred]
   end
 
+  private
+
+
+    def paper_trail_update
+      # changed_fields = self.changes.keys - ['created_at', 'updated_at']
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      # self.paper_trail_event = "¡#{object} actualizado en #{changed_fields.to_sentence}"
+      self.paper_trail_event = "¡#{object} actualizado!"
+    end  
+
+    def paper_trail_create
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡#{object} registrado!"
+    end  
+
+    def paper_trail_destroy
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡Estudiante eliminado!"
+    end
 
 end

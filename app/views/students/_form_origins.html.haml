@@ -1,6 +1,7 @@
 - if @student and @student.origin_country
   - data_hash = Student.countries
-  - @cities = data_hash[@student.origin_country].sort{|a,b| a <=> b}
+  - @cities = data_hash[@student.origin_country]
+  - @cities = @cities.sort{|a,b| a <=> b} if @cities
 - @cities ||= []
 
 .mb-3.string.required.student_origin_country

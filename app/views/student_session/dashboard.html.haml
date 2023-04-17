@@ -1,7 +1,5 @@
 - if false #current_user.sign_in_count.eql? 1
   =# render template: 'devise/passwords/edit', locals: {resource: current_user, resource_name: 'User'}
+= render partial: '/users/personal_data', locals: {user: @student.user}
 
-.text-center
-  %h1.text-primary.mt-5= @title
-  = image_tag image_url('build_website.png'), width: '40%'
-  %h6.mt-5.alert.alert-info AQUI SE CONSTRUYE COESFACO
+.mt-4.p-4= render partial: '/students/show', locals: {student: @student}

@@ -1,0 +1,18 @@
+- logged_as_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
+.badge.bg-info.align-top= academic_record.status.titleize
+- if logged_as_admin
+  - msg = 'Eliminar inscripción'
+  - confirm = '¿Está Seguro de la siguiente acción?'
+
+  = link_to "/academic_records/#{academic_record.id}", class: 'btn btn-danger btn-sm float-end align-middle mx-2', 'data-confirm': confirm, method: :delete, 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip" do
+    .fa-solid.fa-trash
+
+
+  - if !academic_record.pi?
+    - unless academic_record.retirado?
+      - msg = 'Retirar Asignatura'
+      = form_tag "/academic_records/#{academic_record.id}", method: :put, class: 'float-end align-middle' do
+        = hidden_field_tag '[academic_record]status', :retirado
+        = button_tag(class: 'btn btn-danger btn-sm', 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip", type: :submit, 'data-confirm': confirm) do
+          .fa.fa-calendar-minus
+

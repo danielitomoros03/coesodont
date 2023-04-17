@@ -6,12 +6,8 @@
     .border.p-3
       = simple_form_for @user, html: { class: 'form-horizontal', novalidate: false } do |f|
         %h5.text-center.bg-dark.text-info.p-1 REGISTRO DE DATOS
-        %h5.text-center.bg-info.p-1 Datos Personales y de Contacto:
-        
-        / - # Password:
-        / %div{'data-bs-toggle': :tooltip, title: 'Cambie su contraseña a un valor distinto a la cédula de identidad'}
-        /   = f.input :password, required: true, minlength: 6, passwordrules: "required: upper; required: lower; required: digit; minlength: 8; allowed: [-().&@?'#,/&quot;+]; max-consecutive: 2"
-        /   = f.input :password_confirmation, required: true, input_html: {minlength: 6}
+        %h5.text-center.bg-info.p-1 PASO 2: COMPLETAR DATOS PERSONALES Y DE CONTACTO
+
         %hr
         - # Cedula de Identidad:
         = f.input :ci, readonly: true, disabled: true 
@@ -29,7 +25,7 @@
         = f.input :last_name, required: true, input_html: {oninput: '$(this).val($(this).val().toUpperCase());'}
         
         - # Emails:
-        %div{'data-bs-toggle': :tooltip, title: 'Atención: Recuerde que el correo electrónico es el medio principal de comunicación para COESFHE, complételo de manera correcta.'}
+        %div{'data-bs-toggle': :tooltip, title: 'Atención: Recuerde que el correo electrónico es el medio principal de comunicación para COESFAU, complételo de manera correcta.'}
           = f.input :email, required: true
         - # Phone
         = f.input :number_phone, required: true, input_html: {class: 'upcase', oninput: "$(this).val($(this).val().replace(/[^0-9]/g,''));"}

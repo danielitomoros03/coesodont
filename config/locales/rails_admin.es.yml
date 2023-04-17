@@ -28,6 +28,8 @@ es:
       reset_filters: "Resetear filtros"
       refresh: "Buscar"
     form:
+      operators:
+        like: Contiene
       bulk_delete: 'Confirmación de Eliminación'
       new_model: 'Nuevo'
       char_length_of: "Caracteres entre"
@@ -44,11 +46,11 @@ es:
       cancel: "Cancelar"
     actions:
       history_show:
-        title: "Bitácora" 
+        title: "Bitácora %{model_label}"
         menu: "Bitácora"
         breadcrumb: "Bitácora"
       history_index:
-        title: "Bitácora" 
+        title: "Bitácora %{model_label}"
         menu: "Bitácora"
         breadcrumb: "Bitácora"
       import:
@@ -105,7 +107,7 @@ es:
       dashboard:
         menu: "Escritorio"
         title: "Escritorio"
-        breadcrumb: "Escritorio"    
+        breadcrumb: "Escritorio"
     Escritorio:
       menu: "Escritorio"
       title: "Escritorio"

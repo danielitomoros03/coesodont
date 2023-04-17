@@ -38,6 +38,8 @@ class AcademicRecordsController < ApplicationController
   def update
     respond_to do |format|      
       if @academic_record.update(academic_record_params)
+        flash[:info] = '¡Actualización Exitosa!'
+        format.html { redirect_back fallback_location: root_path}
         format.json { render json: {data: '¡Datos Guardados con éxito!', type: 'success'}, status: :ok }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -50,9 +52,10 @@ class AcademicRecordsController < ApplicationController
   # DELETE /academic_records/1 or /academic_records/1.json
   def destroy
     @academic_record.destroy
+    flash[:info] = '¡Registro Eliminado!'
 
     respond_to do |format|
-      format.html { redirect_to academic_records_url, notice: "Academic record was successfully destroyed." }
+      format.html { redirect_back fallback_location: root_path, notice: "Registro Académico Eliminado" }
       format.json { head :no_content }
     end
   end

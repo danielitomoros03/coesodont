@@ -1,0 +1,18 @@
+%table.table.table-sm.border.text-center
+	%tr
+		%td.text-center Plan
+		%td.text-center Admisión
+		- if grade.registration_status
+			%td.text-center Estado de Registro
+		- if grade.graduate_status
+			%td.text-center Estado de la Carrera
+
+	%tr
+		%td.text-center.fw-bold= grade.study_plan.desc
+		%td.text-center.fw-bold= grade.admission_type.name
+		- if grade.registration_status
+			%td.text-center
+				.badge.bg-info= grade.registration_status.titleize
+		- if grade.graduate_status
+			%td.text-center
+				.badge.bg-info= grade.graduate_status.titleize

@@ -5,6 +5,7 @@
   %h6.text-orange= 'Por Favor Selecione un rol:'
   - @roles.each do |rol|
     - if rol.eql? 'admin'
+      - session[:rol] = 'admin'
       - redirect = rails_admin_path 
     - else
       - redirect = "/#{rol}_session/dashboard?rol=#{rol}"

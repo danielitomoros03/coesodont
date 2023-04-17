@@ -6,21 +6,29 @@
       = simple_form_for @user, html: { class: 'form-horizontal', novalidate: false } do |f|
         
         %h5.text-center.bg-dark.text-info.p-1 REGISTRO DE DATOS
-        %h5.text-center.bg-info.p-1 Imágenes de Respaldo:
+        %h5.text-center.bg-info.p-1 PASO 1: CARGAR IMÁGENES DE RESPALDO
 
         - correo_ayuda = (@user.student and @user.student.grades.first) ? @user.student.grades.first.school.contact_email : 'coes.fau@gmail.com'
 
         .alert.alert-warning
           %b IMPORTANTE: 
-          = "Debido a los inconvenientes de conectividad en el país, recomendamos encarecidamente subir archivos de baja resolución y peso (menores a 3 MegaBytes), de ser posible capturas de pantalla. Si al intentar subir el archivo adjunto el sistema genera un error o tarda más de 3 minutos en responder, puede intentar nuevamente el proceso con un archivo más liviano o enviarlo al correo electrónico #{link_to correo_ayuda} para brindarle el apoyo respectivo.".html_safe
+          = "Debido a los inconvenientes de conectividad en el país, recomendamos encarecidamente subir archivos de baja resolución y peso (menores a 3 MegaBytes). Si al intentar subir el archivo adjunto el sistema genera un error o tarda más de 3 minutos en responder, puede intentar nuevamente el proceso con un archivo más liviano o enviarlo al correo electrónico #{link_to correo_ayuda} para brindarle el apoyo respectivo.".html_safe
 
         = image_tag main_app.url_for(@user.profile_picture_as_thumb) unless @user.empty_profile_picture?
 
-        = f.input :profile_picture, required: @user.empty_profile_picture?, input_html: {class: 'file-upload', direct_upload: true, accept: '.png,.jpeg,.jpg'}
+        .alert.alert-warning 
+          = f.input :profile_picture, required: @user.empty_profile_picture?, input_html: {class: 'file-upload', direct_upload: true, accept: '.png,.jpeg,.jpg'}
+          %h5.text-danger
+            %b Atención: 
+            Suba una foto tipo carnet, de frente y con fondo blanco únicamente.
 
         = image_tag main_app.url_for(@user.ci_image_as_thumb) unless @user.empty_ci_image?
 
-        = f.input :ci_image, required: @user.empty_ci_image?, input_html: {class: 'file-upload', direct_upload: true, accept: '.png,.jpeg,.jpg'}
+        .alert.alert-warning
+          = f.input :ci_image, required: @user.empty_ci_image?, input_html: {class: 'file-upload', direct_upload: true, accept: '.png,.jpeg,.jpg'}
+          %h5.text-danger
+            %b Atención: 
+            Suba una foto perfectamente legible de su cédula de identidad.
         .form-actions
           %hr
           = f.submit 'Cargar Imágenes', class: 'btn btn-primary float-end', disable_with: 'Cargando...'
