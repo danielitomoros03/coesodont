@@ -1,0 +1,25 @@
+%table.table-striped.text-center.no_border
+  %thead
+    %tr
+      %th Código
+      %th Asignatura
+      %th Créd
+      %th Tipo
+      %th Sec
+      %th Conv
+      %th Cal
+      %th Cal. Alf
+
+  %tbody
+    - academic_records.by_subjects.each do |academic_record|
+      - subject = academic_record.subject
+      %tr{class: academic_record.tr_class_by_status_q, style: 'padding: 3px'}
+        %td= subject.code
+        %td.text-start{style: 'padding-left: 10px; width: 500px'}= subject.name
+        %td= subject.unit_credits
+        %td= subject.modality_initial_letter
+        %td= academic_record.section.code
+        %td= academic_record.conv_type
+
+        %td= academic_record.final_q_to_02i
+        %td= academic_record.desc_conv_absolute

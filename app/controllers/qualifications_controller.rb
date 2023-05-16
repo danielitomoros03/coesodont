@@ -1,5 +1,6 @@
 class QualificationsController < ApplicationController
   before_action :set_academic_record, only: %i[ update ]
+  before_action :logged_as_teacher_or_admin?, only: %i[ update ]
 
   # PATCH/PUT /academic_records/1 or /academic_records/1.json
   def update

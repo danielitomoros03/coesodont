@@ -1,4 +1,5 @@
 es:
+  delete: Eliminar
   edit: Editar
   new: Nuevo
   index: Listado
@@ -16,8 +17,8 @@ es:
   perdida_por_inasistencia: PI
   PI: perdida_por_inasistencia
 
-  equivalencia_interna: EQ
-  EQ: equivalencia_interna
+  equivalencia: EQ
+  EQ: equivalencia
   
   retirado: RT
   RT: retirado
@@ -151,6 +152,11 @@ es:
       second: Segundos
       year: Año
   errors: &errors
+    models:
+      academic_record:
+        attributes:
+          qualifications:
+            blank: "Calificación no puede estar en blanco. Si desea eliminar la calificación, coloque el estado de calificación a 'Sin Calificar'"
     format: ! '%{attribute} %{message}'
     messages:
       accepted: debe ser aceptado
@@ -282,9 +288,9 @@ es:
           attributes:
             period:
               required: requerido
-        dependency:
+        subject_link:
           attributes:
-            subject_dependent:
+            depend_subject:
               required: requerido
         grade:
           attributes:
@@ -325,6 +331,12 @@ es:
       academic_record:
         one: 'Registro Académico'
         other: 'Registros Académicos'
+      area_authorizable:
+        one: 'Area Autorizable'
+        other: 'Areas Autorizables'
+      authorizable:
+        one: 'Autorizable'
+        other: 'Autorizables'
       address:
         one: 'Dirección'
         other: 'Direcciones'
@@ -347,8 +359,8 @@ es:
         one: 'Cartelera'
         other: 'Carteleras'
       course:
-        one: 'Oferta Académica'
-        other: 'Ofertas Académicas'
+        one: 'Curso'
+        other: 'Cursos'
       enroll_academic_process:
         one: 'Inscripción en Proceso Académico'
         other: 'Inscripciones en Proceso Académico'
@@ -394,6 +406,9 @@ es:
       subject:
         one: 'Asignatura'
         other: 'Asignaturas'
+      subject_type:
+        one: 'Tipo de Asignatura'
+        other: 'Tipos de Asignatura'
       teacher:
         one: 'Profesor'
         other: 'Profesores'
@@ -434,12 +449,23 @@ es:
         subject: 'Asignatura'
         study_plan: Plan de Estudio
         qualifications: Calificaciones
+        address: Dirección
       academic_record/status_q:
         sin_calificar: 'Sin Calificar'
         aprobado: 'Aprobados'
         aplazado: 'Aplazados'
         retirado: 'Retirados'
         diferido: 'Diferidos'
+      authorizable:
+        area_authorizable_id: Área Autorizable
+        klazz: Clase
+        description: Descripción
+        icon: Ícono
+      area_authorizable:
+        name: Nombre
+        description: Descripción
+        icon: Ícono 
+        authorizables: Accesibles       
       admin:
         user: 'Usuario'
         role: 'Rol'
@@ -447,6 +473,7 @@ es:
         profile: 'Perfil de Usuario' 
         created_at: 'Fecha Registro'
       admission_type:
+        code: Código
         name: 'Nombre'
         school: 'Escuela'
         total_students: 'Total Estudiantes'
@@ -472,6 +499,7 @@ es:
         updated_at: 'Fecha de Edición'
         content: 'Contenido de Cartelera'
       course:
+        area: 'Área'
         period: Período
         school: Escuela
         sections: Oferta Docente
@@ -562,6 +590,7 @@ es:
         starttime: Hora Inicio
         endtime: Hora Final
       section:
+        area: 'Área'
         code: 'Sección'
         capacity: 'Capacidad'
         course: 'Proceso/Asignatura'
@@ -581,7 +610,7 @@ es:
         grades: Grados
         students: Estudiantes
         schedules: Horarios
-        classroom: 'Áula'
+        classroom: 'Aula'
         created_at: Fecha Creación
         updated_at: Fecha Última Actualización
       student:
@@ -604,6 +633,7 @@ es:
       study_plan:
         code: 'Código'
         name: 'Nombre'
+        subject_types: 'Tipos de Asignatura'
       subject:
         school: Escuela
         courses: Cursos
@@ -615,10 +645,14 @@ es:
         qualification_type: 'Tipo de calificación'
         modality: 'Modalidad'
         area: 'Área'
-        subject_parents: Asignaturas de Prelaciones
-        subject_dependents: Asignaturas de Dependencias
+        prelate_subjects: Prelada por
+        depend_subjects: Asignaturas que prela
         created_at: 'Fecha de Registro'
         updated_at: 'Fecha de Actualización'
+      subject_type:
+        name: Nombre
+        code: Letra Identificativa
+        required_credits: Créditos Requeridos 
       teacher:
         area: 'Área'
         user: 'Usuario'
@@ -663,8 +697,8 @@ es:
         par: 'Parciales'
       section:
         nota_final: 'Final'
-        equivalencia_externa: 'Equivalencia Externa'
-        equivalencia_interna: 'Equivalencia Interna' 
+        equivalencia: 'Equivalencia'
+        equivalencia: 'Equivalencia' 
         diferido: 'Diferido' 
         reparacion: 'Reparación'
         suficiencia: 'Suficiencia'

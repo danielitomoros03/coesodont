@@ -1,5 +1,6 @@
-%br
-%table.font-sm.no_border
+- total = academic_records.count
+- rest = total%total_by_page
+%table.no_border.table-striped
   %thead.border
     %tr
       %th N°
@@ -7,25 +8,25 @@
       %th APELLIDOS Y NOMBRES
       %th PLAN
       %th DESC
-      - unless @section.subject.as_absolute?
+      - unless section.subject.as_absolute?
         %th NUM
       %th LETRAS
 
   %tbody
-    - @academic_records.each_with_index do |ar, i|
-      - if !ar.qualifications.any? or @section.subject.as_absolute?
-        %tr
+    - academic_records.each_with_index do |ar, i|
+      - if !ar.qualifications.any? or section.subject.as_absolute?
+        %tr.h-30
           %td.text-center= i+1
           %td.text-center= ar.user.ci
           %td.padding-x= ar.user.reverse_name
           %td.text-center= ar.study_plan.code
           %td.text-center= ar.desc_conv_absolute
-          - unless @section.subject.as_absolute?
+          - unless section.subject.as_absolute?
             %td
           %td.padding-x= ar.num_to_s
       - else
         - ar.qualifications.each do |q|
-          %tr
+          %tr.h-30
             %td.text-center= i+1
             %td.text-center= ar.user.ci
             %td.padding-x= ar.user.reverse_name
@@ -33,3 +34,16 @@
             %td.text-center= q.desc_conv
             %td.text-center= q.value_to_02i
             %td.padding-x= ar.num_to_s
+
+    - if rest > 0
+      - loops = (total_by_page-rest)-1 
+      - loops.times do
+        %tr.h-30
+          %td= '**'
+          %td.text-center= '********'
+          %td.padding-x= '***************************************************'
+          %td.text-center= '****'
+          - unless section.subject.as_absolute?
+            %td.text-center= '*****'
+          %td.text-center= '**'
+          %td.padding-x= '*************'

@@ -26,8 +26,9 @@ class EnrollAcademicProcess < ApplicationRecord
   has_many :subjects, through: :sections
 
   # ENUMERIZE:
+  # IDEA CON ESTADO DE INSCRIPCIÓN EN GRADE Y ENROLL ACADEMIC PROCESS
   enum enroll_status: [:preinscrito, :reservado, :confirmado, :retirado]
-  enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7]  
+  enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]  
 
   # VALIDATIONS:
   validates :grade, presence: true
@@ -42,8 +43,7 @@ class EnrollAcademicProcess < ApplicationRecord
 
   scope :of_academic_process, -> (academic_process_id) {where(academic_process_id: academic_process_id)}
 
-  scope :sort_by_period, -> {joins(period: :period_type).order('periods.year': :desc, 'period_types.name': :asc)}
-
+  scope :sort_by_period, -> {joins(period: :period_type).order('periods.year': :desc, 'period_types.name': :desc)}
 
   scope :without_academic_records, -> {joins(:academic_records).group(:"enroll_academic_processes.id").having('COUNT(*) = 0').count}
 
@@ -63,6 +63,10 @@ class EnrollAcademicProcess < ApplicationRecord
   def set_default_values_by_import
     self.enroll_status = :confirmado
     self.permanence_status = :regular
+  end
+
+  def enrolling?
+    school.enroll_process_id.eql? academic_process_id  
   end
 
   def total_academic_records
@@ -102,8 +106,9 @@ class EnrollAcademicProcess < ApplicationRecord
   end  
 
   rails_admin do
-    navigation_label 'Inscripciones'
+    navigation_label 'Gestión Periódica'
     navigation_icon 'fa-solid fa-calendar-check'
+    weight 0
     
     list do
       search_by :custom_search

@@ -7,7 +7,7 @@ module ImporterHelper
 
     render_haml <<-HAML
       .text-center
-        = image_tag image_url('ejem_csv_importar_estudiantes.png')
+        = image_tag image_url('example_csv_import_students.png')
         %p 
           .float-right.text-success.ml-2 #campos opcionales
           .float-right.text-danger.ml-2 #campos obligatorios

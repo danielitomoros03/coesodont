@@ -5,7 +5,7 @@ class AcademicRecord < ApplicationRecord
   # t.integer "status"
 
   # ENUMERIZE:
-  enum status: [:sin_calificar, :aprobado, :aplazado, :retirado, :perdida_por_inasistencia, :equivalencia_interna, :equivalencia_externa]
+  enum status: [:sin_calificar, :aprobado, :aplazado, :retirado, :perdida_por_inasistencia, :equivalencia]
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -20,6 +20,7 @@ class AcademicRecord < ApplicationRecord
   belongs_to :enroll_academic_process
 
   has_many :qualifications, dependent: :destroy
+  accepts_nested_attributes_for :qualifications, allow_destroy: true#, reject_if: proc { |attributes| attributes['academic_record_id'].blank? }  
 
   has_one :academic_process, through: :enroll_academic_process
   has_one :grade, through: :enroll_academic_process
@@ -40,7 +41,14 @@ class AcademicRecord < ApplicationRecord
   validates_uniqueness_of :enroll_academic_process, scope: [:section], message: 'Ya inscrito en la sección', field_name: false
 
   validates_with SamePeriodValidator, field_name: false  
-  validates_with SameSchoolValidator, field_name: false  
+  validates_with SameSchoolValidator, field_name: false
+  validates_with SameSubjectInPeriodValidator, field_name: false, if: :new_record?
+  validates_with ApprovedAndEnrollingValidator, field_name: false
+
+  # validates :qualifications, presence: true, if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado? or object.equivalencia? ))}
+
+  # OJO: Se usó este validador en luegar del de arriba para poder espeficificar el mensaje
+  validates_presence_of :qualifications, message: "Calificación no puede estar en blanco. Si desea eliminar la calificación, coloque el estado de calificación a 'Sin Calificar'", if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado? or object.equivalencia?))}
 
   # CALLBACK
   after_save :set_options_q
@@ -87,22 +95,17 @@ class AcademicRecord < ApplicationRecord
 
   scope :total_subjects_coursed, -> {coursed.total_subjects}
   scope :total_subjects_approved, -> {aprobado.total_subjects}
+  scope :total_subjects_equivalence, -> {equivalencia.total_subjects}
 
   scope :total_credits_coursed, -> {coursed.total_credits}
   scope :total_credits_approved, -> {aprobado.total_credits}
+  scope :total_credits_equivalence, -> {equivalencia.total_credits}
   
   scope :weighted_average, -> {joins(:subject).joins(:qualifications).coursed.sum('subjects.unit_credits * qualifications.value')}
 
   scope :promedio, -> {joins(:qualifications).coursed.average('qualifications.value')}
   scope :promedio_approved, -> {aprobado.promedio}
   scope :weighted_average_approved, -> {aprobado.weighted_average}
-
-  scope :without_equivalence, -> {joins(:section).not_equivalencia_interna} 
-
-  scope :by_equivalence, -> {joins(:section).equivalencia_interna}
-
-  # scope :by_equivalencia_interna, -> {joins(:section).where "sections.modality = 1"}
-  # scope :by_equivalencia_externa, -> {joins(:section).where "sections.modality = 2"}
 
   scope :student_enrolled_by_period, lambda { |period_id| joins(:academic_process).where("academic_processes.period_id": period_id).group(:student).count } 
 
@@ -116,9 +119,10 @@ class AcademicRecord < ApplicationRecord
   scope :student_enrolled_by_credits2, -> { joins(:subject).group('academic_records.student_id', 'subjects.unit_credits').count} 
 
   scope :by_subjects, -> {joins(:subject).order('subjects.code': :asc)}
+  scope :by_subject_types, -> (tipo){joins(:subject).where('subjects.modality': tipo.downcase)}
   # scope :perdidos, -> {perdida_por_inasistencia}
 
-  scope :sort_by_user_name, -> {joins(:user).order('users.last_name desc, users.first_name')}
+  scope :sort_by_user_name, -> {joins(:user).order('users.last_name asc, users.first_name asc')}
 
 
   # FUNCTIONS:
@@ -301,10 +305,6 @@ class AcademicRecord < ApplicationRecord
     q_value_to_02i post_q
   end
 
-  def post_type_q
-    post_q ? post_q.type_q : nil
-  end
-
   def definitive_type_q
     definitive_q ? definitive_q.type_q : :final
   end
@@ -346,6 +346,20 @@ class AcademicRecord < ApplicationRecord
     end
   end
 
+
+  def conv_type
+
+    type = definitive_type_q[0]
+    type ||= 'F'
+
+    modality_process = academic_process.modality[0]
+    modality_process ||= 'S'
+
+    aux = "#{type.upcase}#{modality_process.upcase}#{period.period_type.code.last}"
+
+    aux
+  end  
+
   def conv_descrip force_final = false # convocados
 
     data = [self.user.ci, self.user.reverse_name, self.study_plan.code]
@@ -368,23 +382,50 @@ class AcademicRecord < ApplicationRecord
 
   # RAILS_ADMIN
   rails_admin do
-    navigation_label 'Inscripciones'
+    navigation_label 'Gestión Periódica'
     navigation_icon 'fa-solid fa-signature'
+    weight 1
     # visible false
 
     list do
       search_by :custom_search
+      sort_by 'periods.name'
       # filters [:period_name, :section_code, :subject_code, :student_desc]
-      field :period_name do
-        label 'Período'
-        column_width 100
-        # searchable 'periods_academic_records.name'
-        # filterable 'periods_academic_records.name'
-        # sortable 'periods_academic_records.name'
-        formatted_value do
-          bindings[:object].period.name if bindings[:object].period
+      # field :period_name do
+      #   label 'Período'
+      #   column_width 100
+      #   # searchable 'periods_academic_records.name'
+      #   # filterable 'periods_academic_records.name'
+      #   # sortable 'periods_academic_records.name'
+      #   formatted_value do
+      #     bindings[:object].period.name if bindings[:object].period
+      #   end
+      # end
+
+      field :period do
+        label 'Period'
+        column_width 120
+
+        associated_collection_cache_all false
+        associated_collection_scope do
+          # bindings[:object] & bindings[:controller] are available, but not in scope's block!
+          Proc.new { |scope|
+            # scoping all Players currently, let's limit them to the team's league
+            # Be sure to limit if there are a lot of Players and order them by position
+            scope = scope.joins(:period)
+            scope = scope.limit(30) # 'order' does not work here
+          }
+        end
+
+        searchable 'periods.name'
+        filterable 'periods.name'
+        sortable 'periods.name'
+        pretty_value do
+          value.name
         end
       end
+
+
 
       field :section_code do
         label 'Sec'
@@ -397,16 +438,36 @@ class AcademicRecord < ApplicationRecord
         end
       end
 
-      field :subject_code do
+      # field :subject_code do
+      #   label 'Asignatura'
+      #   column_width 300
+      #   # searchable ['subjects_academic_records.code', 'subjects_academic_records.name']
+      #   # filterable ['subjects_academic_records.code', 'subjects_academic_records.name']
+      #   # sortable 'subjects_academic_records.code'
+      #   formatted_value do
+      #     bindings[:view].link_to( bindings[:object].subject.desc, "/admin/subject/#{bindings[:object].subject.id}") if bindings[:object].subject.present?
+      #   end
+      # end
+
+      field :subject do
         label 'Asignatura'
         column_width 300
-        # searchable ['subjects_academic_records.code', 'subjects_academic_records.name']
-        # filterable ['subjects_academic_records.code', 'subjects_academic_records.name']
-        # sortable 'subjects_academic_records.code'
-        formatted_value do
-          bindings[:view].link_to( bindings[:object].subject.desc, "/admin/subject/#{bindings[:object].subject.id}") if bindings[:object].subject.present?
+
+        searchable 'subjects.code'
+        filterable 'subjects.code'
+        sortable 'subjects.code'
+
+        associated_collection_cache_all false
+        associated_collection_scope do
+          # bindings[:object] & bindings[:controller] are available, but not in scope's block!
+          Proc.new { |scope|
+            # scoping all Players currently, let's limit them to the team's league
+            # Be sure to limit if there are a lot of Players and order them by position
+            scope = scope.joins(:subject, :course)
+            scope = scope.limit(30) # 'order' does not work here
+          }
         end
-      end
+      end      
 
       field :student_desc do
         label 'Estudiante'
@@ -431,11 +492,11 @@ class AcademicRecord < ApplicationRecord
         label 'Definitiva'
         column_width 30
       end
-      field :status_value do
+      field :status do
         label 'Estado'
         column_width 200
-        formatted_value do
-          bindings[:object].status.titleize if bindings[:object].status
+        pretty_value do
+          ApplicationController.helpers.label_status('bg-info', value.titleize)
         end        
       end
     end
@@ -448,10 +509,21 @@ class AcademicRecord < ApplicationRecord
       end
 
       field :enroll_academic_process do 
-        inline_add false
+        # inline_add false
         inline_edit false
         help 'Ingrese la cédula de identidad del estudiante y SELECCIONE la correspondiente inscripción en el período'
-
+      end
+      field :status do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.authorized_manage? 'Qualification')
+        end
+      end
+      field :qualifications do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.authorized_manage? 'Qualification')
+        end
       end
     end
 
@@ -515,6 +587,7 @@ class AcademicRecord < ApplicationRecord
               # BUSCAR O CREAR SECCIÓN
               if row[2]
                 row[2].strip!
+                row[2].upcase!
               else
                 return [0,0,2]
               end
@@ -605,8 +678,15 @@ class AcademicRecord < ApplicationRecord
   private
 
   # TRIGGER FUNCTIONS:
+  def validate_state_vs_qualification
+    if definitive_q and (self.aprobado? or self.aplazado?)
+      self.status = definitive_q.approved? ? :aprobado : :aplazado
+    end
+
+  end
+
   def set_options_q
-    self.qualifications.destroy_all if (self.pi? or self.retirado? or (self.subject and self.subject.absoluta?))
+    self.qualifications.destroy_all if (self.pi? or self.retirado? or self.sin_calificar? or (self.subject and self.subject.absoluta?))
 
     self.qualifications.create(type_q: :final, value: 0) if self.pi?
   end

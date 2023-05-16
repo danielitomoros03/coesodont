@@ -6,7 +6,7 @@ class Admin < ApplicationRecord
   # t.bigint "env_authorizable_id"
 
   # ENUMERIZE:
-  enum role: [:super, :jefe_control_estudio, :director, :jefe_departamento, :asistente]
+  enum role: [:desarrollador, :jefe_control_estudio, :asistente]
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -19,14 +19,19 @@ class Admin < ApplicationRecord
   belongs_to :user
   # accepts_nested_attributes_for :user
   
-  belongs_to :env_authorizable, polymorphic: true
+  belongs_to :env_authorizable, polymorphic: true, optional: true
   belongs_to :profile, optional: true
+
+  has_many :authorizeds
+
+  before_save :set_role
+
 
   # VALIDATIONS:
   validates :user, presence: true, uniqueness: true
-  validates :env_authorizable, presence: true
-  validates :user, presence: true
-  validates :role, presence: true
+  # validates :env_authorizable, presence: true
+  # validates :user, presence: true
+  # validates :role, presence: true
 
   # validates :env_authorizable_type, presence: true
 
@@ -47,31 +52,134 @@ class Admin < ApplicationRecord
   def check_user_for_destroy
     user_aux = User.find self.user_id
     user_aux.delete if user_aux.without_rol?
-  end  
+  end 
+
+  def authorized_manage? clazz
+    if yo? or desarrollador? or jefe_control_estudio?
+      return true
+    else
+      
+      if authorizable = Authorizable.where(klazz: clazz).first
+        if authorized = authorizeds.where(authorizable_id: authorizable.id).first
+          return authorized.can_manage?
+        else
+          return false
+        end
+      else
+        return false
+      end
+    end
+  end
+ 
+  def authorized_delete? clazz
+    if yo? or desarrollador? or jefe_control_estudio?
+      return true
+    else
+      
+      if authorizable = Authorizable.where(klazz: clazz).first
+        if authorized = authorizeds.where(authorizable_id: authorizable.id).first
+          return authorized.can_delete?
+        else
+          return false
+        end
+      else
+        return false
+      end
+    end
+  end
+
+  def authorized_update? clazz
+    if yo? or desarrollador? or jefe_control_estudio?
+      return true
+    else
+      
+      if authorizable = Authorizable.where(klazz: clazz).first
+        if authorized = authorizeds.where(authorizable_id: authorizable.id).first
+          return authorized.can_update?
+        else
+          return false
+        end
+      else
+        return false
+      end
+    end
+  end
+
+  def authorized_read? clazz
+    if yo? or desarrollador? or jefe_control_estudio?
+      return true
+    else
+      
+      if authorizable = Authorizable.where(klazz: clazz).first
+        if authorized = authorizeds.where(authorizable_id: authorizable.id).first
+          return authorized.can_read?
+        else
+          return false
+        end
+      else
+        return false
+      end
+    end
+  end
+
 
   rails_admin do
     navigation_label 'Gestión de Usuarios'
     navigation_icon 'fa-regular fa-user-tie'
 
     show do
-     field :user 
-     field :role 
-     field :env_authorizable 
-     field :created_at
+      field :user 
+      # field :role do
+      #   pretty_value do
+      #     value.titleize
+      #   end
+      # end
+      field :pare do
+        label 'PARE (Procesos de Acceso Restringido)'
+        formatted_value do
+          if bindings[:object].asistente?
+
+            bindings[:view].render(partial: 'authorizeds/form', locals: {user: bindings[:object].user})
+          end
+        end
+      end
+
+
+      # field :env_authorizable 
+      # field :created_at
     end
 
     list do
       search_by :custom_search
-      field :user
-      field :role
-      field :env_authorizable
-      field :created_at
+      field :user do
+        pretty_value do
+          value.description
+        end
+      end
+      field :role do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.desarrollador? )
+        end
+        pretty_value do
+          value.titleize
+        end        
+      end
+      # field :env_authorizable
+      # field :created_at
     end
 
     edit do
-       field :user 
-       field :role 
-       field :env_authorizable
+      field :user 
+      field :role do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.yo? )
+        end
+      end
+
+      # field :env_authorizable
+      # field :authorizeds
 
       # field :role do
       #   html_attributes do
@@ -90,6 +198,9 @@ class Admin < ApplicationRecord
   
   private
 
+    def set_role
+      self.role = :asistente if self.role.nil?
+    end
 
     def paper_trail_update
       # changed_fields = self.changes.keys - ['created_at', 'updated_at']

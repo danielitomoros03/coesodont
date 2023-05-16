@@ -1,0 +1,11 @@
+.text-center.py-2.font-sm
+  = image_tag wicked_pdf_asset_base64('logo_ucv.png'), class: 'img-fluid mb-2', width: '60px' 
+  .font-title UNIVERSIDAD CENTRAL DE VENEZUELA
+  PLANILLA DE EXAMENES
+  %br
+  = "TIPO DE EXAMEN: #{section.academic_process.exame_type.upcase}"
+
+= render partial: '/sections/acta_title', locals: {period_name: section.period.name, faculty_name: school.faculty.name, section: section, school_name: school.name} 
+
+= render partial: '/sections/acta_description', locals: {section: section, subject: section.subject}
+%br

@@ -8,12 +8,14 @@
       %th TIPO
       %th SECCIÓN
       %th DURACIÓN
+      %th INSCRS
 
   %tbody{style: 'border-top: 1px solid black;'}
     %tr.text-center
-      %td= @subject.name
-      %td= @subject.code.upcase
-      %td= @subject.unit_credits
-      %td= @subject.modality_initial_letter
-      %td= @section.code.upcase
-      %td= @section.conv_long
+      %td= subject.name
+      %td= subject.code.upcase
+      %td= subject.unit_credits
+      %td= subject.modality_initial_letter
+      %td= section.code.upcase
+      %td= section.conv_long
+      %td= section.academic_records.count

@@ -1,7 +1,26 @@
 module ApplicationHelper
 	def render_haml(haml, locals = {})
-		Haml::Engine.new(haml.strip_heredoc, format: :html5).render(self, locals)
+		Haml::Engine.new(haml.strip_heredoc, format: :html5).render(locals)
 	end
+
+	def btn_toggle type, icon, href, title_tooltip, value, onclick_action=nil
+
+		target = ''
+		rel = ''
+
+		if (icon.include? 'fa-download')
+			target = '_blank'
+			rel = 'noopener noreferrer'
+		end
+		link_to href, class: "btn btn-sm #{type}", title: title_tooltip, onclick: onclick_action, target: target, rel: rel do
+			capture_haml{"<i class= '#{icon}'></i> #{value}".html_safe}
+		end
+	end
+
+	def btn_toggle_download classes, href, title_tooltip, value, onclick_action=nil
+		btn_toggle classes, 'fa fa-download', href, title_tooltip, value, onclick_action
+	end
+
 
 	def label_status(klazz, content)
 		capture_haml{"<span class='text-center badge #{klazz}'>#{content}</span>".html_safe }
@@ -11,8 +30,59 @@ module ApplicationHelper
 
 		content_tag :b, rel: :tooltip, 'data-bs-toggle': 'tooltip', 'data-bs-placement': placement, 'data-bs-original-title': title do
 			capture_haml{"<span class='text-center badge #{klazz}'>#{content}</span>".html_safe }
-		end
-	
+		end	
 	end
+
+	def translate_model model
+		I18n.t("activerecord.models.#{model}.other")
+	end
+
+	def checkbox_auth id, action, value, area_id, onclick=nil
+
+		content_tag :a do
+			check_box_tag "[model#{id}][can_#{action}]", nil, value, {class: "area#{area_id} can_all#{id} read#{id}", onclick: onclick}
+		end
+	end
+
+	def simple_toggle href, value, title_tooltip, color_type, icon, onclick_action = nil
+		target = (href.include? 'descargar') ? '_blank' : ''
+		link_to href, class: "tooltip-btn text-#{color_type}", onclick: onclick_action, target: target, 'data_toggle': :tooltip, title: title_tooltip do
+			capture_haml{"<i class= '#{icon}'></i> #{value}".html_safe}
+		end
+
+	end
+
+	def signatures
+
+		capture_haml {
+			".signatures
+				.font-title.text-center FACULTAD
+					%table.no_border
+						%thead
+							%tr
+							%th.text-center{style: 'width: 500px'} JURADO EXAMINADOR
+							%th.text-center{style: 'width: 500px'} SECRETARÍA
+					%br
+					%table.no_border
+						%thead
+							%tr
+								%th APELLIDOS Y NOMBRES
+								%th FIRMAS
+								%th 
+							%tr{style: 'height:30px'}
+								%th _________________________________
+								%th ______________________
+								%th NOMBRE ______________________        
+							%tr{style: 'height:30px'}
+								%th _________________________________
+								%th ______________________
+								%th FIRMA _______________________
+							%tr{style: 'height:30px'}
+								%th _________________________________
+								%th ______________________
+								%th FECHA _______________________"
+		}
+
+	end	
 
 end

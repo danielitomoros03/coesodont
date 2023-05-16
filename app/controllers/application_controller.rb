@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :set_paper_trail_whodunnit
 
-  helper_method :logged_as_teacher?, :logged_as_student?, :logged_as_admin?, :current_admin, :current_teacher, :current_student
+  helper_method :logged_as_teacher_or_admin?, :logged_as_teacher?, :logged_as_student?, :logged_as_admin?, :current_admin, :current_teacher, :current_student
 
   def models_list
     aux = ActiveRecord::Base.connection.tables-['schema_migrations', 'ar_internal_metadata'].map{|model| model.capitalize.singularize.camelize}
@@ -23,6 +23,10 @@ class ApplicationController < ActionController::Base
   end
 
   # IS LOGGED BY
+  def logged_as_teacher_or_admin?
+    logged_as_teacher? or logged_as_admin?
+  end
+
   def logged_as_teacher?
     !current_user.nil? and !current_user.teacher.nil? and session[:rol].eql? 'teacher'
   end

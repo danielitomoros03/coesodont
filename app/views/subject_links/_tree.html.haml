@@ -1,0 +1,28 @@
+- if subject_links.any?
+  %table.table-striped.table-hover.table-bordered.m-1.p-2
+    %tbody
+      - subject_links.each do |dep|
+        - aprobada = (@aprobadas_ids and @aprobadas_ids.include? dep.asignatura_id) ? 'table-success' : ''
+        %tr{class: aprobada, id: "dep#{dep.id}"}
+          %td.p-2
+            - if (current_user.admin and current_user.admin.yo?)
+              = "dep: #{dep.id}"
+              = "depend: #{dep.depend_subject_id}"
+              = "prelate: #{dep.prelate_subject_id}"
+            - unless aprobada.eql? ''
+              %span.badge.bg-success Aprobada
+            = ApplicationController.helpers.description_subject_tree(dep, adelante, current_user.admin).html_safe
+
+            - if adelante 
+              - links = dep.depend_subject.depend_links.joins(:depend_subject).order('subjects.ordinal': :asc)
+              - id = "treeDepend#{dep.id}"
+            - else
+              - links = dep.prelate_subject.prelate_links.joins(:prelate_subject).order('subjects.ordinal': :asc)
+              - id = "treePrelate#{dep.id}"
+
+            - if links.any?
+              = link_to "##{id}", 'aria-controls': "##{id}", 'aria-expanded': false, "data-bs-toggle": :collapse, onclick: "$(this).find('i').toggleClass('fa-rotate-90');" do
+                %i.fa.fa-chevron-right.text-success
+
+              .collapse{id: id}
+                = render partial: '/subject_links/tree', locals: {subject_links: links, adelante: adelante}

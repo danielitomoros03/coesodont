@@ -1,14 +1,27 @@
 @import "custom_style";
 @import "bootstrap/scss/bootstrap";
 
+.page-break { display:block; clear:both; page-break-after:always; }
+
+.alwaysbreak { page-break-before: always; }
+.nobreak:before { clear:both; }
+.nobreak { page-break-inside: avoid; }
+
+.h-30{height:30px;}
+
 .image_profile{
   position: absolute;
   left: 20px;
-  top: 20px	
+  top: 10px	
 }
 .signatures{
 	position: absolute;
-  top: 1000px;
+  bottom: 100;
+  right: 0;
+}
+
+.table-striped > tbody > tr:nth-child(odd) td {
+	background-color: #F0F0F0 !important;
 }
 
 .font-title{
@@ -40,14 +53,22 @@ text-left{
 	text-align: left;
 }
 
-/* body{
+#watermark_bg{
 	background-image: url('logo_bg.png');
 	background-size: auto auto;
 	background-repeat: repeat;
 	opacity: 0.1;
 	transform: rotate(30deg);
 
-} */
+}
+
+#watermark_bg_acta{
+	background-image: url('logo_ucv_bg_acta.png');
+	background-position: center;
+	background-size: 600;
+	background-repeat: repeat-y;
+
+}
 
 
 .alert-message{

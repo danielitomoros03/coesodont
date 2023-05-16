@@ -11,10 +11,9 @@
 		= glyph 'plus'
 		= "Reportar Pago Ingreso a #{grade.school.code}"
 
-- if session[:rol] and session[:rol].eql? 'admin'
+- if session[:rol] and session[:rol].eql? 'admin' and current_user and current_user.admin and (current_user.admin.authorized_manage? 'AcademicRecord')
 	.m-3.p-3= render partial: 'enroll_academic_processes/new', locals: {grade: grade}
 - else
-
 	- school = grade.school
 	- academic_process = school.enroll_process
 	- academic_process_before = academic_process.process_before if academic_process
@@ -58,4 +57,5 @@
 
 
 = render partial: 'grades/academic_resume', locals: {grade: grade}
+
 = render template: 'enroll_academic_processes/index', locals: {enroll_academic_processes: grade.enroll_academic_processes}

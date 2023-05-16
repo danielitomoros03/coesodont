@@ -16,16 +16,44 @@ class Ability
     if user.admin?
       can :access, :rails_admin
       can :manage, :dashboard
-      cannot :import, :all
-      can :import, [User, Student, Teacher, Subject, Period, AcademicRecord, Billboard]
+      can :read, Faculty
 
-      if user.admin.yo?
+      if user.admin.desarrollador?
         can :manage, :all
       elsif user.admin.jefe_control_estudio?
-        can :manage, [Admin, Student, Teacher, Area, Subject, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, Dependency, Schedule, EnrollmentDay, Billboard]
-        can :crue, [School, User, Faculty]
+        can :import, Authorizable::IMPORTABLES
+        can :manage, [Admin, Student, Teacher, Area, Subject, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User]
+        can :ru, [School]
       else
-        cannot :manage, [User, Admin, Student, Teacher, Area, Subject, School, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address]
+        user.admin.authorizeds.each do |authd|
+            if authd.authorizable.klazz.eql? 'Subject' and authd.can_manage?
+                can :manage, [SubjectLink, Area]
+            end
+            if authd.authorizable.klazz.eql? 'Student' and authd.can_manage?
+                can :manage, [User, Address, Grade]
+                can :read, [AdmissionType, StudyPlan]
+            end
+            if authd.authorizable.klazz.eql? 'AcademicProcess' and authd.can_manage?
+                can :manage, [Period, PeriodType]
+            end
+            if authd.authorizable.klazz.eql? 'Section' and authd.can_manage?
+                can :manage, [Schedule]
+            end
+            if authd.authorizable.klazz.eql? 'AcademicRecord' and authd.can_manage?
+                can :read, [Section, EnrollAcademicProcess]
+            end            
+
+            can :read, authd.authorizable_klazz_constantenize if authd.can_read?
+            can :create, authd.authorizable_klazz_constantenize if authd.can_create?
+            can :update, authd.authorizable_klazz_constantenize if authd.can_update?
+            can :destroy, authd.authorizable_klazz_constantenize if authd.can_delete?
+            can :import, authd.authorizable_klazz_constantenize if authd.can_import?
+            can :export, authd.authorizable_klazz_constantenize if authd.can_export?
+            can :history, authd.authorizable_klazz_constantenize
+
+        end
+
+        # cannot :manage, [User, Admin, Student, Teacher, Area, Subject, School, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address]
       end
     end
   end

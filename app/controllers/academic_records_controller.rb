@@ -38,11 +38,13 @@ class AcademicRecordsController < ApplicationController
   def update
     respond_to do |format|      
       if @academic_record.update(academic_record_params)
-        flash[:info] = '¡Actualización Exitosa!'
+        flash[:success] = '¡Actualización Exitosa!'
         format.html { redirect_back fallback_location: root_path}
         format.json { render json: {data: '¡Datos Guardados con éxito!', type: 'success'}, status: :ok }
       else
-        format.html { render :edit, status: :unprocessable_entity }
+        flash[:danger] = @academic_record.errors.full_messages.to_sentence
+
+        format.html { redirect_back fallback_location: root_path}
         format.json { render json: {data: "Error: #{@academic_record.errors.full_messages.to_sentence}", type: 'danger'}, status: :ok }
         # format.json { render json: @academic_record.errors, status: :unprocessable_entity }
       end
@@ -55,7 +57,7 @@ class AcademicRecordsController < ApplicationController
     flash[:info] = '¡Registro Eliminado!'
 
     respond_to do |format|
-      format.html { redirect_back fallback_location: root_path, notice: "Registro Académico Eliminado" }
+      format.html { redirect_back fallback_location: root_path}
       format.json { head :no_content }
     end
   end

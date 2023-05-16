@@ -16,9 +16,9 @@
         %span.label.label-danger Requerido
 
   #admission_type_field.control-group.row.mb-3.enum_type
-    %label.col-sm-2.col-form-label.text-md-end{for: "admission_type_field"} Tipo de Ingreso
+    %label.col-sm-2.col-form-label.text-md-end{for: "admission_type_field"} Tipo de Admisión
     .col-sm-10.controls
-      = grouped_collection_select nil, :admission_type_id, School.all, :admission_types, :description, :id, :name, {:prompt => "Selecciona el tipo de ingreso a la escuela...", selected: @school_id}, { class: 'form-control', required: true}
+      = grouped_collection_select nil, :admission_type_id, School.all, :admission_types, :description, :id, :name, {:prompt => "Selecciona el tipo de Admisión a la escuela...", selected: @school_id}, { class: 'form-control', required: true}
       .form-text
         %span.label.label-danger Requerido
 

@@ -4,26 +4,26 @@
     %tr
       %td
         %b FECHA DE EMISIÓN:
-        = Date.today.strftime('%d/%m/%Y %I:%M %p')
+        = Time.now.strftime('%d/%m/%Y %I:%M %p')
       %td.text-right
         %b ACTA NO.:
-        = @section.number_acta
+        = section.number_acta
     %tr
       %td
         %b EJERCICIO:
-        = @section.period.name
+        = period_name
       %td.text-right
         %b PERIODO ACADÉMICO:
-        = @period.name
+        = period_name
     %tr
       %td
         %b FACULTAD:
-        = @section.faculty.name
+        = faculty_name
       %td.text-right
         %b TIPO DE CONVOCATORIA:
-        = @section.conv_type
+        = section.conv_type
     %tr
       %td
         %b ESCUELA:
-        = @school.name
+        = school_name
       %td

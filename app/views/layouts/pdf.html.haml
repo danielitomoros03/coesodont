@@ -2,13 +2,9 @@
 %html{ lang: "#{I18n.locale}"}
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
-    %title Coesfaco - Bienvenido
+    %title Coesodon - Documento Pdf
     %meta{:content => "width=device-width, initial-scale=1, shrink-to-fit=no", :name => "viewport"}/
-    = csrf_meta_tags
-    = csp_meta_tag
     = wicked_pdf_stylesheet_link_tag "pdf"
-    =# stylesheet_link_tag wicked_pdf_asset_base64("pdf")
-    =# javascript_include_tag wicked_pdf_asset_base64("number_pages")
 
   %body
     = yield

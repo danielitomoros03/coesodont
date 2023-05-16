@@ -1,5 +1,5 @@
 class SectionsController < ApplicationController
-  before_action :set_section, only: %i[ show update export ]
+  before_action :set_section, only: %i[ show update export change]
 
   # GET /sections or /sections.json
   def index
@@ -15,18 +15,11 @@ class SectionsController < ApplicationController
   # GET /sections/1 or /sections/1.json
   def show
     if current_admin or (current_teacher and @section.teacher and @section.teacher_id.eql? current_teacher.id)
-      @subject = @section.subject
-      @period = @section.period
-      @school = @section.school
-      @academic_records = @section.academic_records.sort_by_user_name
-
       respond_to do |format|
         format.html
         format.pdf do
-          render pdf: "ACTA#{@section.number_acta}", template: "sections/acta", formats: [:html], page_size: 'letter', footer: {center: "Página: [page] de [topage]", font_size: '8'}
-          # , header: {content: render_to_string('sections/acta_header')} 
+          render pdf: "acta_#{@section.number_acta}", template: "sections/acta", locals: {section: @section}, formats: [:html], page_size: 'letter', header: {html: {template: '/sections/acta_header', formats: [:html], layout: false, locals: {school: @section.school, section: @section}}}, footer: {html: {template: '/sections/signatures', formats: [:html]}}, margin: {top: 70, bottom: 55}#, dpi: 150
         end
-
       end
     else
       flash[:warning] = 'Sección no asignada'
@@ -88,6 +81,6 @@ class SectionsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def section_params
-      params.require(:section).permit(:code, :capacity, :course_id, :teacher_id, :qualified, :modality, :enabled)
+      params.require(:section).permit(:id, :code, :capacity, :course_id, :teacher_id, :qualified, :modality, :enabled)
     end
 end

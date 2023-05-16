@@ -1,4 +1,4 @@
-
+- enabled_to_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false 
 %table.table.table-condensed.table-striped.table-hover.border.table-bordered.table-sm.table-responsive
   %thead
     %tr.text-center
@@ -13,7 +13,8 @@
       %th Estudiante
       
       - if section.subject.numerica?
-        %th.text-center PI
+        - if (enabled_to_admin and current_user.admin.authorized_update? 'Qualification')
+          %th.text-center PI
         %th.text-center Cal. Final
         - if false
           %th CD
@@ -50,8 +51,11 @@
         - if retirado
           %td{colspan: 2}
         - else
-          - @academic_record = acre
-          = render partial: '/academic_records/form_qualify', locals: {academic_record: acre, disable_row: disable_row, status: status, id: id, preinscrito: preinscrito}
+          - if (enabled_to_admin and current_user.admin.authorized_update? 'Qualification')
+            - @academic_record = acre
+            = render partial: '/academic_records/form_qualify', locals: {academic_record: acre, disable_row: disable_row, status: status, id: id, preinscrito: preinscrito}
+          - else
+            %td= text_field_tag nil, {}, {value: acre.final_q_to_02i_to_from, class: 'form-control form-control-sm', disabled: true}          
         = render partial: '/academic_records/qualification_to_s', locals: {academic_record: acre, id: id}
         %td.text-center
           .badge.bg-info{id: "labelStatus#{acre.id}"}= status.titleize

@@ -49,9 +49,15 @@ class AcademicProcess < ApplicationRecord
   # SCOPE:
   default_scope { order(name: :desc) }
 
+  scope :without_enroll_academic_processes, -> {left_joins(:enroll_academic_processes).where('enroll_academic_processes.academic_process_id': nil)}
+
   # CALLBACKS:
   before_save :set_name
 
+
+  def exame_type
+    "#{period.period_type.name.upcase} #{modality.upcase}" if (period and period.period_type and modality)
+  end
 
   def default_value_by_import
     max_credits = 24
@@ -115,9 +121,9 @@ class AcademicProcess < ApplicationRecord
   end
 
   rails_admin do
-    navigation_label 'Inscripciones'
+    navigation_label 'Gestión Periódica'
     navigation_icon 'fa-solid fa-calendar'
-    weight -2
+    weight -3
     list do
       sort_by 'periods.name'
       fields :period do
@@ -137,22 +143,38 @@ class AcademicProcess < ApplicationRecord
       field :total_sections do
         column_width 100
         label 'T Sec.'
-        pretty_value do
-          %{<a href='/admin/section?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
-        end      end
+        pretty_value do 
+          user = bindings[:view]._current_user
+          if (user and user.admin and user.admin.authorized_read? 'Section')
+            %{<a href='/admin/section?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+          else
+            %{<span class='badge bg-info'>#{value}</span>}.html_safe
+          end
+        end
+      end
 
       field :total_enroll_academic_processes do
         column_width 100
         label 'T Inscritos'
         pretty_value do
-          %{<a href='/admin/enroll_academic_process?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+          user = bindings[:view]._current_user
+          if (user and user.admin and user.admin.authorized_read? 'EnrollAcademicProcess')
+            %{<a href='/admin/enroll_academic_process?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+          else
+            %{<span class='badge bg-info'>#{value}</span>}.html_safe
+          end
         end
       end
       field :total_academic_records do
         column_width 100
         label 'T Inscripciones'
         pretty_value do
-          %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+          user = bindings[:view]._current_user
+          if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')          
+            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+          else
+            %{<span class='badge bg-info'>#{value}</span>}.html_safe
+          end
         end
       end      
     end
@@ -185,6 +207,10 @@ class AcademicProcess < ApplicationRecord
       end
 
       field :courses do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.authorized_manage? 'AcademicProcess')
+        end
         label 'Opciones de Oferta Docente'
         pretty_value do
           bindings[:view].render(partial: "/academic_processes/clonation_options", locals: {academic_process: bindings[:object]})
@@ -192,8 +218,11 @@ class AcademicProcess < ApplicationRecord
       end
 
       field :enrollment_days do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.authorized_manage? 'AcademicProcess')
+        end
         pretty_value do
-
           if bindings[:object].process_before
             enrollment_days = bindings[:object].enrollment_days
             grades_without_appointment = bindings[:object].readys_to_enrollment_day
@@ -202,8 +231,6 @@ class AcademicProcess < ApplicationRecord
 
           else
             bindings[:view].content_tag(:p, 'Sin proceso academico anterio vinculado. Para habilitar el sistema de Cita Horaria en este proceso académico, por favor edítelo y agregue un proceso anteriór', {class: 'alert alert-warning'})
-        
-            
           end
         end
 

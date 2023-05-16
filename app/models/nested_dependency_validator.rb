@@ -7,8 +7,7 @@ class NestedDependencyValidator < ActiveModel::Validator
 
   private
     def nested_dependency(record)
-      p "    #{record.to_s}      ".center(500, "%")
-      (record.subject_parent_id.eql? record.subject_dependent_id) or
-      record.subject_parent.full_dependency_tree_ids.include? record.subject_dependent_id
-    end
+      tree = record.prelate_subject.full_dependency_tree_ids
+      (tree.include? record.depend_subject_id)
+    end    
 end

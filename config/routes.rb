@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       get 'constancias'
     end
   end
+  resources :subject_links, only: :destroy
   resources :page, only: :show
   resources :qualifications, only: :update
   resources :period_types
@@ -27,13 +28,21 @@ Rails.application.routes.draw do
 
 
   resources :enroll_academic_processes do
+    member do
+      put :total_retire
+    end
     collection do
       post :reserve_space
       post :enroll
     end
   end
 
+  resources :authorizeds do
+    collection do
+      post :update_authorize
+    end
 
+  end
 
   resources :enrollment_days, only: [:create, :destroy] do
     member do
@@ -75,10 +84,17 @@ Rails.application.routes.draw do
   
   resources :faculties do
     resources :schools do
-      resources :admission_types, :grades, :study_plans
+      resources :admission_types, :study_plans
       resources :areas do
         resources :subjects
       end
+    end
+  end
+
+  
+  resources :grades do
+    member do
+      get 'kardex'
     end
   end
 

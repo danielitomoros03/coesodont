@@ -24,12 +24,20 @@ class Subject < ApplicationRecord
   has_many :courses, dependent: :destroy
   has_many :sections, through: :courses
 
-  has_many :parents, foreign_key: :subject_dependent_id, class_name: 'Dependency'
-  has_many :subject_parents, through: :parents
-  # accepts_nested_attributes_for :subject_parents
+  # LINKS
+    # ATENCIÓN, MUCHA ATENCIÓN: Pareciera que las foraign_keys están al revés pero no es asi.
+    # Si quiero ver las prelaciones de una materia, no debo ver las prelate_subject_id porque serían las asignaturas cuyas prelate_subject_id sean iguales a esta, es decir, las decendientes y eso sí estaría mal.
+    # PRELATE:
+      has_many :prelate_links, foreign_key: :depend_subject_id, class_name: 'SubjectLink', dependent: :destroy
+      has_many :prelate_subjects, through: :prelate_links
+      # accepts_nested_attributes_for :prelate_links, allow_destroy: true
+      # accepts_nested_attributes_for :prelate_subjects, allow_destroy: true
 
-  has_many :dependencies, foreign_key: :subject_parent_id, class_name: 'Dependency', dependent: :delete_all
-  has_many :subject_dependents, through: :dependencies
+    # DEPEND:
+      has_many :depend_links, foreign_key: :prelate_subject_id, class_name: 'SubjectLink', dependent: :destroy
+      has_many :depend_subjects, through: :depend_links
+      # accepts_nested_attributes_for :dependent_links, allow_destroy: true
+
 
   # ENUMS:
   enum qualification_type: [:numerica, :absoluta]
@@ -50,7 +58,12 @@ class Subject < ApplicationRecord
 
   scope :custom_search, -> (keyword) {joins([:area]).where("subjects.name ILIKE ? or subjects.code ILIKE ? or areas.name ILIKE ?", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%")} 
 
-  scope :independents, -> {joins('LEFT JOIN dependencies ON dependencies.subject_dependent_id = subjects.id').where('dependencies.subject_dependent_id IS NULL')}
+  # scope :independents, -> {joins('LEFT JOIN subject_links ON subject_links.prelate_subject_id = subjects.id').where('subject_links.prelate_subject_id IS NULL')}
+
+  scope :independents, -> {left_joins(:prelate_links).where('subject_links.prelate_subject_id': nil)}
+
+  scope :not_inicial, -> {where('ordinal > 1')}
+
 
   # CALLBACKS:
   before_save :clean_values
@@ -71,26 +84,39 @@ class Subject < ApplicationRecord
 
   def full_dependency_tree_ids
     aux = []
-    aux << prelation_tree_ids
-    aux << dependency_tree_ids
+    aux << prelate_tree
+    aux << depend_tree
     return aux.flatten.uniq
+  end  
+
+  def prelate_tree
+    self.prelate_links.map{|link| [link.prelate_subject_id, link.prelate_subject.prelate_tree].uniq.flatten} 
   end
 
-  def prelation_tree_ids
-    if parents.any?
-      parents.map{|dep| [self.id, dep.subject_parent.prelation_tree_ids]}
-    else
-      self.id
-    end
-  end
+  def depend_tree
+    self.depend_links.map{|link| [link.depend_subject_id, link.depend_subject.depend_tree].uniq.flatten} 
+  end  
 
-  def dependency_tree_ids
-    if dependencies.any?
-      dependencies.map{|dep| [self.id, dep.subject_dependent.dependency_tree_ids]}
-    else
-      self.id
-    end
-  end
+  # def prelate_tree names=false
+
+  #   if (prelate_links.count > 1)
+  #     prelate_links.map{|subj_link| subj_link.prelate_subject.prelate_tree (names)}
+  #   elsif (prelate_links.count.eql? 1)
+  #     if aux = self.prelate_links.first.prelate_subject
+  #       names ? aux.name : aux.id
+  #     end
+  #   end
+  # end
+
+  # def depend_tree names=false
+  #   if (depend_links.count > 1)
+  #     depend_links.map{|subj_link| subj_link.depend_subject.depend_tree (names)}
+  #   elsif (depend_links.count.eql? 1)
+  #     if aux = self.depend_links.first.depend_subject
+  #       names ? aux.name : aux.id
+  #     end
+  #   end
+  # end
 
   # DESCRIPTIONS TYPES:
 
@@ -100,6 +126,10 @@ class Subject < ApplicationRecord
 
   def desc_confirm_enroll
     "- #{self.name} - #{self.unit_credits}"
+  end
+
+  def desc_id
+    "#{id} #{desc}"
   end
 
   def description_code
@@ -154,7 +184,7 @@ class Subject < ApplicationRecord
   end
 
   def total_dependencies
-    self.dependencies.count
+    self.depend_subjects.count
   end
 
   def total_courses
@@ -192,6 +222,11 @@ class Subject < ApplicationRecord
         column_width 20
       end
 
+      field :ordinal do
+        label 'Orden'
+        column_width 20
+      end
+
       field :total_courses do
         label 'Cursos'
         column_width 20
@@ -208,7 +243,6 @@ class Subject < ApplicationRecord
         end        
       end
 
-
       field :total_dependencies do
         label 'Depends'
         column_width 20
@@ -216,7 +250,34 @@ class Subject < ApplicationRecord
     end
 
     show do
-      fields :area, :code, :name, :unit_credits, :ordinal, :qualification_type, :modality, :created_at, :updated_at, :subject_parents, :subject_dependents, :courses, :sections
+      # fields :area, :code, :name, :unit_credits, :ordinal, :qualification_type, :modality, :created_at, :updated_at
+
+      field :desc_show do
+        label 'Descripción'
+        formatted_value do
+          bindings[:view].render(partial: "subjects/desc_table", locals: {subject: bindings[:object]})
+        end
+      end      
+
+      field :prelate_subjects do
+        pretty_value do
+          if bindings[:object].prelate_subjects.any?
+            bindings[:view].render(partial: "/subject_links/index", locals: {subject: bindings[:object], adelante: false})
+          else
+            "<span class='badge bg-secondary'>Sin Prelaciones</span>".html_safe
+          end
+        end
+      end
+      field :depend_subjects do
+        pretty_value do
+          if bindings[:object].depend_subjects.any?
+            bindings[:view].render(partial: "/subject_links/index", locals: {subject: bindings[:object], adelante: true})
+
+          else
+            "<span class='badge bg-secondary'>Sin Dependencias</span>".html_safe
+          end
+        end
+      end
     end
 
     edit do
@@ -244,16 +305,17 @@ class Subject < ApplicationRecord
         # help 'Parcial3 equivale a asignatura con 3 calificaciones parciales'
       end
 
-      field :subject_parents do
-        inline_add false
-        inline_edit false
-        help 'Asignatura(s) que prela directamente esta Asignatura. El estudiante debe aprobar la(s) asignatura(s) seleccionada(s) a continuación para que esta asignatura sea ofertada.'
-      end
-      # field :subject_dependents do
+      # field :prelate_subjects do
       #   inline_add false
       #   inline_edit false
-      #   help 'Asignatura(s) que dependen directamente de esta asignatura. Si el estudiante aprueba esta asignatura, la(s) asignatura(s) seleccionada(s) a continuación podrán ser ofertadas.'
+      #   help 'Asignatura(s) que prela(n) DIRECTAMENTE esta Asignatura. El estudiante debe aprobar la(s) asignatura(s) seleccionada(s) a arriba para que esta asignatura sea ofertada.'
       # end
+
+      field :depend_subjects do
+        inline_add false
+        inline_edit false
+        help 'Asignatura(s) que depende(n) DIRECTAMENTE de esta asignatura. Si el estudiante aprueba esta asignatura, la(s) asignatura(s) seleccionada(s) arriba podrán ser ofertadas.'
+      end
     end
 
     export do

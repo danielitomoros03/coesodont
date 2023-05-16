@@ -1,15 +1,35 @@
 - logged_as_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
 .badge.bg-info.align-top= academic_record.status.titleize
 - if logged_as_admin
-  - msg = 'Eliminar inscripción'
-  - confirm = '¿Está Seguro de la siguiente acción?'
 
-  = link_to "/academic_records/#{academic_record.id}", class: 'btn btn-danger btn-sm float-end align-middle mx-2', 'data-confirm': confirm, method: :delete, 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip" do
-    .fa-solid.fa-trash
+  - if (current_user.admin.authorized_delete? 'AcademicRecord')
+    - msg = 'Eliminar inscripción'
+    - confirm = '¿Está Seguro de la siguiente acción?'
 
+    = link_to "/academic_records/#{academic_record.id}", class: 'btn btn-danger btn-sm float-end align-middle mx-2', 'data-confirm': confirm, method: :delete, 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip" do
+      .fa-solid.fa-trash
 
-  - if !academic_record.pi?
-    - unless academic_record.retirado?
+  - if !academic_record.pi? and (current_user.admin.authorized_update? 'AcademicRecord')
+    - if academic_record.retirado?
+      - msg = 'Reinscribir Asignatura'
+      = form_tag "/academic_records/#{academic_record.id}", method: :put, class: 'float-end align-middle' do
+        = hidden_field_tag '[academic_record]status', :sin_calificar
+        = button_tag(class: 'btn btn-success btn-sm', 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip", type: :submit) do
+          .fa.fa-calendar-plus
+    - else
+      - section = academic_record.section
+      - sections = academic_record.course.sections.where('id != ?', section.id)
+      - if sections.any?
+        - msg = 'Cambio de sección'
+
+        - content = render partial: 'sections/form_change_section', locals: {academic_record: academic_record, sections: sections}
+
+        = render partial: 'layouts/scaffold-modal', locals: {id: "ChangeSec#{section.id}", title: "Cambio de sesión: #{section.desc_subj_code}", content: content}
+
+        %b{'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip"}
+          %button.btn.btn-sm.btn-warning{"data-bs-target": "#ChangeSec#{section.id}", "data-bs-toggle": :modal, type: :button}
+            %i.fa-solid.fa-rotate-right
+
       - msg = 'Retirar Asignatura'
       = form_tag "/academic_records/#{academic_record.id}", method: :put, class: 'float-end align-middle' do
         = hidden_field_tag '[academic_record]status', :retirado

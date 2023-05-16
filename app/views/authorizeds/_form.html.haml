@@ -1,0 +1,88 @@
+= form_tag('/authorizeds/update_authorize', class: 'form-horizontal') do
+	= hidden_field_tag :id, params[:id]
+	- AreaAuthorizable.all.each do |area|
+		%table.table.table-bordered.table-sm.table-responsive.table-striped.table-hover
+			%thead
+				%tr
+					%th.text-center
+						%i{class: "#{area.icon}"}
+						= area.name
+						.text-muted= area.description					
+					%th.text-center
+						.form-check.form-switch
+							= check_box_tag nil, nil, (area.can_all? params[:id]), class: "form-check-input area#{area.id}", onclick: "clicked_all('.area#{area.id}', this);" , title: 'Todos/Ninguno'
+
+					%th.text-center{colspan: 6} Acceso
+				%tr.text-center
+					%th.text-center.col-8 Procesos
+					%th{title: 'Todos/Ninguno'}
+						%i.fa-solid.fa-shield-halved
+					%th{title: 'Ver Listas y Detalles'}
+						%i.fas.fa-th-list
+						%i.fas.fa-info-circle
+					%th{title: 'Agregar Nuevo'}
+						%i.fas.fa-plus
+					%th{title: 'Editar'}
+						%i.fas.fa-pencil-alt
+					%th{title: 'Eliminar'}
+						%i.fas.fa-times
+					%th{title: 'Importar'}
+						%i.fas.fa-folder-open
+						%i.fas.fa-file-import
+					%th{title: 'Generar Reportes'}
+						%i.fas.fa-file-export
+						%i.fas.fa-folder-open
+
+			%tbody
+				- area.authorizables.each do |authble|
+					- @autorized = Authorized.where(admin_id: params[:id], authorizable_id: authble.id).first
+					- @autorized ||= Authorized.new
+					- model_id = "[model#{authble.id}]"
+					%tr.text-center
+						%td.text-start
+							%i{class: "#{authble.icon}"}
+							= authble.name
+							.text-muted= authble.description
+						%td.align-middle				
+							.form-check.form-switch
+								= check_box_tag nil, nil, @autorized.can_all?, class: "form-check-input area#{area.id}", onclick: "clicked_all('.can_all#{authble.id}', this);", title: 'Todos/Ninguno'
+						%td.align-middle
+							.form-check
+								= check_box_tag "#{model_id}[can_read]", nil, @autorized.can_read, class: "form-check-input area#{area.id} can_all#{authble.id} read#{authble.id}", onclick: "checked_if('.visible#{authble.id}', this, false);", title: 'Ver Listas y Detalles' 
+
+						%td.align-middle
+							- unless Authorizable::UNCREABLES.include? authble.klazz
+								.form-check
+									= check_box_tag "#{model_id}[can_create]", nil, @autorized.can_create, class: "form-check-input visible#{authble.id} area#{area.id} can_all#{authble.id}", onclick: "checked_if('.read#{authble.id}', this, true);", title: 'Agregar Nuevo'
+
+						%td.align-middle
+							.form-check
+								= check_box_tag "#{model_id}[can_update]", nil, @autorized.can_update, class: "form-check-input visible#{authble.id} area#{area.id} can_all#{authble.id}", onclick: "checked_if('.read#{authble.id}', this, true);", title: 'Editar'
+
+						%td.align-middle
+							- unless Authorizable::UNDELETABLES.include? authble.klazz
+								.form-check
+									= check_box_tag "#{model_id}[can_delete]", nil, @autorized.can_delete, class: "form-check-input visible#{authble.id} area#{area.id} can_all#{authble.id}", onclick: "checked_if('.read#{authble.id}', this, true, true);", title: 'Eliminar'
+						%td.align-middle
+							- if Authorizable::IMPORTABLES.include? authble.klazz
+								.form-check
+									= check_box_tag "#{model_id}[can_import]", nil, @autorized.can_import, class: "form-check-input visible#{authble.id} area#{area.id} can_all#{authble.id}", onclick: "checked_if('.read#{authble.id}', this, true, true);", title: 'Importar'
+						%td.align-middle
+							- unless Authorizable::UNEXPORTABLES.include? authble.klazz
+								.form-check
+									= check_box_tag "#{model_id}[can_export]", nil, @autorized.can_export, class: "form-check-input visible#{authble.id} area#{area.id} can_all#{authble.id}", onclick: "checked_if('.read#{authble.id}', this, true, true);", title: 'Exportar'
+
+
+	= submit_tag 'Guardar', class: 'btn btn-primary float-end'
+
+:javascript
+	function clicked_all(klazz, ele) {
+		elem = $(ele);
+		$(klazz).prop('checked', elem.prop('checked'));
+	}
+
+	function checked_if(klazz, ele, value) {
+		elem = $(ele);
+		if (elem.prop('checked') == value) {$(klazz).prop('checked', value);}
+	}
+

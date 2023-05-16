@@ -177,7 +177,7 @@ class Student < ApplicationRecord
         label 'Datos Personales'
         formatted_value do
           bindings[:view].render(partial: 'users/personal_data', locals: {user: bindings[:object].user})
-        end        
+        end
       end
       field :description_grades do
         label 'Registro Académico'
@@ -293,7 +293,7 @@ class Student < ApplicationRecord
     
     if row[1]
       row[1].strip!
-      usuario.email = row[1]
+      usuario.email = row[1].remove("mailto:")
     else
       return [0,0,1]
     end
@@ -316,17 +316,21 @@ class Student < ApplicationRecord
     if row[4]
       row[4].strip!
       row[4].delete! '^A-Za-z'
-      row[4] = :Masculino if row[4].upcase.eql? 'M'
-      row[4] = :Femenino if row[4].upcase.eql? 'F'
+      row[4] = :Masculino if row[4][0].upcase.eql? 'M'
+      row[4] = :Femenino if row[4][0].upcase.eql? 'F'
       usuario.sex = row[4] 
     end
 
     usuario.number_phone = row[5] if row[5]
 
-    if usuario.save
+    if usuario.save!
       estudiante = Student.find_or_initialize_by(user_id: usuario.id)
 
-      if estudiante.save
+      grado = estudiante.grades.find_or_initialize_by(study_plan_id: fields[:study_plan_id])
+      grado.admission_type_id = fields[:admission_type_id]
+      grado.registration_status = fields[:registration_status]
+
+      if estudiante.save!
         grado = Grade.find_or_initialize_by(student_id: estudiante.id, study_plan_id: fields[:study_plan_id])
         grado.admission_type_id = fields[:admission_type_id]
         grado.registration_status = fields[:registration_status]

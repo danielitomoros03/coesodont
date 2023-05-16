@@ -1,9 +1,9 @@
 #imageMain.text-center
   .image_profile
-    - if image = @user.profile_picture_as_thumb
-      = image_tag main_app.url_for(image)
-  %p UNIVERSIDAD CENTRAL DE VENEZUELA
-  %p= "CONTROL DE ESTUDIO #{@school.type_entity.upcase}"
-  %p.font-sm= @school.name.upcase
+    - if image = user.profile_picture_as_thumb
+      = render partial: "layouts/set_image", locals: {image: image, size: '60x70', alt: "foto perfil #{user.nick_name}"}
+  %p{style: 'margin-bottom: 0 !important;'} UNIVERSIDAD CENTRAL DE VENEZUELA
+  %p{style: 'margin-bottom: 0 !important;'}= "CONTROL DE ESTUDIO #{school.type_entity.upcase}"
+  %p.font-sm{style: 'margin-bottom: 0 !important;'}= school.name.upcase
   %h2= title
 

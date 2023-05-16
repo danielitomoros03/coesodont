@@ -1,5 +1,5 @@
 class EnrollAcademicProcessesController < ApplicationController
-  before_action :set_enroll_academic_process, only: %i[ show edit update destroy study_constance ]
+  before_action :set_enroll_academic_process, only: %i[ show edit update destroy study_constance total_retire ]
 
   # GET /enroll_academic_processes or /enroll_academic_processes.json
   def index
@@ -10,7 +10,7 @@ class EnrollAcademicProcessesController < ApplicationController
 
   def show
 
-    if @enroll_academic_process.school.active_process.eql? @enroll_academic_process.academic_process and @enroll_academic_process.confirmado?
+    if (@enroll_academic_process.school.enroll_process.eql? @enroll_academic_process.academic_process or @enroll_academic_process.school.active_process.eql? @enroll_academic_process.academic_process) and @enroll_academic_process.confirmado?
 
       @school = @enroll_academic_process.school
       @faculty = @school.faculty
@@ -38,13 +38,13 @@ class EnrollAcademicProcessesController < ApplicationController
           # @encrypted_id, @salt = crypt.encrypt_and_sign(@version.id).split("/")
 
 
-          render pdf: file_name, template: "enroll_academic_processes/constance", formats: [:html], page_size: 'letter', backgroud: false,  header:  {html: { content: '<h1>HOLA MUNDO</h1>'}}, footer: { center: 'Página: [page] de [topage]', font_size: '8'}
+          render pdf: file_name, template: "enroll_academic_processes/constance", formats: [:html], page_size: 'letter', backgroud: false,  footer: { center: 'Página: [page] de [topage]', font_size: '8'}
         end
       end
 
     else
       flash[:warning] = 'Debe estar activado el proceso académico o la inscripción para descargar el documento solicitado.'
-      redirect_back fallback_location: root_path      
+      redirect_back fallback_location: '/admin'
     end
   end
 
@@ -88,7 +88,7 @@ class EnrollAcademicProcessesController < ApplicationController
           enroll_academic_process.enroll_status = :reservado 
           enroll_academic_process.save!
         end
-        enroll_academic_process
+
         if enroll_academic_process
           # INTENTO POR TOTAL DE CREDITOS Y ASIGNATURAS: 
           credits_attemp = enroll_academic_process.total_credits+course.subject.unit_credits
@@ -193,6 +193,19 @@ class EnrollAcademicProcessesController < ApplicationController
     end
   end
 
+  def total_retire
+    aux = true
+    @enroll_academic_process.academic_records.each do |ar|
+      aux = ar.update!(status: :retirado)
+    end
+    if aux.blank? or aux.eql? true
+      flash[:info] = '¡Actualización Exitosa!'
+    else
+      flash[:danger] = aux
+    end
+    redirect_back fallback_location: "/admin/student/#{@enroll_academic_process.student.id}"
+  end
+
   # PATCH/PUT /enroll_academic_processes/1 or /enroll_academic_processes/1.json
   def update
     respond_to do |format|
@@ -220,8 +233,8 @@ class EnrollAcademicProcessesController < ApplicationController
   def destroy
     @enroll_academic_process.destroy
 
-    respond_to do |format|
-      format.html { redirect_to enroll_academic_processes_url, notice: "Enroll academic process was successfully destroyed." }
+    respond_to do |format|      
+      format.html { redirect_to "/admin/student/#{@enroll_academic_process.student.id}", notice: "¡Inscripción en Proceso Académico eliminada con éxito!" }
       format.json { head :no_content }
     end
   end

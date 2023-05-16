@@ -1,31 +1,4 @@
-= render 'acta_header'
-= render 'acta_title'
-= render 'acta_description'
-= render 'acta_academic_records'
-
-.signatures
-  .font-title.text-center FACULTAD
-  %table.no_border
-    %thead
-      %tr
-        %th.text-center{style: 'width: 500px'} JURADO EXAMINADOR
-        %th.text-center{style: 'width: 500px'} SECRETARÍA
-  %br
-  %table.no_border
-    %thead
-      %tr
-        %th APELLIDOS Y NOMBRES
-        %th FIRMAS
-        %th 
-      %tr{style: 'height:30px'}
-        %th _________________________________
-        %th ______________________
-        %th NOMBRE ______________________        
-      %tr{style: 'height:30px'}
-        %th _________________________________
-        %th ______________________
-        %th FIRMA _______________________
-      %tr{style: 'height:30px'}
-        %th _________________________________
-        %th ______________________
-        %th FECHA _______________________
+- academic_records = section.academic_records.sort_by_user_name
+- total_by_page = 23
+- if academic_records and academic_records.any?
+	= render partial: '/sections/acta_academic_records', locals: {academic_records: academic_records, total_by_page: total_by_page, section: @section}

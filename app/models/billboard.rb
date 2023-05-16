@@ -17,16 +17,15 @@ class Billboard < ApplicationRecord
 		activa ? 'Activada' : 'Desactivada'
 	end
 
-
 	rails_admin do
-		navigation_icon 'fa-regular fa-calendar-alt'
+		navigation_label 'Informativos'
+		navigation_icon 'fa-regular fa-panorama'
 
 		edit do
 			field :active
 			field :content
 		end		
 	end
-	
 
 	private
 

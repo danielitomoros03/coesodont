@@ -3,6 +3,8 @@ class Qualification < ApplicationRecord
   # t.integer "type_q"
   
   belongs_to :academic_record
+  # accepts_nested_attributes_for :academic_record
+
   has_one :enroll_academic_process, through: :academic_record
   has_one :grade, through: :enroll_academic_process
 
@@ -18,6 +20,10 @@ class Qualification < ApplicationRecord
   validates_uniqueness_of :academic_record, scope: [:type_q], message: 'Calificación ya existente', field_name: false
 
   after_save :update_academic_record_status
+
+  def name
+    "#{type_q.titleize} #{value}" if (type_q and value)
+  end
 
   after_destroy :update_academic_record_status
   def update_academic_record_status
@@ -67,12 +73,15 @@ class Qualification < ApplicationRecord
   end
 
   def update_status
-    status = approved? ? :aprobado : :repproved
+    status = approved? ? :aprobado : :aplazado
     academic_record.update(status: status)
     self.grade.update(efficiency: self.grade.calculate_efficiency, simple_average: self.grade.calculate_average, weighted_average: self.grade.calculate_weighted_average)
   end
 
   rails_admin do
+    edit do
+      fields :value, :type_q
+    end
     export do
       fields :value, :type_q
     end

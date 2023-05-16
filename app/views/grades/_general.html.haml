@@ -12,7 +12,7 @@
 		%td.text-center.fw-bold= grade.admission_type.name
 		- if grade.registration_status
 			%td.text-center
-				.badge.bg-info= grade.registration_status.titleize
+				%strong.badge.bg-info= grade.registration_status.titleize
 		- if grade.graduate_status
 			%td.text-center
-				.badge.bg-info= grade.graduate_status.titleize
+				%strong.badge.bg-info= grade.graduate_status.titleize

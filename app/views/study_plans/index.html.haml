@@ -5,8 +5,8 @@
     %tr
       %th Code
       %th Name
+      %th Required Credits
       %th School
-      %th
       %th
       %th
 
@@ -15,6 +15,7 @@
       %tr
         %td= study_plan.code
         %td= study_plan.name
+        %td= study_plan.required_credits
         %td= study_plan.school
         %td= link_to 'Show', study_plan
         %td= link_to 'Edit', edit_study_plan_path(study_plan)

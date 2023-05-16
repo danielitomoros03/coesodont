@@ -1,4 +1,5 @@
 class EnrollmentDaysController < ApplicationController
+  before_action :logged_as_admin?
   before_action :set_enrollment_day, only: %i[ destroy export ]
 
   # GET /enrollment_days or /enrollment_days.json

@@ -1,9 +1,11 @@
 .modal.fade{"aria-hidden": true, "aria-labelledby": "#{id}ModalLabel", tabindex: "-1", id: id}
-  .modal-dialog.modal-lg
+  .modal-dialog.modal-xl
     .modal-content
       .modal-header
-        %h5.modal-title.text-center{id: "#{id}ModalLabel"}= title
-        %button.btn-close{"aria-label": "Close", "data-bs-dismiss": :modal, type: :button}
+        .modal-title{id: "#{id}ModalLabel"}
+          .text-ds
+            %h5= title
       .modal-body
         = content.html_safe
+
 

@@ -1,8 +1,8 @@
 - if ((section.qualified?) or (current_user.admin? and session[:rol] and session[:rol].eql? 'admin'))
-  = link_to "/sections/#{section.id}.pdf", class: 'btn btn-success btn-sm float-right' do
+  = link_to "/sections/#{section.id}.pdf", class: 'btn btn-success btn-sm float-right m-3', target: '_blank', rel: "noopener noreferrer" do
     .fa.fa-download.fa-list
     Generar Acta  
 
-= link_to "/sections/#{section.id}/export.xls", class: 'btn btn-success btn-sm float-end m-3' do
+= link_to "/sections/#{section.id}/export.xls", class: 'btn btn-success btn-sm float-end m-3', target: '_blank', rel: "noopener noreferrer" do
   .fa.fa-download
   Generar Listado Estudiantes

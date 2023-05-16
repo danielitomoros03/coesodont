@@ -17,7 +17,13 @@
       %span.control-label
         %label.btn.btn-info.btn-sm
           ¿Clonar Profesores?:
-          = check_box_tag :teachers
+          = check_box_tag :teachers, nil, true
+          
+    .control-group.mt-3.mb-3
+      %span.control-label
+        %label.btn.btn-info.btn-sm
+          ¿Clonar Horarios?:
+          = check_box_tag :schedules, nil, true
 
     .modal-footer
       %button.btn.btn-secondary{"data-bs-dismiss": :modal, type: :button} Cancelar

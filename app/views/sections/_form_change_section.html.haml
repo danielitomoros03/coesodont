@@ -1,0 +1,11 @@
+= form_tag("/academic_records/#{academic_record.id}", id: "ChangeSectionForm#{academic_record.id}", method: :patch) do
+  - section = academic_record.section
+  .border.p-2
+    %p
+      = 'Sección Actual:'
+      = text_field_tag "current_section#{section.id}", section.desc_subj_code, disabled: true, readonly: true, class: 'form-control'
+    %p
+      = 'Nueva Sección:'
+      = collection_select(:academic_record, :section_id, sections, :id, :description_with_quotes, {include_blank: 'Seleccione'}, {class: "form-control", required: true})
+
+    = submit_tag 'Cambiar Sección', class: "btn btn-success btn-sm", 'data-disable-with': 'Enviando'

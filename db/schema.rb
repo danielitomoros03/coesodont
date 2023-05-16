@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_15_193938) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -108,7 +108,16 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
     t.bigint "school_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "code"
     t.index ["school_id"], name: "index_admission_types_on_school_id"
+  end
+
+  create_table "area_authorizables", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "description"
+    t.string "icon"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "areas", force: :cascade do |t|
@@ -119,6 +128,33 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
     t.datetime "updated_at", null: false
     t.index ["parent_area_id"], name: "index_areas_on_parent_area_id"
     t.index ["school_id"], name: "index_areas_on_school_id"
+  end
+
+  create_table "authorizables", force: :cascade do |t|
+    t.bigint "area_authorizable_id", null: false
+    t.string "klazz", null: false
+    t.string "description"
+    t.string "icon"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["area_authorizable_id"], name: "index_authorizables_on_area_authorizable_id"
+    t.index ["klazz", "area_authorizable_id"], name: "index_authorizables_on_klazz_and_area_authorizable_id", unique: true
+  end
+
+  create_table "authorizeds", force: :cascade do |t|
+    t.bigint "admin_id", null: false
+    t.bigint "authorizable_id", null: false
+    t.boolean "can_create", default: false
+    t.boolean "can_read", default: false
+    t.boolean "can_update", default: false
+    t.boolean "can_delete", default: false
+    t.boolean "can_import", default: false
+    t.boolean "can_export", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id", "authorizable_id"], name: "index_authorizeds_on_admin_id_and_authorizable_id", unique: true
+    t.index ["admin_id"], name: "index_authorizeds_on_admin_id"
+    t.index ["authorizable_id"], name: "index_authorizeds_on_authorizable_id"
   end
 
   create_table "bank_accounts", force: :cascade do |t|
@@ -155,15 +191,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
     t.string "name"
     t.index ["academic_process_id"], name: "index_courses_on_academic_process_id"
     t.index ["subject_id"], name: "index_courses_on_subject_id"
-  end
-
-  create_table "dependencies", force: :cascade do |t|
-    t.bigint "subject_parent_id", null: false
-    t.bigint "subject_dependent_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["subject_dependent_id"], name: "index_dependencies_on_subject_dependent_id"
-    t.index ["subject_parent_id"], name: "index_dependencies_on_subject_parent_id"
   end
 
   create_table "enroll_academic_processes", force: :cascade do |t|
@@ -339,6 +366,26 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
     t.index ["school_id"], name: "index_study_plans_on_school_id"
   end
 
+  create_table "subject_links", force: :cascade do |t|
+    t.bigint "prelate_subject_id", null: false
+    t.bigint "depend_subject_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["depend_subject_id"], name: "index_subject_links_on_depend_subject_id"
+    t.index ["prelate_subject_id", "depend_subject_id"], name: "link_parent_depend", unique: true
+    t.index ["prelate_subject_id"], name: "index_subject_links_on_prelate_subject_id"
+  end
+
+  create_table "subject_types", force: :cascade do |t|
+    t.bigint "study_plan_id", null: false
+    t.string "name"
+    t.string "code"
+    t.integer "required_credits", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["study_plan_id"], name: "index_subject_types_on_study_plan_id"
+  end
+
   create_table "subjects", force: :cascade do |t|
     t.string "code", null: false
     t.string "name", null: false
@@ -409,12 +456,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
   add_foreign_key "admission_types", "schools"
   add_foreign_key "areas", "areas", column: "parent_area_id"
   add_foreign_key "areas", "schools"
+  add_foreign_key "authorizables", "area_authorizables"
+  add_foreign_key "authorizeds", "admins", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
+  add_foreign_key "authorizeds", "authorizables", on_update: :cascade, on_delete: :cascade
   add_foreign_key "bank_accounts", "banks"
   add_foreign_key "bank_accounts", "schools"
   add_foreign_key "courses", "academic_processes"
   add_foreign_key "courses", "subjects"
-  add_foreign_key "dependencies", "subjects", column: "subject_dependent_id"
-  add_foreign_key "dependencies", "subjects", column: "subject_parent_id"
   add_foreign_key "enroll_academic_processes", "academic_processes"
   add_foreign_key "enroll_academic_processes", "grades"
   add_foreign_key "enrollment_days", "academic_processes"
@@ -433,6 +481,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_11_215040) do
   add_foreign_key "sections_teachers", "teachers", primary_key: "user_id"
   add_foreign_key "students", "users"
   add_foreign_key "study_plans", "schools"
+  add_foreign_key "subject_links", "subjects", column: "depend_subject_id"
+  add_foreign_key "subject_links", "subjects", column: "prelate_subject_id"
+  add_foreign_key "subject_types", "study_plans"
   add_foreign_key "subjects", "areas"
   add_foreign_key "teachers", "areas"
   add_foreign_key "teachers", "users"

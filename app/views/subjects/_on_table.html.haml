@@ -1,0 +1,35 @@
+%table.table.table-condensed.table-hover
+  %thead
+    %tr Nombre
+  %tbody.table-group-divider
+    - links.each_with_index do |link,i|
+      - 
+      - if row.is_a? String
+        %tr
+          %td= link_to row
+      - else
+        - row.each do |v|
+          %tr
+            %td= link_to v
+
+
+- if dependientes.any?
+  - dependientes.each do |dep|
+    - aprobada = true ? 'table-success' : '' #(@aprobadas_ids and @aprobadas_ids.include? dep.asignatura_id) ? 'table-success' : ''
+    %tr{class: aprobada}
+      %td.pr-5
+        - unless aprobada.eql? ''
+          %span.badge.badge-success Aprobada
+        = description_subject_tree(dep, adelante)
+
+        - if adelante 
+          - if dep.depend_subject.depend_links.any?
+            = link_to 'javascript:void(0)', onclick: "$('#tree#{dep.id}').toggleClass('d-none'); $(this).toggleClass('gly-rotate-90');" do
+              %i.fa.fa-chevron-right
+            %div{id: "tree#{dep.id}", class: 'd-none'}
+              %table.table-striped.table-hover.table-bordered.ml-5.m-3
+                %tbody
+                  = render partial: '/admin/dependencias/tabla_dependencias', locals: {dependientes: dep.depend_subject.dependencias, adelante: true}
+        - else
+          - if dep.asignatura.dependencia_hacia_atras.any?
+            = render partial: '/admin/dependencias/tabla_dependencias', locals: {dependientes: dep.asignatura.dependencia_hacia_atras, adelante: false}

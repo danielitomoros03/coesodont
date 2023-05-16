@@ -74,6 +74,11 @@ class School < ApplicationRecord
 
 
   # FUNCTIONS:
+
+  def modalities
+    academic_processes.map{|ap| ap.modality}.uniq.to_sentence if academic_processes.any?
+  end
+
   def description
     "#{self.code}: #{self.name}. (#{self.faculty.name}) #{self.type_entity.titleize}"
   end
@@ -95,12 +100,24 @@ class School < ApplicationRecord
         filterable false
         searchable false
       end
+      fields :enroll_process do
+        label 'Período Inscripción'
+        queryable false
+        filterable false
+        searchable false
+      end
+      fields :active_process do
+        label 'Período Activo'
+        queryable false
+        filterable false
+        searchable false
+      end      
     end
 
     show do
       field :description
 
-      fields :study_plans, :enroll_process, :active_process, :periods, :areas, :bank_accounts, :contact_email
+      fields :study_plans, :periods, :areas, :bank_accounts, :contact_email
     end
 
     edit do

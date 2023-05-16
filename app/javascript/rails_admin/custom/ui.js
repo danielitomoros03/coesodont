@@ -18,4 +18,7 @@ document.addEventListener("rails_admin.dom_ready", function() {
 		$(`#${idModal}`).modal();
 
 	});
+
+	$(".form-text:not(:has(span))").addClass('alert alert-warning');
+	
 });

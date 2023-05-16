@@ -2,6 +2,9 @@ class StudyPlan < ApplicationRecord
   # SCHEMA:
   # t.string "code"
   # t.string "name"
+  # t.integer "madatory_credits"
+  # t.integer "optative_credits"
+  # t.integer "elective_credits"
   # t.bigint "school_id", null: false 
   
   
@@ -15,10 +18,13 @@ class StudyPlan < ApplicationRecord
   # ASSOCIATIONS:
   belongs_to :school
   has_many :grades, dependent: :destroy
+  has_many :subject_types, dependent: :destroy
+  accepts_nested_attributes_for :subject_types, allow_destroy: true  
 
   # VALIDATIONS:
   validates :code, presence: true, uniqueness: {case_sensitive: false}
   validates :name, presence: true, uniqueness: {case_sensitive: false}
+  validates :subject_types, presence: true
   validates :school, presence: true
 
   # CALLBACKS:
@@ -40,16 +46,25 @@ class StudyPlan < ApplicationRecord
     "(#{code}) #{name}"
   end
 
+  # def desc_credits
+  #   "(Créditos Requeridos) #{mandatory_credits}"
+  # end
+
   rails_admin do
     navigation_label 'Gestión Académica'
     navigation_icon 'fa-solid fa-award'
     weight -2
+
+    show do
+      fields :school, :code, :name, :subject_types
+    end
+
     list do
-      fields :code, :name
+      fields :code, :name, :subject_types
     end
 
     export do
-      fields :code, :name
+      fields :code, :name, :subject_types
     end
 
     edit do
@@ -59,7 +74,8 @@ class StudyPlan < ApplicationRecord
           {:length => 8, :size => 8, :onInput => "$(this).val($(this).val().toUpperCase().replace(/[^a-zA-Z0-9\u00f1\u00d1 ]/g,''))"}
         end
       end
-      field :name
+      field :name#, :subject_types
+      field :subject_types
     end
 
   end

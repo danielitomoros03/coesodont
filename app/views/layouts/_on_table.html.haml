@@ -2,9 +2,13 @@
   %thead
     %tr
       - headers.each do |head|
-        %th.header.code_field.string_type= head.titleize
+        %th= head.titleize
   %tbody.table-group-divider
-    %tr.bank_row
-      - rows.each_with_index do |row,i|
+    - rows.each_with_index do |row,i|
+      - if row.is_a? String
+        %tr
+          %td= row
+      - else
         - row.each do |v|
-          %td.string_type= v
+          %tr
+            %td= v

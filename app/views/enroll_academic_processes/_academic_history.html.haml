@@ -1,0 +1,26 @@
+%h4.text-center.mt-2.bg-info.py-2 Historial Académico
+
+- enroll_academic_processes.sort_by_period.each do |enroll_academic_process|
+  .border.m-3.p-4
+    %table.table.table-condensed
+      %thead
+        %tr
+          %th.text-center Período
+          %th.text-center Estado Inscripción
+          %th.text-center Estado de Permanencia
+          %th.text-center Total inscripciones
+          %th.text-center Opciones
+
+      %tbody
+        %tr
+          %td.text-center= enroll_academic_process.academic_process.period.name
+          %td.text-center
+            .badge.bg-info= enroll_academic_process.enroll_status
+          %td.text-center
+            .badge.bg-info= enroll_academic_process.permanence_status
+          %td.text-center= enroll_academic_process.academic_records.count
+          %td.text-center
+            = render partial: 'enroll_academic_processes/options', locals: {enroll_academic_process: enroll_academic_process}
+
+        %tr
+          = render partial: 'academic_records/index_to_history', locals: {academic_records: enroll_academic_process.academic_records}

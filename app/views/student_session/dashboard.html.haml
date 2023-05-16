@@ -3,3 +3,5 @@
 = render partial: '/users/personal_data', locals: {user: @student.user}
 
 .mt-4.p-4= render partial: '/students/show', locals: {student: @student}
+
+/= link_to show_path(@grade, format: :pdf), target: '_blank', title: 'Click para Exportar como PDF', class: 'btn btn-default'

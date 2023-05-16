@@ -1,0 +1,4 @@
+- links = adelante ? subject.depend_links.joins(:depend_subject).order('subjects.ordinal': :asc) : subject.prelate_links.joins(:prelate_subject).order('subjects.ordinal': :asc)
+
+- if links.any?
+  = render partial: '/subject_links/tree', locals: {subject_links: links, adelante: adelante}
