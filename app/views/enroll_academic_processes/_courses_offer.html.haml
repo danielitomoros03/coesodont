@@ -11,7 +11,7 @@
           %span#inputGroup-sizing-sm.input-group-text 
             %span.badge.bg-dark= courses.count
             = " Asignaturas "
-          %input.form-control{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", onkeyup: 'filterSections(this);', placeholder: 'Buscar', autofocus: true, id: 'filterSections', name: 'filterSections'}
+          %input.form-control{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", onkeyup: 'filterSections(this);', placeholder: 'Buscar', autofocus: true, id: 'filterOffer', name: 'filterOffer'}
 
       %th{style: 'width: 5%'} Sem
       %th{style: 'width: 5%'} Créd
@@ -26,25 +26,26 @@
         - approved = true
         - desc_qualification = ac.q_value_to_02i
       - reservada = !section_id.nil? ? 'table-success' : ''
-      - asigApproved = approved ? 'text-muted border border-success' : ''
+      - asigApproved = approved ? 'text-muted border table-success' : ''
       - sections = course.sections#.con_cupos
       - # ATENCIÓN: El scope "con_cupos" no va, ya que es importante seleccionar secciones que haya inscrito o con cupos jutas. Esto con el objetivo de que luego pueda cambiar secciones
       - if sections.any?
+        - subject = course.subject
         %tr{class: "#{asigApproved} #{reservada}"}
           %td.align-middle.text-right= i+1
           %td.align-middle
             = course.subject_desc_with_pci
             = ac.badge_approved if ac
 
-          %td.align-middle.text-center= course.subject.ordinal
-          %td.align-middle.text-center= course.subject.unit_credits
+          %td.align-middle.text-center= subject.ordinal
+          %td.align-middle.text-center= subject.unit_credits
           %td.align-middle.pl-3
             -unless approved
               - sections = sections.select{|s| s.has_capacity? or s.has_academic_record? grade.student_id}
               - disable_promt = ''
 
               - if sections.any?
-                = collection_select("sections", nil, sections, :id, :description_with_quotes, {selected: section_id, include_blank: 'Seleccione Sección'}, {class: "form-control selectInscripcion", style: 'width: 90%', titulo: course.subject.desc_to_select, credits: course.subject.unit_credits, gradeId: grade.id, courseId: course.id, pci: pcis, onchange: "selected(this);", name: "sections_course_id_#{course.id}", id: "sections_course_id_#{course.id}"})
+                = collection_select("sections", nil, sections, :id, :description_with_quotes, {selected: section_id, include_blank: 'Seleccione Sección'}, {class: "form-control selectInscripcion", style: 'width: 90%', titulo: subject.desc_to_select, credits: subject.unit_credits, gradeId: grade.id, courseId: course.id, pci: pcis, onchange: "selected(this);", name: "sections_course_id_#{course.id}", id: "sections_course_id_#{course.id}"})
               - else
                 - disable_promt = 'Sin cupos'
                 %b.pl-3.text-muted

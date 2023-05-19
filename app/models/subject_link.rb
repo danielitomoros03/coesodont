@@ -11,6 +11,9 @@ class SubjectLink < ApplicationRecord
 
   validates_with NestedDependencyValidator, field_name: false
 
+  scope :in_prelation, -> (aprobadas_ids) {where(prelate_subject_id: aprobadas_ids) }
+  scope :not_in_dependency, -> (aprobadas_ids) {where.not(depend_subject_id: aprobadas_ids) }
+
   def self.subject_tree ids
     auxs = SubjectLink.where(id: ids).joins(:subject).select('subjects.*')
   end

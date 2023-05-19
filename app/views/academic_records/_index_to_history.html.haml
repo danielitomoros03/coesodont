@@ -2,25 +2,27 @@
 %table.table.table-sm.table-striped.table-hover
   %thead
     %tr
-      %th Código
+      %th{style: 'width:120px;'} Código
+      %th.text-center{style: 'width:10px;'} Orden
       %th Asignatura
-      %th Créd
-      %th Tipo
-      %th Sec
-      %th Cal
+      %th.text-center{style: 'width:10px;'} Créd
+      %th.text-center{style: 'width:10px;'} Tipo
+      %th.text-center{style: 'width:10px;'} Sec
+      %th.text-center{style: 'width:10px;'} Cal
       - if enabled_options
-        %th Opciones
+        %th{style: 'width:240px;'} Opciones
 
   %tbody
     - academic_records.by_subjects.each do |academic_record|
       - subject = academic_record.subject
       %tr{class: academic_record.tr_class_by_status_q}
         %td= link_to_if logged_as_admin, subject.code, "/admin/subject/#{subject.id}"
+        %td.text-center= subject.ordinal
         %td{title: subject.name}= subject.name
-        %td= subject.unit_credits
-        %td= subject.modality_initial_letter
-        %td= link_to_if logged_as_admin, academic_record.section.code, "/admin/section/#{academic_record.section.id}"
-        %td= academic_record.final_q_to_02i
+        %td.text-center= subject.unit_credits
+        %td.text-center= subject.modality_initial_letter
+        %td.text-center= link_to_if logged_as_admin, academic_record.section.code, "/admin/section/#{academic_record.section.id}"
+        %td.text-center= academic_record.final_q_to_02i
         - if enabled_options
           %td.align-middle
             = render partial: 'academic_records/options', locals: {academic_record: academic_record}

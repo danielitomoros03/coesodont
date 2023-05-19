@@ -127,24 +127,24 @@ class Grade < ApplicationRecord
       aprobadas_ids = self.subjects_approved_ids
 
       # Buscamos por ids de las asignaturas que dependen de las aprobadas
-      dependent_subject_ids = SubjectLink.where('prelate_subject_id IN (?)', aprobadas_ids).map{|dep| dep.depend_subject_id}
+      dependent_subject_ids = SubjectLink.in_prelation(aprobadas_ids).not_in_dependency(aprobadas_ids).pluck(:depend_subject_id).uniq
 
-      ids_subjects_positives = []
+      # ids_subjects_positives = []
 
       # Ahora por cada asignatura válida miramos sus respectivas dependencias a ver si todas están aprobadas
 
       # OJO: REVISAR, Creo que este paso es REDUNDANTE, si tienes las dependencias de las aprovadas, no deberías mirar si aprobó las asignaturas de esas dependencias. 
-      dependent_subject_ids.each do |subj_id|
-        ids_aux = SubjectLink.where(depend_subject_id: subj_id).map{|dep| dep.prelate_subject_id}
-        ids_aux.reject!{|id| aprobadas_ids.include? id}
-        ids_subjects_positives << subj_id if (ids_aux.eql? []) #Si aprobó todas las dependencias
-      end
+      # dependent_subject_ids.each do |subj_id|
+      #   ids_aux = SubjectLink.where(depend_subject_id: subj_id).map{|dep| dep.prelate_subject_id}
+      #   ids_aux.reject!{|id| aprobadas_ids.include? id}
+      #   ids_subjects_positives << subj_id if (ids_aux.eql? []) #Si aprobó todas las dependencias
+      # end
 
       # Buscamos las asignaturas sin prelación
       ids_subjects_independients = self.school.subjects.independents.not_inicial.ids
 
       # Sumamos todas las ids ()
-      asignaturas_disponibles_ids = ids_subjects_positives + ids_subjects_independients
+      asignaturas_disponibles_ids = dependent_subject_ids + ids_subjects_independients
 
       Subject.where(id: asignaturas_disponibles_ids)
     end
