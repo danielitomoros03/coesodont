@@ -69,7 +69,7 @@ class ApplicationController < ActionController::Base
         pages_multirols_path(roles: rols)
       elsif current_user.admin?
         session[:rol] = 'admin'
-        session[:academic_processes_id] = School.first.academic_processes.first.id 
+        #session[:academic_processes_id] = School.first.academic_processes.first.id 
         rails_admin_path
       elsif current_user.student?
         session[:rol] = 'student'
