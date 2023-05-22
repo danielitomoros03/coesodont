@@ -650,9 +650,12 @@ es:
         created_at: 'Fecha de Registro'
         updated_at: 'Fecha de Actualización'
       subject_type:
+        study_plan: Plan de Estudio
         name: Nombre
         code: Letra Identificativa
         required_credits: Créditos Requeridos 
+        created_at: Creado en
+        updated_at: Actualizado en
       teacher:
         area: 'Área'
         user: 'Usuario'
