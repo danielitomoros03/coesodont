@@ -46,7 +46,7 @@ Rails.application.configure do
   # Configuración para Envío de Correos
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address:            'smtp.mailersend.net',
+    address:            'smtp.gmail.com',
     port:               587,
     domain:             ENV['PROVIDER_DOMAIN_ADRESS'],
     user_name:          ENV['USERNAME'],
