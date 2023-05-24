@@ -2,7 +2,7 @@ Arguments:
   /usr/local/Cellar/node@14/14.21.2_1/bin/node /usr/local/Cellar/yarn/1.22.19/libexec/bin/yarn.js add direct_upload
 
 PATH: 
-  /Users/danielmoros/.rvm/gems/ruby-3.1.2@coesfaco/bin:/Users/danielmoros/.rvm/gems/ruby-3.1.2@global/bin:/Users/danielmoros/.rvm/rubies/ruby-3.1.2/bin:/Users/danielmoros/.rvm/bin:/usr/local/opt/node@14/bin:/usr/local/opt/node@14/bin:/usr/local/opt/node@14/bin:/usr/local/opt/icu4c/sbin:/usr/local/opt/icu4c/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/usr/local/opt/node@14/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
+  /Users/danielmoros/.rvm/gems/ruby-3.1.2@coesodont/bin:/Users/danielmoros/.rvm/gems/ruby-3.1.2@global/bin:/Users/danielmoros/.rvm/rubies/ruby-3.1.2/bin:/Users/danielmoros/.rvm/bin:/usr/local/opt/node@14/bin:/usr/local/opt/node@14/bin:/usr/local/opt/node@14/bin:/usr/local/opt/icu4c/sbin:/usr/local/opt/icu4c/bin:/Applications/Postgres.app/Contents/Versions/latest/bin:/usr/local/opt/node@14/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin
 
 Yarn version: 
   1.22.19
