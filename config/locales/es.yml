@@ -347,8 +347,8 @@ es:
         one: 'Tipo de Admisión'  
         other: 'Tipos de Admisión'
       area:
-        one: 'Área de Conocimiento'
-        other: 'Áreas de Conocimiento'
+        one: 'Departamento'
+        other: 'Departamentos'
       bank:
         one: 'Banco'
         other: 'Bancos'
@@ -495,11 +495,11 @@ es:
         school: 'Escuela'
       billboard:
         active: 'Activa'
+        content: 'Contenido de Cartelera'
         created_at: 'Fecha de Creación'
         updated_at: 'Fecha de Edición'
-        content: 'Contenido de Cartelera'
       course:
-        area: 'Área'
+        area: 'Departamento'
         period: Período
         school: Escuela
         sections: Oferta Docente
@@ -580,7 +580,7 @@ es:
         enroll_process: Abrir Inscripción en Proceso Académico 
         faculty: 'Facultad'
         periods: 'Períodos'
-        areas: 'Áreas'
+        areas: 'Departamentos'
         bank_accounts: Cuentas Bancarias
         study_plans: Planes de Estudio
         admission_types: Tipos de Admisión
@@ -590,7 +590,7 @@ es:
         starttime: Hora Inicio
         endtime: Hora Final
       section:
-        area: 'Área'
+        area: 'Departamento'
         code: 'Sección'
         capacity: 'Capacidad'
         course: 'Proceso/Asignatura'
@@ -631,6 +631,7 @@ es:
         grade_university: Universidad
         graduate_year: Año de Graduado
       study_plan:
+        school: 'Escuela'
         code: 'Código'
         name: 'Nombre'
         subject_types: 'Tipos de Asignatura'
@@ -644,7 +645,7 @@ es:
         ordinal: 'Orden'
         qualification_type: 'Tipo de calificación'
         modality: 'Modalidad'
-        area: 'Área'
+        area: 'Departamento'
         prelate_subjects: Prelada por
         depend_subjects: Asignaturas que prela
         created_at: 'Fecha de Registro'
@@ -657,7 +658,7 @@ es:
         created_at: Creado en
         updated_at: Actualizado en
       teacher:
-        area: 'Área'
+        area: 'Departamento'
         user: 'Usuario'
         created_at: 'Fecha de Registro'
         sections: 'Secciones'
