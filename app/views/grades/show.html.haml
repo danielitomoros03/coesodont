@@ -32,7 +32,7 @@
 		- if enroll_in_process.nil? or enrolling
 			- totalCreditsReserved = enroll_in_process ? enroll_in_process.total_credits : 0
 			- totalSubjectsReserved = enroll_in_process ? enroll_in_process.total_subjects : 0
-			- process_before = academic_process.process_before 
+			-# process_before = academic_process.process_before 
 			- current_enrollment_day = academic_process.enrollment_days.of_today.first
 			- active_enrollment_day = (current_enrollment_day and current_enrollment_day.active_now?)? true : false
 			- if active_enrollment_day
@@ -49,13 +49,13 @@
 			- #permitida = !(@grado.articulo_7? or @grado.articulo_6? or @grado.iniciado_periodo_id.eql? @periodo_inscripcion.id)
 			- #NOTA INTERNA: La siguiente línea no funciona con or. por lo que fue cambiada a || 
 			- #Tiene que ver con que el or pareciera un or exclusivo, es decir que tienen que ser todos true. O tiene que ver con que algunos valores no son binarios (true or flase) sino que son null u otra cosa
-			- enabled_enroll_by_general = false #enrolling || valid_to_regular_enroll 
+			- enabled_enroll_by_general = enrolling || valid_to_regular_enroll 
 
 			- if (enabled_enroll_by_appointment || enabled_enroll_by_general)
 				%h4.text-center.text-success.mt-1= "INSCRIPCIÓN  #{academic_process.period.name} ABIERTA"
-				.m-3.p-3.text-center= render partial: 'enroll_academic_processes/new', locals: {grade: grade}
+				.m-3.p-3.text-center= render partial: 'enroll_academic_processes/new', locals: {grade: grade, academic_process: academic_process}
 
 
 = render partial: 'grades/academic_resume', locals: {grade: grade}
 
-= render template: 'enroll_academic_processes/index', locals: {enroll_academic_processes: grade.enroll_academic_processes}
+= render template: 'enroll_academic_processes/index', locals: {grade: grade}

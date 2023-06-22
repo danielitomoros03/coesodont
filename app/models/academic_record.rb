@@ -502,8 +502,11 @@ class AcademicRecord < ApplicationRecord
     end
 
     edit do
+      field :course do
+        inline_edit false
+        label 'Curso'
+      end
       field :section do
-        inline_add false
         inline_edit false
         help 'Ingrese el código de la asignatura y SELECCIONE la correspondiente al período y código de la sección'
       end
@@ -525,6 +528,16 @@ class AcademicRecord < ApplicationRecord
           (user and user.admin and user.admin.authorized_manage? 'Qualification')
         end
       end
+    end
+
+    show do
+      field :historico do
+        label 'Histórico'
+        formatted_value do
+          bindings[:view].render(partial: 'students/show_admin', locals: {student: bindings[:object]})
+        end
+      end      
+      
     end
 
     export do

@@ -1,12 +1,11 @@
 -# 'data-bs-backdrop': 'static', 'data-bs-keyboard': 'false'}
 .modal.fade{"aria-hidden": true, "aria-labelledby": "#{id}ModalLabel", tabindex: "-1", id: id}
   .modal-dialog.modal-xl
-    .modal-content
-      .modal-header
-        .modal-title{id: "#{id}ModalLabel"}
-          .text-ds
-            %h5= title1
-            %h5= title2
+    .modal-content.p-3
+      .modal-title{id: "#{id}ModalLabel"}
+        .text-ds
+          %h5= title1
+          %h5= title2
       .modal-body
         = content.html_safe
 

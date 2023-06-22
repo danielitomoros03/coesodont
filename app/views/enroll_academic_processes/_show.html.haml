@@ -1,0 +1,37 @@
+- academic_process = enroll_academic_process.academic_process
+- period = academic_process.period
+- academic_records = enroll_academic_process.academic_records
+- school = enroll_academic_process.school
+- enrolling = (school.enroll_process.eql? academic_process)
+- active = (school.active_process.eql? academic_process)
+
+- titulo_inscrip = enrolling ? 'Proceso de Inscripción Abierto' : ''
+- titulo_activo = enrolling ? 'Proceso Académico Activo' : ''
+
+%table.table.table-sm
+  %thead
+    %tr
+      %th.text-center Período
+      %th.text-center Estado Inscripción
+      %th.text-center Estado de Permanencia
+      %th.text-center Total inscripciones
+      %th.text-end{style: 'width:50%'} Opciones
+
+  %tbody
+    %tr
+      %td.text-center{title: period.name}
+        - if active
+          %i.fa-solid.fa-calendar-check.text-success{title: titulo_activo}
+        - if enrolling
+          %i.fa-solid.fa-graduation-cap.text-success{title: titulo_inscrip}
+        = period.name
+      %td.text-center
+        .badge.bg-info= enroll_academic_process.enroll_status
+      %td.text-center
+        .badge.bg-info= enroll_academic_process.permanence_status
+      %td.text-center= academic_records.count
+      %td.text-center{style: 'width:50%'}
+        = render partial: 'enroll_academic_processes/options', locals: {period: period, enroll_academic_process: enroll_academic_process, enabled_options: (enrolling or active)}
+
+    %tr
+      = render partial: 'academic_records/index_to_history', locals: {academic_records: academic_records, enabled_options: (enrolling or active)}

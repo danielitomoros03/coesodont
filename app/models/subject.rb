@@ -62,11 +62,14 @@ class Subject < ApplicationRecord
 
   scope :independents, -> {left_joins(:prelate_links).where('subject_links.prelate_subject_id': nil)}
 
-  scope :not_inicial, -> {where('ordinal > 1')}
-
+  scope :not_inicial, -> {where('ordinal != 1')}
 
   # CALLBACKS:
   before_save :clean_values
+
+  def section_codes
+    sections.select(:code).distinct.map{|s| s.code}
+  end
   
   # HOOKS:
   def clean_values
@@ -167,8 +170,12 @@ class Subject < ApplicationRecord
 
   def label_modality
     return ApplicationController.helpers.label_status("bg-info", self.modality.titleize)
-
   end
+
+  def label_qualification_type
+    return ApplicationController.helpers.label_status("bg-info", self.qualification_type.titleize)
+  end
+  
 
   def modality_initial_letter
     case modality
@@ -243,6 +250,17 @@ class Subject < ApplicationRecord
         end        
       end
 
+      field :qualification_type_label do
+        label 'Tipo Calif'
+        column_width 20
+        searchable 'qualification_type'
+        filterable 'qualification_type'
+        sortable 'qualification_type'
+        formatted_value do
+          bindings[:object].label_qualification_type
+        end        
+      end
+
       field :total_dependencies do
         label 'Depends'
         column_width 20
@@ -281,7 +299,10 @@ class Subject < ApplicationRecord
     end
 
     edit do
-      field :area
+      field :area do
+        inline_edit false
+        inline_add false
+      end
       field :code do
         html_attributes do
           {length: 20, size: 20, onInput: "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9]/g,''))"}

@@ -6,7 +6,6 @@ window.toastr = toastr;
 // import "trix"
 import "@rails/actiontext"
 
-
 document.addEventListener("rails_admin.dom_ready", function() {
 	$('[rel="tooltip"]').tooltip();
 	$('[title!=""]').tooltip();
@@ -22,3 +21,4 @@ document.addEventListener("rails_admin.dom_ready", function() {
 	$(".form-text:not(:has(span))").addClass('alert alert-warning');
 	
 });
+

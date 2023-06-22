@@ -9,7 +9,6 @@ class EnrollAcademicProcessesController < ApplicationController
   # GET /enroll_academic_processes/1 or /enroll_academic_processes/1.json
 
   def show
-
     if (@enroll_academic_process.school.enroll_process.eql? @enroll_academic_process.academic_process or @enroll_academic_process.school.active_process.eql? @enroll_academic_process.academic_process) and @enroll_academic_process.confirmado?
 
       @school = @enroll_academic_process.school
@@ -178,18 +177,26 @@ class EnrollAcademicProcessesController < ApplicationController
     redirect_back fallback_location: 'student_session/dashboard'
   end
 
-  # POST /enroll_academic_processes or /enroll_academic_processes.json
+  # POST /enroll_academic_processes?academic_process_id=x&grade_id=y
   def create
-    @enroll_academic_process = EnrollAcademicProcess.new(enroll_academic_process_params)
+    if grade = Grade.find(params[:grade_id]) and academic_process = AcademicProcess.find(params[:academic_process_id])
+      school = grade.school
 
-    respond_to do |format|
-      if @enroll_academic_process.save
-        format.html { redirect_to enroll_academic_process_url(@enroll_academic_process), notice: "Enroll academic process was successfully created." }
-        format.json { render :show, status: :created, location: @enroll_academic_process }
+      @enroll_academic_process = EnrollAcademicProcess.new(grade_id: grade.id, academic_process_id: academic_process.id, permanence_status: :regular)
+      @enroll_academic_process.enroll_status = @enroll_academic_process.historical? ?
+      :confirmado : :reservado
+      if @enroll_academic_process.save!
+        flash[:success] = 'Proceso de Inscripción Iniciado'
+        redirect_to "/admin/enroll_academic_process/#{@enroll_academic_process.id}"
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @enroll_academic_process.errors, status: :unprocessable_entity }
+        flash[:danger] = @enroll_academic_process.errors.full_messages.to_sentence
+        redirect_back fallback_location: '/admin'
       end
+
+
+    else
+      flash[:danger] = 'Grado o Periodo no encontrado'
+      redirect_back fallback_location: '/admin'
     end
   end
 

@@ -8,4 +8,4 @@
       = 'Nueva Sección:'
       = collection_select(:academic_record, :section_id, sections, :id, :description_with_quotes, {include_blank: 'Seleccione'}, {class: "form-control", required: true})
 
-    = submit_tag 'Cambiar Sección', class: "btn btn-success btn-sm", 'data-disable-with': 'Enviando'
+    = submit_tag 'Cambiar Sección', class: "btn btn-success float-end", 'data-disable-with': 'Enviando'

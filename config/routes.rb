@@ -81,7 +81,7 @@ Rails.application.routes.draw do
   resources :banks do
     resources :payment_reports
   end
-  
+  resources :subjects, only: [:show]
   resources :faculties do
     resources :schools do
       resources :admission_types, :study_plans

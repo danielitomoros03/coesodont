@@ -138,7 +138,6 @@
     let val = elem.val();
     let url = `/academic_records/${id}`
     let values = `{"academic_record": {"status": "${val}"}}`;
-    console.log("VAL despues de values: "+val);
     sendData('absolute', val, id, url, values);    
   }
 
@@ -150,7 +149,6 @@
     val = parseInt(val);
     let url = `/qualifications/${id}`;
     let values = `{"qualification": {"value": ${val}, "type_q": "${tipo}"}}`;
-    console.log("VAL despues de values: "+val);
     sendData('qualifiable', val, id, url, values, val2);
   }
 
@@ -187,16 +185,8 @@
   }
 
   function messageSendData(clase, msg) {
-    let elem = $('#message');
-
-    elem.removeClass('alert-danger alert-success');
-
-    elem.addClass(`alert-${clase}`);
-    elem.html(msg);
-    
-    elem.fadeIn(0);
-    elem.fadeOut(4000);
-
+    if (clase == 'danger') toastr.error(msg);
+    else toastr.success(msg);
   }
 
   function desactivar_por_pi(obj, ar_id){

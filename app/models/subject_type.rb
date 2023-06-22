@@ -39,22 +39,4 @@ class SubjectType < ApplicationRecord
     end
   end
 
-  private
-
-    def paper_trail_update
-      changed_fields = self.changes.keys - ['created_at', 'updated_at']
-      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-      self.paper_trail_event = "¡#{object} actualizada en #{changed_fields.to_sentence}"
-    end  
-
-    def paper_trail_create
-      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-      self.paper_trail_event = "¡#{object} creada!"
-    end  
-
-    def paper_trail_destroy
-      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-      self.paper_trail_event = "¡Tipo de Asignatura eliminada!"
-    end
-
 end

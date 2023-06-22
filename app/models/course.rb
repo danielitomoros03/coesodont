@@ -13,6 +13,13 @@ class Course < ApplicationRecord
 	before_destroy :paper_trail_destroy
 	before_update :paper_trail_update
 
+  # HISTORY:
+	has_paper_trail on: [:create, :destroy, :update]
+
+	before_create :paper_trail_create
+	before_destroy :paper_trail_destroy
+	before_update :paper_trail_update
+
   # ASSOCIATIONS:
   # belongs_to
   belongs_to :academic_process
@@ -32,6 +39,7 @@ class Course < ApplicationRecord
   # validates_uniqueness_of :subject_id, scope: [:academic_process_id], message: 'Ya existe la asignatura para el proceso académico.', field_name: false
 
   # SCOPE
+  scope :of_academic_process, ->(academic_process_id){where(academic_process_id: academic_process_id)}
   scope :pcis, -> {where(offer_as_pci: true)}
   scope :order_by_subject_ordinal, -> {joins(:subject).order('subjects.ordinal': :asc)}
   scope :order_by_subject_code, -> {joins(:subject).order('subjects.code': :asc)}
@@ -212,8 +220,7 @@ class Course < ApplicationRecord
       self.name = self.get_name
     end
 
-  
-	private
+  private
 
     def paper_trail_update
       changed_fields = self.changes.keys - ['created_at', 'updated_at']
@@ -228,7 +235,6 @@ class Course < ApplicationRecord
 
     def paper_trail_destroy
       object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-      self.paper_trail_event = "Curso eliminada!"
+      self.paper_trail_event = "¡Curso eliminado!"
     end
-
 end

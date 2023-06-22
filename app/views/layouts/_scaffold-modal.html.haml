@@ -1,10 +1,8 @@
-.modal.fade{"aria-hidden": true, "aria-labelledby": "#{id}ModalLabel", tabindex: "-1", id: id}
+.modal.fade{"aria-hidden": true, tabindex: "-1", id: id}
   .modal-dialog.modal-xl
     .modal-content
-      .modal-header
-        .modal-title{id: "#{id}ModalLabel"}
-          .text-ds
-            %h5= title
+      .text-center.pt-3
+        %h5= title
       .modal-body
         = content.html_safe
 

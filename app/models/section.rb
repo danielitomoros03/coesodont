@@ -63,6 +63,8 @@ class Section < ApplicationRecord
   
   scope :qualified, -> () {where(qualified: true)}
 
+  scope :codes, -> () {select(:code).all.distinct.order(code: :asc).map{|s| s.code}}
+
   scope :without_teacher_assigned, -> () {where(teacher_id: nil)}
   scope :with_teacher_assigned, -> () {where('teacher_id IN NOT NULL')}
 

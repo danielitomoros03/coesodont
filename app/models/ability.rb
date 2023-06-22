@@ -20,9 +20,10 @@ class Ability
 
       if user.admin.desarrollador?
         can :manage, :all
+
       elsif user.admin.jefe_control_estudio?
         can :import, Authorizable::IMPORTABLES
-        can :manage, [Admin, Student, Teacher, Area, Subject, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User]
+        can :manage, [Admin, Student, Teacher, Area, Subject, Course, Grade, AcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User]
         can :ru, [School]
       else
         user.admin.authorizeds.each do |authd|
@@ -52,6 +53,7 @@ class Ability
             can :history, authd.authorizable_klazz_constantenize
 
         end
+
 
         # cannot :manage, [User, Admin, Student, Teacher, Area, Subject, School, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address]
       end

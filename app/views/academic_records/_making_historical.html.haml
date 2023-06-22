@@ -1,0 +1,10 @@
+-# frozen_string_literal: true
+= link_to "/admin/student/#{enroll.student.id}", class: 'btn btn-primary mb-3' do
+  .fas.fa-chevron-left
+  = "Ir al detalle de #{enroll.user.first_name}"
+
+- admin = current_user.admin
+- active = admin and admin.authorized_manage? 'AcademicRecord'
+= render partial: 'academic_records/index_to_history', locals: {academic_records: enroll.academic_records, enabled_options: active}
+
+= render partial: 'academic_records/form_historical', locals: {enroll: enroll} if active

@@ -182,7 +182,7 @@ class Student < ApplicationRecord
       field :description_grades do
         label 'Registro Académico'
         formatted_value do
-          bindings[:view].render(partial: 'students/show', locals: {student: bindings[:object]})
+          bindings[:view].render(partial: 'students/show_admin', locals: {student: bindings[:object]})
         end
       end
       # fields :user, :grades, :nacionality, :origin_country, :origin_city, :birth_date, :marital_status, :address, :grade_title, :grade_university, :graduate_year, :created_at

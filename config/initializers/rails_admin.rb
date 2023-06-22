@@ -65,7 +65,9 @@ RailsAdmin.config do |config|
       only [AcademicRecord, Section, Course]
     end
     show
-    edit
+    edit do
+      except [EnrollAcademicProcess]
+    end
     delete do
       except [School, StudyPlan, Faculty, EnrollAcademicProcess]
     end
@@ -75,8 +77,12 @@ RailsAdmin.config do |config|
     # show_in_app
 
     ## With an audit adapter, you can add:
-    history_index
-    history_show
+    history_index do
+      except [EnrollAcademicProcess]
+    end
+    history_show do
+      except [EnrollAcademicProcess]
+    end
   end
 
   # config.model Section do

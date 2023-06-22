@@ -50,7 +50,9 @@ class AdmissionType < ApplicationRecord
         help 'Sólo 4 dígitos numéricos permitidos' 
       end
 
-      field :school
+      field :school do
+        inline_edit false
+      end
     end
 
     export do

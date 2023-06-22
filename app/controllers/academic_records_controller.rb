@@ -13,6 +13,10 @@ class AcademicRecordsController < ApplicationController
   # GET /academic_records/new
   def new
     @academic_record = AcademicRecord.new
+    # @grade = Grade.find params[:grade_id]
+    # @academic_process = AcademicProcess.find params[:academic_process_id]
+
+    # @school = @grade.school
   end
 
   # GET /academic_records/1/edit
@@ -23,15 +27,68 @@ class AcademicRecordsController < ApplicationController
   def create
     @academic_record = AcademicRecord.new(academic_record_params)
 
-    respond_to do |format|
-      if @academic_record.save
-        format.html { redirect_to academic_record_url(@academic_record), notice: "Academic record was successfully created." }
-        format.json { render :show, status: :created, location: @academic_record }
+    if enroll_academic_process = @academic_record.enroll_academic_process
+      if subject = Subject.find(params[:course][:subject_id])
+        if academic_process = @academic_record.academic_process
+          course = Course.find_or_create_by(subject_id: subject.id, academic_process_id: academic_process.id)
+
+          section = Section.find_or_initialize_by(course_id: course.id, code: params[:section_code])
+
+          if section.new_record?
+            section.capacity = 30
+            section.modality = params[:eq] ? :equivalencia : :nota_final
+          end
+
+          if section.save 
+            @academic_record.section = section
+
+            if subject.absoluta?
+              if params[:approved]
+                @academic_record.status = :aprobado
+              else
+                @academic_record.status = :aplazado
+              end
+            elsif params[:pi]
+              @academic_record.status = :perdida_por_inasistencia
+            elsif params[:rt]
+              @academic_record.status = :retirado
+            end
+            if @academic_record.save
+              flash[:success] = 'Se guardó el historial ' 
+              if subject.numerica? and @academic_record.sin_calificar?
+                if params[:qualifications] 
+                  qa = @academic_record.qualifications.new
+                  qa.type_q = params[:qualifications][:type_q]
+                  qa.value = params[:qualifications][:value]
+                  if qa.save
+                    flash[:success] += '¡Calificación cargada!'
+                  else
+                    flash[:danger] = "Error al intentar guardar la calificación: #{qa.errors.full_messages.to_sentence}"
+                  end
+                else
+                  flash[:danger] = 'No se especificó la calificación'
+                end
+              end
+            else
+              flash[:danger] = "Error al intentar guardar el histórico: #{@academic_record.errors.full_messages.to_sentence}"
+            end
+
+          else
+            flash[:danger] = 'Error al intentar guardar la sección. No se pudo completar el proceso:'+ section.errors.full_messages.to_sentence
+          end
+
+        else
+          flash[:danger] = 'Periodo no encontrado'
+        end
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @academic_record.errors, status: :unprocessable_entity }
+        flash[:danger] = 'Asignatura no encontrada'
       end
+    else
+      flash[:danger] = 'Sin inscripción en sistema'
     end
+
+    redirect_back fallback_location: root_path
+
   end
 
   # PATCH/PUT /academic_records/1 or /academic_records/1.json
@@ -70,6 +127,6 @@ class AcademicRecordsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def academic_record_params
-      params.require(:academic_record).permit(:section_id, :enroll_academic_process_id, :status, :pi)
+      params.require(:academic_record).permit(:section_id, :enroll_academic_process_id)
     end
 end

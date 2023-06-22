@@ -1,0 +1,190 @@
+%h5 Agregar Inscripción
+.border.p-3
+  .row.text-center.fw-bold
+    .col-3{title: 'Descripción de la asigntura'} Asignatura
+    .col-2{title: 'Identificador de la Sección'} Sección
+    .col-1.border-end{title: 'Equivalencia'} EQ
+    .col-4.absoluta{style: 'display:none'} ¿Aprobado?
+    
+    .col-1.numerica{style: 'display:none', title: 'Pérdida por Inasistencia'} PI
+    .col-1.numerica{style: 'display:none', title: 'Retirada'} RT
+    .col-1.numerica{style: 'display:none', title: 'Tipo de Calificación'} Tipo
+    .col-1.numerica{style: 'display:none', title: 'Calificación'} Calif
+    .col-2 
+
+  = form_tag "/academic_records" do
+    = hidden_field_tag 'academic_record[enroll_academic_process_id]', enroll.id
+    .row
+      .col-3
+        =# SUBJECTS
+        %select#subject_id{"data-filteringselect": true, "data-options": "{\"xhr\":true,\"remote_source\":\"/admin/subject?associated_collection=subject\\u0026compact=true\\u0026current_action=create\\u0026source_abstract_model=course\"}", name: "course[subject_id]", placeholder: "Escriba Código Asignatura", style: "display: none;", onchange: "getSections(this);"}
+          %option{label: " ", value: ""}
+          %option{value: ""}
+
+
+      .col-2
+        =# EXISTENTS SECTIONS CODES 
+        #subjectSectionsCode.text-center
+          .input-group
+            = select_tag :section_code, options_for_select(Section.codes), {class: "form-control", id: 'sessions'} 
+
+            = link_to 'javascript:void(0)', id: 'addCode', class: 'input-group-text btn btn-success', title: 'Agregar Identificador', onclick: "showSections(false);" do
+              %i.fa-regular.fa-plus
+
+        =# NEW SECTION CODE 
+        #newSection.text-center{style: 'display:none'}
+          .input-group
+            = text_field_tag :section_code, {}, {placeholder: 'Identificador', class: "form-control", oninput: "notSpecialChars(this)", maxlength: 3, id: :code}
+                    
+            = link_to 'javascript:void(0)', id: 'restoreSections', class: 'input-group-text btn btn-success', title: 'Códigos existentes', onclick: "showSections(true);" do
+              %i.fa-regular.fa-minus
+
+      .col-1.text-center.border-end{title: 'Marque esta casilla para indicar que la sección es de Equivalencia'}
+        =# EQUIVALENCIA
+        = check_box_tag :eq, nil, false, {class: 'btn-check', autocomplete: :off}
+        %label.btn.btn-outline-primary{for: :eq}
+          .fa-regular.fa-check
+      
+      .col-4.text-center.absoluta{style: 'display:none', title: 'Marque esta casilla si aprobó el curso'}
+        =# ABSOLUTAS
+
+        = check_box_tag :approved, nil, false, {class: 'btn-check', autocomplete: :off}
+        %label.btn.btn-outline-primary{for: :approved}
+          .fa-regular.fa-check
+      
+      .col-1.text-center.numerica{style: 'display:none', title: 'Marque esta casilla para indicar Pérdida por Inasistencia'}
+        =# PI'S
+        = check_box_tag :pi, nil, false, {class: 'btn-check', onclick: "disabledByCheck(this, 'rt');", autocomplete: :off}
+        %label.btn.btn-outline-primary{for: :pi}
+          .fa-regular.fa-check
+
+      .col-1.text-center.numerica{style: 'display:none', title: 'Marque esta casilla para indicar Retiro'}
+        =# RETIRO
+        = check_box_tag :rt, nil, false, {class: 'btn-check', onclick: "disabledByCheck(this, 'pi');", autocomplete: :off}
+        %label.btn.btn-outline-primary{for: :rt}
+          .fa-regular.fa-check
+      .col-1.numerica{style: 'display:none'}
+        =# NUMERICAS
+        = select_tag '[qualifications]type_q', options_for_select(Qualification.type_qs.keys), {class: "form-control qualificable text-capitalize"}
+      .col-1.numerica{style: 'display:none'}
+        =# QUALIFICATION VALUE
+        =# text_field_tag '[qualifications]value', {}, {placeholder: 'Cal', class: "form-control qualificable", required: true, step: 1, in: 0...21, oninput: 'onlyValidQ(this);'}
+        = select_tag '[qualifications]value', options_for_select( (1..20).map{|a| sprintf("%02i", a)}), {class: "form-control qualificable", required: true, include_blank: '--'}
+      .col-2
+        =# GUARDAR
+        %button.btn.bt.btn-primary.float-end{type: :submit}
+          %i.fa-regular.fa-check
+          Guardar
+
+:javascript
+
+  function notSpecialChars(ele){
+    var node = $(ele);
+    node.val(node.val().toUpperCase().replace(/[^A-Za-z0-9]/g,''))
+  }  
+
+  function onlyValidQ(ele){
+    var node = $(ele);
+    node.val(node.val().replace(/[^0-9]/g,'') );
+  }
+
+  function disabledByCheck(ele, dis) {
+    let checked = $(ele).prop('checked');
+
+    // console.log(dis);
+    $('#'+dis).prop('disabled', checked);
+    let qa = $(`.qualificable`);
+    qa.prop('disabled', checked);
+    qa.prop('readonly', checked);
+  }
+
+  function showSections(value){
+    let sections = $('#sessions');
+    let codeInput = $('#code');
+    if (value) {
+      $('#subjectSectionsCode').show();
+      $('#newSection').hide();
+      codeInput.hide();
+    } else {
+      $('#subjectSectionsCode').hide();
+      $('#newSection').show();
+      codeInput.show();
+
+    }
+    sections.prop('disabled', !value);
+    sections.prop('readonly', !value);
+    sections.prop('required', value);
+    codeInput.prop('disabled', value);
+    codeInput.prop('readonly', value);
+    codeInput.prop('required', !value);
+  }
+
+  function getSections(ele){
+    let sections = $('#sessions');
+    sections.find('option').remove();
+    console.log(ele.value);
+    $.ajax({
+      url: `/subjects/${ele.value}`,
+      type: 'GET',
+      dataType: 'json',
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+      },
+      success: function(data) {
+        let codeBtn = $('#addCode');
+        let toAppend = '';
+        let codeInput = $('#code')
+
+        if (data.section_codes.length > 0) {
+          $.each(data.section_codes,function(i,o){
+             toAppend += '<option>'+o+'</option>';
+            });
+
+          sections.find('option').end().append(toAppend);
+          showSections(true);
+          codeBtn.prop('disabled', false);
+          codeBtn.removeClass('disabled');
+
+        }else{
+          showSections(false);
+          toastr.error('Sin secciones previas');
+          $('#subjectSectionsCode').hide();
+          $('#newSection').show(); 
+          sections.prop('required', false);
+          codeInput.prop('required', true);
+          $('#restoreSections').hide();
+
+        }
+        let abs = $('.absoluta');
+        let num = $('.numerica');
+        let qa = $('#_qualificationsvalue');
+        let tq = $('#_qualificationstype_q');
+
+        if (data.qualification_type == 'absoluta') {
+          abs.show();
+          num.hide(); 
+          qa.prop('required', false);
+          qa.prop('disabled', true);
+          tq.prop('disabled', true);
+
+        }else {
+          abs.hide(); 
+          num.show();
+          qa.prop('required', true); 
+          qa.prop('disabled', false);
+          tq.prop('disabled', false);
+        }
+
+      },
+      error: function(json) {
+
+        toastr.error('No se pudo cargar las secciones. Inténtelo nuevamente: '+ json.statusText);
+      },
+      unprocessable_entity: function(json) {
+        toastr.error('No procesar la solicitud. Inténtelo nuevamente: '+ json.statusText);
+
+      }
+    });
+  }
+
+

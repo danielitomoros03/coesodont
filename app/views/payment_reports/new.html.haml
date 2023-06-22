@@ -1,5 +1,8 @@
-%h1 New payment_report
+- reportable = grado
+- payment_report = PaymentReport.new
+- content = render partial: "/payment_reports/form"
+= render partial: '/layouts/scaffold-modal', locals: {id_modal: "paymentReportGrade#{@grado.id}", content: content, title: 'Reportar Pago a la Facultad de Ingreso a Escuela'}
 
-= render 'form'
-
-= link_to 'Back', payment_reports_path
+= link_to '#', onclick: "$('#paymentReportGrade#{grado.id}').modal()", class: 'm-3 btn btn-success' do
+	= glyph 'plus'
+	= "Reportar Pago Ingreso a #{grade.school.code}"

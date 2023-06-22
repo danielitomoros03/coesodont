@@ -80,6 +80,11 @@ class Grade < ApplicationRecord
   scope :custom_search, -> (keyword) { joins(:user, :school).where("users.ci ILIKE '%#{keyword}%' OR schools.name ILIKE '%#{keyword}%'") }
 
   # FUNCTIONS:
+
+  def academic_processes_unenrolled
+    school.academic_processes.joins(period: :period_type).order('periods.year DESC, period_types.code DESC').reject{|ap|self.academic_processes.ids.include?(ap.id)}
+  end
+
   # APPOINTMENT_TIME:
   def appointment_slot_time
     (self.appointment_time and self.duration_slot_time) ? self.appointment_time+self.duration_slot_time.minutes : nil    
@@ -118,10 +123,14 @@ class Grade < ApplicationRecord
     end
   end
 
+  def any_approved?
+    academic_records.aprobado.any?
+  end
+
   def subjects_offer_by_dependent
     # Buscamos los ids de las asignaturas aprobadas
 
-    if is_new?
+    if is_new? or !any_approved?
       Subject.independents.where(ordinal: 1)
     else
       aprobadas_ids = self.subjects_approved_ids
@@ -183,11 +192,11 @@ class Grade < ApplicationRecord
   end
 
   def subjects_approved
-    self.academic_records.aprobado.joins(:subject).select('subjects.id')
+    self.academic_records.aprobado.joins(:subject)
   end
 
   def subjects_approved_ids
-    subjects_approved.map{|su| su.id}
+    self.academic_records.aprobado.joins(:subject).select('subjects.id').map{|su| su.id}
   end
 
   # TOTALS CREDITS:

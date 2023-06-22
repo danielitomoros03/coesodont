@@ -190,6 +190,10 @@ class AcademicProcess < ApplicationRecord
         help 'Atención: Aún cuando este campo no es obligatorio y puede ser omitido (en caso de que se encuentre realizando migraciones de periodos anteriores) es muy importante para las Citas Horarias e Inscripciones'
       end
 
+      field :subjects do
+        inline_edit false
+      end
+
       field :max_credits do
         label 'Máximo de créditos permitidos a inscribir'
       end

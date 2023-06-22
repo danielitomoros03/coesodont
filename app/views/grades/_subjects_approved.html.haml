@@ -1,0 +1,20 @@
+
+%table.table.table-striped.table-sm.table-hover.table-bordered.responsive-table
+  %thead{style: "position: sticky;top: 0"}
+    %tr
+      %th.text-center.table-primary{colspan: 5} Asignaturas Aprobadas
+    %tr.table-primary
+      %th.headers{style: 'width: 4%', scope: :col} #
+      %th.headers{style: 'width: 5%', scope: :col} Sem
+      %th.headers{style: 'width: 56%', scope: :col} Asignatura
+      - if false
+        %th.headers{style: 'width: 5%', scope: :col} Créd
+  %tbody
+    - records.each_with_index do |record, i|
+      - subject = record.subject
+      %tr
+        %td.align-middle.text-right= i+1
+        %td.align-middle.text-center= subject.ordinal
+        %td.align-middle{title: subject.desc}= subject.desc
+        - if false
+          %td.align-middle.text-center= subject.unit_credits
