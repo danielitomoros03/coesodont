@@ -1,0 +1,37 @@
+- has_enrolled = academic_process.enroll_academic_processes.any?
+.float-end
+  
+  - # ENLACE A PROGRAMACIONES
+  - if (current_user&.admin&.authorized_read? 'Course')
+    - period_name = academic_process.period_name
+    = link_to "/admin/course?f%5Bacademic_process%5D%5B52520%5D%5Bo%5D=like&f%5Bacademic_process%5D%5B52520%5D%5Bv%5D=#{period_name}&academic_process_id=#{academic_process.id}", class: 'btn btn-primary mx-1', title: "Ver listado #{period_name} en Programaciones" do
+      .fa-solid.fa-shapes
+      ="Ver en Programaciones"
+
+  - if (current_user&.admin&.authorized_manage? 'Course')
+    - if has_enrolled
+      - # CLONACIÓN DESACTIVADA: HAY INSCRIPCIONES
+      - msg =  "Periodo con inscripciones. El proceso de clonación se realiza antes de realizar las inscripciones en un período. Elimine todas las inscripciones para activar esta opción"
+      %b{title: msg}
+        = link_to '#', class: 'btn btn-secondary disabled', disabled: true do
+          .fa.fa-clone
+          Clonar Programación
+    - else
+      - # CLONACIÓN ACTIVADA: SIN INSCRIPCIONES
+      - id = 'clonationModal'
+      %button.btn.btn-primary{"data-bs-target": "##{id}", "data-bs-toggle": :modal, type: :button, title: 'Clona la programación de Períodos anteriores'}
+        .fa.fa-clone
+        Clonar Programación
+      - title = 'Clonar Programación'
+      - content = render partial: '/academic_processes/clonation_form', locals: {academic_process: academic_process}
+      = render partial: '/layouts/scaffold-modal', locals: {content: content, title: title, id: id}
+
+    - if academic_process.sections.any? and (current_user&.admin&.authorized_delete? 'Course')
+      - period_name = academic_process.period.name
+      - total = academic_process.sections.count
+
+      = link_to "/academic_processes/#{academic_process.id}/clean_courses", class: 'btn btn-danger mx-1', 'data-confirm': "Esta acción es irreversible y eliminará un total de #{total} secciones asociadas al proceso y limpiará las asignaturas activadas. ¿ Está completamente seguro?", title: 'Eliminar las secciones y desactivar todas las asignaturas' do
+        .fa.fa-remove
+        = "Eliminar Toda la Programación"
+
+= render partial: '/academic_processes/index_programation', locals: {academic_process: academic_process, has_enrolled: has_enrolled}

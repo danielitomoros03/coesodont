@@ -1,5 +1,5 @@
-- logged_as_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
-- if logged_as_admin and grades_without_appointment.any?
+- logged_as_admin = (current_user&.admin? and session[:rol].eql? 'admin') ? true : false
+- if logged_as_admin and grades_without_appointment.any? and (current_user&.admin&.authorized_create? 'AcademicProcess')
   - id = 'newEnrollmentDayModal'
   %button.btn.btn-success.float-end{"data-bs-target": "##{id}", "data-bs-toggle": :modal, type: :button}
     .fa.fa-plus
@@ -32,11 +32,11 @@
 
   - enrollment_days.each do |day|
     .tab-pane.fade{"aria-labelledby": "#day#{day.id}Tab", role: "tabpanel", id: "day#{day.id}"}
-
-      = link_to "/enrollment_days/#{day.id}", class: 'btn btn-danger float-end my-3', method: :delete, 'data-confirm': 'Esta acción es irreversible ¿Está completamente seguro? Se limpiarán las citas horarias respectivas' do
-        .fa.fa-trash
-        Eliminar Jornada del
-        = I18n.l(day.start, format: "%d/%m/%Y")
+      - if current_user&.admin&.authorized_delete? 'AcademicProcess'
+        = link_to "/enrollment_days/#{day.id}", class: 'btn btn-danger float-end my-3', method: :delete, 'data-confirm': 'Esta acción es irreversible ¿Está completamente seguro? Se limpiarán las citas horarias respectivas' do
+          .fa.fa-trash
+          Eliminar Jornada del
+          = I18n.l(day.start, format: "%d/%m/%Y")
 
       = link_to "/enrollment_days/#{day.id}/export.xls", class: 'btn btn-info float-end m-3' do
         .fa.fa-download

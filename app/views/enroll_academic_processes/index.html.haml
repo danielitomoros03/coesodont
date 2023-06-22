@@ -1,6 +1,15 @@
 %h4
   .text-center.mt-2.bg-info.py-2 Historial Académico
 
-- grade.enroll_academic_processes.sort_by_period.each do |enroll_academic_process|
-  .border.m-3.p-4
-    = render partial: 'enroll_academic_processes/show', locals: {enroll_academic_process: enroll_academic_process}
+#accordionFlush.accordion.accordion-flush
+  - grade.enroll_academic_processes.sort_by_period.each do |enroll_academic_process|
+    .accordion-item
+      %h2.accordion-header{id: "flush-heading#{enroll_academic_process.id}"}
+        %button.accordion-button.collapsed{"aria-controls" => "flush-collapse#{enroll_academic_process.id}", "aria-expanded" => "false", "data-bs-target" => "#flush-collapse#{enroll_academic_process.id}", "data-bs-toggle" => "collapse", :type => "button"}
+          %b= "Periodo #{enroll_academic_process.period.name}"
+      .accordion-collapse.collapse{id: "flush-collapse#{enroll_academic_process.id}", "aria-labelledby" => "flush-heading#{enroll_academic_process.id}"}
+        .accordion-body
+          = render partial: 'enroll_academic_processes/show', locals: {enroll_academic_process: enroll_academic_process}
+
+
+    

@@ -18,7 +18,7 @@ class Billboard < ApplicationRecord
 	end
 
 	rails_admin do
-		navigation_label 'Informativos'
+		navigation_label 'Informativa'
 		navigation_icon 'fa-regular fa-panorama'
 
 		edit do

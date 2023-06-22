@@ -1,0 +1,15 @@
+%ul.navbar-nav.ms-auto.root_links
+  - actions(:root).select(&:show_in_navigation).each do |action|
+    %li{class: "nav-item #{action.action_name}_root_link"}
+      = link_to wording_for(:menu, action), { action: action.action_name, controller: 'rails_admin/main' }, {class: ['nav-link']}.merge(action.turbo? ? {} : {data: {turbo: 'false'}})
+  - if main_app_root_path = (main_app.root_path rescue false)
+    %li.nav-item
+      = link_to t('admin.home.name'), main_app_root_path, class: 'nav-link'
+  - if _current_user
+    - if user_link = edit_user_link
+      %li.nav-item.edit_user_root_link
+        = user_link
+    - if logout_path.present?
+      %li.nav-item
+        = link_to logout_path, method: logout_method, class: 'nav-link', data: {turbo: 'false'} do
+          %span.badge.bg-success= t('admin.misc.log_out')

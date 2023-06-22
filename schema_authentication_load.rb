@@ -22,7 +22,7 @@ Student 'fa-regular fa-user-graduate'
 Teacher 'fa-regular fa-chalkboard-user'
  User
  
-'Gestión Periódica' 'fa-solid fa-book-open-reader'
+'Config Específica' 'fa-solid fa-book-open-reader'
 AcademicProcess 'fa-solid fa-calendar'
  Period
   PeriodType

@@ -1,0 +1,30 @@
+%table.table.table-striped.table-sm
+  %thead
+    %tr.text-center
+      %th Número
+      %th Capacidad
+      %th.text-start Profesor
+      %th Estado
+      %th Tipo
+      %th Horario
+
+  %tbody
+    - sections.each do |section|
+      %tr.text-center
+        %td= section.code
+        %td= section.capacity
+        %td.text-start= section.teacher_desc
+        %td= section.label_qualified
+        %td= section.label_modality
+        %td= section.schedule_name
+
+%br
+- if false
+  - section = Section.new(course_id: course_id)
+  = render partial: '/sections/form', locals: {section: section, section_codes: section_codes}
+
+  %a{'data-link': "/admin/section/new?modal=true&amp;section%5Bcourse_id%5D=1571", class: 'create btn btn-info', style: "margin-left:10px", href: '#'}
+    %i.fas.fa-plus
+    Agregar
+
+

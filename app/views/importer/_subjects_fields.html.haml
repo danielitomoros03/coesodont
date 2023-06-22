@@ -11,7 +11,7 @@
       %span.label.label-danger Requerido
 
 #modality_field.control-group.row.mb-3
-  %label.col-sm-2.col-form-label.text-md-end{for: "modality_field"} Modalidad
+  %label.col-sm-2.col-form-label.text-md-end{for: "modality_field"} Tipo
   .col-sm-10.controls
     - Subject.modalities.each_with_index.map do |value, i|
       %label.btn.btn-secondary.btn-sm.tooltip-btn{'data_toggle': :tooltip, title: value[0].titleize}

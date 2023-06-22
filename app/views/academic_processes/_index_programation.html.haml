@@ -1,0 +1,136 @@
+%ul#scope_selector.nav.nav-tabs
+  - Subject.modalities.keys.each do |moda|
+    - active = (moda.eql? params[:scope]) ? 'active' : ''
+    %li.nav-item
+      %a.nav-link{:href => "/admin/academic_process/18/programation?scope=#{moda}", class: active}
+        = moda.titleize
+%br
+.border{style: 'overflow-y:scroll;max-height:320px'}
+  %table#programation.table.table-condensed.table-striped.table-hover
+    %thead{style: "position: sticky;top: 0; background-color:#F4F4F4"}
+      %tr
+        %th.col-1{scope: :col} #
+        %th.col-2{scope: :col}
+          Área
+          - if false
+            = select_tag :section_code, options_for_select(Area.names), {class: "form-control filtrable", id: 'filterArea', style: 'width: 100%;', include_blank: '-- Filtrar -- '}   
+            .input-group.input-group-sm{style: 'width: 100%;'}
+              %input.form-control.filtrable{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", placeholder: 'Áreas', id: 'filterArea', name: 'filterArea'}
+        %th.col-3{scope: :col}
+          .input-group.input-group-sm{style: 'width: 100%;'}
+            %input.form-control{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", placeholder: 'Asignaturas', autofocus: true, id: 'filterSubject', name: 'filterSubject'}
+
+        %th.col-1.text-center Activa
+        - if (current_user&.admin&.authorized_read? 'Section') or (current_user&.admin&.authorized_create? 'Section')
+          %th Secciones
+    %tbody.table-group-divider
+      - subjects = academic_process.school.subjects.where(modality: params[:scope]).sort_by_code
+      - subjects.each_with_index do |subject, i|
+        - course = academic_process.courses.where(subject_id: subject.id).first
+        - sections = course&.sections
+        - has_sections = sections&.any?
+        %tr
+          %td= i+1
+          %td= subject.area.name
+          %td{title: subject.desc}= subject.desc
+          %td.text-center
+            - if course
+              - if (current_user&.admin&.authorized_delete? 'Course')
+                = render partial: 'academic_processes/form_active_subject', locals: {academic_process: academic_process, subject_id: subject.id, has_sections: has_sections, course: course}
+              - else
+                %i.fas.fa-check
+
+            - else
+              - if (current_user&.admin&.authorized_create? 'Course')
+                = render partial: 'academic_processes/form_active_subject', locals: {academic_process: academic_process, subject_id: subject.id, has_sections: has_sections, course: course}
+              - else
+                %i.fas.fa-remove            
+          %td
+            - if course
+              - if has_sections
+                - if (current_user&.admin&.authorized_read? 'Section')
+                  = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: has_enrolled}
+              - if (current_user&.admin&.authorized_create? 'Section')
+                = ApplicationController.helpers.button_add_section course.id
+
+:javascript
+
+  document.addEventListener("rails_admin.dom_ready", function() {
+
+    $('.addSection').on('click', function(e){
+      $('#section_course_id').val(this.attributes['course_id'].value);
+    });
+
+    $('.activeSubject').on('change', function(e){
+      updateElem(this);
+    });
+
+    $('#filterSubject').on('keyup', function(e){
+      filterSections(this, 2);
+      // let fliterSubjectValue = $('#filterArea');
+      // filterSections(fliterSubjectValue, 1);
+    });
+
+  });
+
+  function updateElem(ele){
+    let url;
+    let type;
+    let  attrs = `{"course":{"academic_process_id": #{academic_process.id}, "subject_id": ${ele.value}}}`;
+    if (ele.checked == true) {
+      url = "/courses"
+      type = 'POST'
+    }else{
+      url = "/courses/1"
+      type = 'DELETE'
+    }
+    $.ajax({
+      url: url,
+      type: type,
+      data: JSON.parse(attrs),
+      dataType: 'json',
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+      },
+      success: function(json) {
+        let td = ele.parentElement.parentElement.nextElementSibling
+        if (json.type == `create`) {
+          td.innerHTML = json.new_section;  
+          toastr.success(json.data);
+        }else {
+          td.textContent = "";
+          toastr.info(json.data);
+        }
+
+      },
+      error: function(json) {
+        toastr.error(json.data);
+      },
+      unprocessable_entity: function(json) {
+        toastr.error(json.data);
+      }
+    });
+
+  }
+
+  function filterSections(ele, col){
+    var keyword = ele.value;
+    keyword = keyword.toUpperCase();
+    var table_1 = document.getElementById("programation");
+    var all_tr = table_1.getElementsByTagName("tr");
+
+    for(var i=0; i<all_tr.length; i++){
+        var name_column = all_tr[i].getElementsByTagName("td")[col];
+        if(name_column){
+            var name_value = name_column.textContent || name_column.innerText;
+            name_value = name_value.toUpperCase();
+            if(name_value.indexOf(keyword) > -1){
+
+              all_tr[i].style.display = ""; // show
+            }else{
+              all_tr[i].style.display = "none"; // hide
+            }
+        }
+    }    
+
+  }

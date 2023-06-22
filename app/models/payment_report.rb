@@ -32,7 +32,7 @@ class PaymentReport < ApplicationRecord
   enum transaction_type: [:transferencia, :efectivo, :punto_venta]
 
   rails_admin do
-    navigation_label 'Finanzas'
+    navigation_label 'Administrativa'
     navigation_icon 'fa-solid fa-cash-register'
 
     export do

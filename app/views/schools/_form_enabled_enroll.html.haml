@@ -1,0 +1,35 @@
+.text-center
+  = form_tag(nil, class: "form-inline") do 
+    .input-group{style: 'width:60%'}
+      = collection_select(:school, :enroll_process_id, school.academic_processes.limit(3), :id, :period_name, {include_blank: 'Inscripción Cerrada', selected: school.enroll_process_id}, {class: "form-control form-control-sm ", 'data-bs-original-title': "Esta acción modificará la posibilidad de inscribirse a los estudiantes. Para cerrar la inscripción seleccione 'Inscripción Cerrada'", onchange: 'setEnabledEnroll(this);', id: "enroll_process_id#{school.id}", type_elem: 'enroll_process_id'})
+      -# url = "/schools/#{school.id}"
+      =# collection_select(:school, :enroll_process_id, school.academic_processes, :id, :period_name, {include_blank: 'Inscripción Cerrada', selected: school.enroll_process_id}, {class: "form-control form-control-sm ", 'data-bs-original-title': "Esta acción modificará la posibilidad de inscribirse a los estudiantes. Para cerrar la inscripción seleccione 'Inscripción Cerrada'", onclick: 'updateElem(`'+url+'`, `{"school":{"enroll_process_id":${this.attributes["type_elem"].value}}}`);', id: "enroll_process_id#{school.id}", type_elem: 'enroll_process_id'})
+
+:javascript
+
+  function setEnabledEnroll(ele){
+    let value = ele.value
+    let tipo = ele.attributes['type_elem'].value
+    if (ele.value == '') value = -1;
+
+    let values = `{"school": {"${tipo}": ${value}}}`;
+
+    $.ajax({
+      url: `/schools/#{school.id}`,
+      type: 'PUT',
+      data: JSON.parse(values),
+      dataType: 'json',
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+      },
+      success: function(json) {
+        toastr.success(json.data);
+      },
+      error: function(json) {
+        toastr.error(json.data);
+      },
+      unprocessable_entity: function(json) {
+        toastr.error(json.data);
+      }
+    });
+  }

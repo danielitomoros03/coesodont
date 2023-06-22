@@ -12,6 +12,17 @@ class SectionsController < ApplicationController
     end
   end
 
+  def bulk_delete
+
+    if Section.where(id: params[:bulk_ids]).destroy_all
+      flash[:info] = 'Secciones Eliminadas'
+    else
+      flash[:danger] = 'Error al intentar eliminar las secciones'
+    end
+
+    redirect_back fallback_location: root_path
+  end
+
   # GET /sections/1 or /sections/1.json
   def show
     if current_admin or (current_teacher and @section.teacher and @section.teacher_id.eql? current_teacher.id)
@@ -62,16 +73,6 @@ class SectionsController < ApplicationController
     redirect_back fallback_location: section_url(@section)
 
   end
-
-  # DELETE /sections/1 or /sections/1.json
-  # def destroy
-  #   @section.destroy
-
-  #   respond_to do |format|
-  #     format.html { redirect_to sections_url, notice: "Section was successfully destroyed." }
-  #     format.json { head :no_content }
-  #   end
-  # end
 
   private
     # Use callbacks to share common setup or constraints between actions.

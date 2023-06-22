@@ -16,7 +16,7 @@ class Schedule < ApplicationRecord
   end
 
   def name
-    "#{day} #{starttime.strftime("de %I:%M%P") } #{endtime.strftime("a %I:%M%P") }"
+    "#{day} #{starttime.strftime("de %I:%M%P") } #{endtime.strftime("a %I:%M%P") }" if (starttime and endtime)
   end
 
   rails_admin do

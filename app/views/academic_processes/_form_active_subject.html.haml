@@ -1,0 +1,5 @@
+- title = (course and course.sections.any?) ? 'Para activar esta opción elimine las secciones' : '' 
+.form-switch{title: title}
+  = check_box_tag "enable_subject#{subject_id}", subject_id, !course.nil?, class: "form-check-input switch activeSubject", title: "Activar/Desactivar asignatura en #{academic_process.period_name}", disabled: has_sections, id: subject_id
+
+

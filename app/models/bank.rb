@@ -26,7 +26,7 @@ class Bank < ApplicationRecord
 
   # RAILS_ADMIN:
   rails_admin do
-    navigation_label 'Finanzas'
+    navigation_label 'Administrativa'
     navigation_icon 'fa-solid fa-bank'
 
     list do

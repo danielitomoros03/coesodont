@@ -1,5 +1,5 @@
-%h5 Agregar Inscripción
-.border.p-3
+%h5.bg-info.p-1.text-center.mb-0 Agregar Nuevo Registro
+.border.p-3.mb-3
   .row.text-center.fw-bold
     .col-3{title: 'Descripción de la asigntura'} Asignatura
     .col-2{title: 'Identificador de la Sección'} Sección
@@ -38,7 +38,6 @@
                     
             = link_to 'javascript:void(0)', id: 'restoreSections', class: 'input-group-text btn btn-success', title: 'Códigos existentes', onclick: "showSections(true);" do
               %i.fa-regular.fa-minus
-
       .col-1.text-center.border-end{title: 'Marque esta casilla para indicar que la sección es de Equivalencia'}
         =# EQUIVALENCIA
         = check_box_tag :eq, nil, false, {class: 'btn-check', autocomplete: :off}

@@ -1,4 +1,5 @@
 class SchoolsController < ApplicationController
+  before_action :logged_as_admin?
   before_action :set_school, only: %i[ show edit update destroy ]
 
   # GET /schools or /schools.json
@@ -36,13 +37,16 @@ class SchoolsController < ApplicationController
 
   # PATCH/PUT /schools/1 or /schools/1.json
   def update
+
+    params[:school][:enroll_process_id] = nil if params[:school][:enroll_process_id].eql? '-1'
+    params[:school][:active_process_id] = nil if params[:school][:active_process_id].eql? '-1'
     respond_to do |format|
       if @school.update(school_params)
-        format.html { redirect_to school_url(@school), notice: "School was successfully updated." }
-        format.json { render :show, status: :ok, location: @school }
+        # format.json { render json: '¡Escuela actualizada con éxito!', status: :ok}
+        # format.html { redirect_back fallback_location root_path }
+        format.json {render json: {data: '¡Escuela actualizada con éxito!', status: :success} }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @school.errors, status: :unprocessable_entity }
+        format.json { render json: {data: @school.errors, status: :unprocessable_entity} }
       end
     end
   end
@@ -65,6 +69,6 @@ class SchoolsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def school_params
-      params.require(:school).permit(:code, :name, :enable_subject_retreat, :enable_change_course, :enable_dependents, :period_id)
+      params.require(:school).permit(:code, :name, :enable_subject_retreat, :enable_change_course, :enable_dependents, :period_id, :enroll_process_id, :active_process_id)
     end
 end

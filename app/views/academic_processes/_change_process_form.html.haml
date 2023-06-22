@@ -1,0 +1,19 @@
+
+= form_tag("/academic_processes/change_process_session", class: 'form-horizontal') do
+  .modal-body
+    .control-group.my-3
+      %span.control-label
+        - if session[:academic_process_id]
+          - academic_process = AcademicProcess.find session[:academic_process_id]
+          Perído Actual de la Sesión:
+        %b= academic_process.period.name
+
+    .control-group.my-3
+      %span.control-label Períodos:
+      .controls
+
+        = collection_select(nil, :id, academic_process.school.academic_processes.joins(period: :period_type).order('periods.year DESC, period_types.code DESC').reject{|pa| pa.id.eql? academic_process.id}, :id, :period_name, {prompt: "-- Seleccione Proceso --", selected: academic_process.process_before}, {class: 'text-field form-control', required: true})
+          
+    .modal-footer
+      = submit_tag 'Cambiar', class: 'btn btn-primary'
+

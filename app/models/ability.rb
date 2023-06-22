@@ -26,13 +26,18 @@ class Ability
         can :manage, [Admin, Student, Teacher, Area, Subject, Course, Grade, AcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User]
         can :ru, [School]
       else
+        can :manage, [User]
         user.admin.authorizeds.each do |authd|
             if authd.authorizable.klazz.eql? 'Subject' and authd.can_manage?
                 can :manage, [SubjectLink, Area]
             end
             if authd.authorizable.klazz.eql? 'Student' and authd.can_manage?
-                can :manage, [User, Address, Grade]
+                can :manage, [Address, Grade]
                 can :read, [AdmissionType, StudyPlan]
+            end
+            if authd.authorizable.klazz.eql? 'AcademicProcess' and authd.can_read?
+                can :programation, [AcademicProcess]
+                can :enrollment_day, [AcademicProcess]
             end
             if authd.authorizable.klazz.eql? 'AcademicProcess' and authd.can_manage?
                 can :manage, [Period, PeriodType]

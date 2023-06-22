@@ -19,6 +19,11 @@ class AcademicProcessesController < ApplicationController
   def edit
   end
 
+  # def change_process_session
+  #   session[:academic_process_id] = params[:id]
+  #   redirect_back fallback_location: root_path
+  # end
+
   def clean_courses
     total = @academic_process.courses.count
     if @academic_process.courses.destroy_all

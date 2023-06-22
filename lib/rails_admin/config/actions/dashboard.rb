@@ -18,6 +18,9 @@ module RailsAdmin
         register_instance_option :show_in_menu do
           false
         end
+        register_instance_option :show_in_navigation do
+          false
+        end        
 
         register_instance_option :sidebar_label do
           false

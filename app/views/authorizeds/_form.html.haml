@@ -46,9 +46,18 @@
 						%td.align-middle				
 							.form-check.form-switch
 								= check_box_tag nil, nil, @autorized.can_all?, class: "form-check-input area#{area.id}", onclick: "clicked_all('.can_all#{authble.id}', this);", title: 'Todos/Ninguno'
+
+
+
 						%td.align-middle
 							.form-check
-								= check_box_tag "#{model_id}[can_read]", nil, @autorized.can_read, class: "form-check-input area#{area.id} can_all#{authble.id} read#{authble.id}", onclick: "checked_if('.visible#{authble.id}', this, false);", title: 'Ver Listas y Detalles' 
+								= check_box_tag "#{model_id}[can_read]", nil, @autorized.can_read, class: "form-check-input area#{area.id} can_all#{authble.id} read#{authble.id}", onclick: "checked_if('.visible#{authble.id}', this, false);", title: 'Ver Listas y Detalles'
+
+								- if false #INICIO DE CAMBIO DE BOTÓN DE CHECK 
+									= check_box_tag "#{model_id}[can_read]", nil, @autorized.can_all?, {class: "btn-check area#{area.id}", autocomplete: :off, onclick: "clicked_all('.can_all#{authble.id}', this);", title: 'Todos/Ninguno'}
+									%label.btn.btn-outline-primary{for: "#{model_id}[can_read]"}
+										.fa-regular.fa-check
+
 
 						%td.align-middle
 							- unless Authorizable::UNCREABLES.include? authble.klazz

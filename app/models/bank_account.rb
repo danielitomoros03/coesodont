@@ -11,8 +11,11 @@ class BankAccount < ApplicationRecord
   # ASSOCIATIONS:
   belongs_to :bank
   belongs_to :school
+
   # has_one :school
 
+  validates_presence_of :code
+  validates_presence_of :holder
 
   # FUNCTIONS:
   def name
@@ -21,17 +24,21 @@ class BankAccount < ApplicationRecord
 
   rails_admin do
     visible false
-    navigation_label 'Finanzas'
+    navigation_label 'Administrativa'
     navigation_icon 'fa-solid fa-piggy-bank'
 
     edit do
-      field :school
       field :code do
         html_attributes do
           {:length => 20, :size => 20, :onInput => "$(this).val($(this).val().toUpperCase().replace(/[^0-9]/g,''))"}
         end
       end
-      fields :holder, :bank, :account_type
+      field :holder
+      field :bank do
+        inline_add false
+        inline_edit false
+      end
+      field :account_type
     end
 
     export do

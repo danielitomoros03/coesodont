@@ -382,7 +382,7 @@ class AcademicRecord < ApplicationRecord
 
   # RAILS_ADMIN
   rails_admin do
-    navigation_label 'Gestión Periódica'
+    navigation_label 'Config Específica'
     navigation_icon 'fa-solid fa-signature'
     weight 1
     # visible false
@@ -501,6 +501,43 @@ class AcademicRecord < ApplicationRecord
       end
     end
 
+    update do
+      field :period do
+        pretty_value do
+          bindings[:view].content_tag(:b, bindings[:object].period.name)
+        end
+        read_only true
+      end 
+      field :subject do
+        pretty_value do
+          bindings[:view].content_tag(:b, bindings[:object].subject.name)
+        end
+
+        read_only true
+      end
+
+      field :section do
+        label 'Sección'
+        pretty_value do
+          bindings[:view].content_tag(:b, bindings[:object].section.code)
+        end
+        read_only true
+      end 
+
+      field :status do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.authorized_manage? 'Qualification')
+        end
+      end
+      field :qualifications do
+        visible do
+          user = bindings[:view]._current_user
+          (user and user.admin and user.admin.authorized_manage? 'Qualification')
+        end
+      end
+    end
+
     edit do
       field :course do
         inline_edit false
@@ -531,12 +568,6 @@ class AcademicRecord < ApplicationRecord
     end
 
     show do
-      field :historico do
-        label 'Histórico'
-        formatted_value do
-          bindings[:view].render(partial: 'students/show_admin', locals: {student: bindings[:object]})
-        end
-      end      
       
     end
 

@@ -19,8 +19,8 @@ class Area < ApplicationRecord
   validates :school_id, presence: true
 
   # SCOPES:
-
   scope :main, -> {where(parent_area_id: nil)}
+  scope :names, -> {select(:name).map{|ar| ar.name}}
 
   # CALLBACKS:
   before_save :clean_name
@@ -33,6 +33,7 @@ class Area < ApplicationRecord
   end
 
   # FUNCTIONS:
+
   def description
     "#{self.id}: #{self.name}"
   end
@@ -47,7 +48,7 @@ class Area < ApplicationRecord
 
   rails_admin do
     visible false
-    navigation_label 'Gestión Académica'
+    navigation_label 'Config General'
     navigation_icon 'fa-regular fa-brain'
 
     list do

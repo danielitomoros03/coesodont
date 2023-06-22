@@ -1,0 +1,11 @@
+- if (current_user&.admin&.authorized_read? 'AcademicProcess')
+  - if @object.process_before
+    - enrollment_days = @object.enrollment_days
+    - grades_without_appointment = @object.readys_to_enrollment_day
+
+    = render partial: "/enrollment_days/index", locals: {enrollment_days: enrollment_days, grades_without_appointment: grades_without_appointment, academic_process: @object}
+
+  - else
+    .alert.alert-warning= 'Sin proceso academico anterio vinculado. Para habilitar el sistema de Cita Horaria en este proceso académico, por favor edítelo y agregue un proceso anteriór'
+- else
+  .text-center.alert.alert-warning Acceso Restringido

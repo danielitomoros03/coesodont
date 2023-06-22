@@ -22,6 +22,7 @@ class Subject < ApplicationRecord
   has_one :school, through: :area
 
   has_many :courses, dependent: :destroy
+  has_many :periods, through: :courses 
   has_many :sections, through: :courses
 
   # LINKS
@@ -64,12 +65,11 @@ class Subject < ApplicationRecord
 
   scope :not_inicial, -> {where('ordinal != 1')}
 
+  scope :sort_by_code, -> {order(code: :desc)}
+
   # CALLBACKS:
   before_save :clean_values
 
-  def section_codes
-    sections.select(:code).distinct.map{|s| s.code}
-  end
   
   # HOOKS:
   def clean_values
@@ -83,6 +83,10 @@ class Subject < ApplicationRecord
   end
 
   # GENERALS FUNCTIONS: 
+  def section_codes
+    sections.select(:code).distinct.map{|s| s.code}
+  end
+
   # DEPENDENCIES FUNCTIONS:
 
   def full_dependency_tree_ids
@@ -169,11 +173,11 @@ class Subject < ApplicationRecord
   end
 
   def label_modality
-    return ApplicationController.helpers.label_status("bg-info", self.modality.titleize)
+    return ApplicationController.helpers.label_status("bg-info", self.modality.titleize) if self.modality
   end
 
   def label_qualification_type
-    return ApplicationController.helpers.label_status("bg-info", self.qualification_type.titleize)
+    return ApplicationController.helpers.label_status("bg-info", self.qualification_type.titleize) if self.qualification_type
   end
   
 
@@ -199,7 +203,7 @@ class Subject < ApplicationRecord
   end
 
   rails_admin do
-    navigation_label 'Gestión Académica'
+    navigation_label 'Config General'
     navigation_icon 'fa-regular fa-book'
     weight -1
 
@@ -210,9 +214,25 @@ class Subject < ApplicationRecord
     list do
       scopes [:todos, :obligatoria, :electiva, :optativa]
       search_by :custom_search
+      checkboxes false
+      sidescroll(num_frozen_columns: 3)
 
       field :code do
         searchable true
+      end
+
+      field :school do
+        filterable true
+        pretty_value do
+          bindings[:object].school.short_name
+        end
+      end
+
+      field :periods do
+        label 'Periodos'
+        pretty_value do
+          bindings[:object].periods.map{|pe| pe.name}.to_sentence          
+        end
       end
 
       field :name do
@@ -239,26 +259,20 @@ class Subject < ApplicationRecord
         column_width 20
       end
 
-      field :modality_label do
-        label 'Modalidad'
+      field :modality do
         column_width 20
-        searchable 'modality'
-        filterable 'modality'
-        sortable 'modality'
-        formatted_value do
+
+        pretty_value do
           bindings[:object].label_modality
         end        
       end
 
-      field :qualification_type_label do
+      field :qualification_type do
         label 'Tipo Calif'
         column_width 20
-        searchable 'qualification_type'
-        filterable 'qualification_type'
-        sortable 'qualification_type'
-        formatted_value do
+        pretty_value do
           bindings[:object].label_qualification_type
-        end        
+        end
       end
 
       field :total_dependencies do
@@ -269,7 +283,12 @@ class Subject < ApplicationRecord
 
     show do
       # fields :area, :code, :name, :unit_credits, :ordinal, :qualification_type, :modality, :created_at, :updated_at
-
+      field :periods do
+        label 'Períodos en los que se ha dictado'
+        pretty_value do
+          bindings[:object].periods.map{|pe| pe.name}.to_sentence
+        end        
+      end
       field :desc_show do
         label 'Descripción'
         formatted_value do
@@ -324,6 +343,9 @@ class Subject < ApplicationRecord
 
       field :qualification_type do
         # help 'Parcial3 equivale a asignatura con 3 calificaciones parciales'
+        formatted_value do
+          bindings[:object].label_qualification_type
+        end
       end
 
       # field :prelate_subjects do

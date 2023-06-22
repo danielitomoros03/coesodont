@@ -3,7 +3,7 @@
 es:
   admin:
     home:
-      name: "Inicio"
+      name: "Principal"
     pagination:
       next: 'Siguiente' 
       previous: 'Anterior' 
@@ -28,6 +28,7 @@ es:
       reset_filters: "Resetear filtros"
       refresh: "Buscar"
     form:
+      show_all_items: 'Ver Todos'
       operators:
         like: Contiene
       bulk_delete: 'Confirmación de Eliminación'
@@ -105,13 +106,13 @@ es:
         menu: "Generar Reporte"
         breadcrumb: "Generar Reporte %{model_label}"
       dashboard:
-        menu: "Escritorio"
-        title: "Escritorio"
-        breadcrumb: "Escritorio"
+        menu: "Principal"
+        title: "Principal"
+        breadcrumb: "Principal"
     Escritorio:
-      menu: "Escritorio"
-      title: "Escritorio"
-      breadcrumb: "Escritorio"      
+      menu: "Principal"
+      title: "Principal"
+      breadcrumb: "Principal"
       pagename: "Administración del sitio"
       name: "Panel"
       model_name: "Nombre del modelo"
@@ -148,6 +149,7 @@ es:
       chosen: "Seleccionado %{name}"
       select_choice: "Seleccione su(s) elección(es) y haga clic"
       chose_all: "Elegir todos"
+      show_all_items: 'Ver Todos'
       clear_all: "Limpiar todos"
       up: "Subir"
       down: "Bajar"
@@ -192,4 +194,4 @@ es:
       new: "nuevo"
       model_history: "historial"
       list: "lista"
-      dashboard: "Escritorio"
+      dashboard: "Principal"

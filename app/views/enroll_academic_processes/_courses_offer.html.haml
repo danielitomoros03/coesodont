@@ -35,7 +35,7 @@
           %td.align-middle.text-right= i+1
           %td.align-middle
             = course.subject_desc_with_pci
-            = ac.badge_approved.html_safe if ac
+            = ac.badge_approved.html_safe if (ac and ac.badge_approved)
           %td.align-middle.text-center= subject.ordinal
           %td.align-middle.text-center= subject.unit_credits
           %td.align-middle.pl-3

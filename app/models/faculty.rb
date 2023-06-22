@@ -40,7 +40,7 @@ class Faculty < ApplicationRecord
 	validates :name, presence: true, uniqueness: {case_sensitive: false}
 
 	rails_admin do
-		navigation_label 'Gestión Académica'
+		navigation_label 'Config General'
 		navigation_icon 'fa-regular fa-building-columns'
 		visible false
 

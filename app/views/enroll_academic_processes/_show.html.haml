@@ -34,4 +34,4 @@
         = render partial: 'enroll_academic_processes/options', locals: {period: period, enroll_academic_process: enroll_academic_process, enabled_options: (enrolling or active)}
 
     %tr
-      = render partial: 'academic_records/index_to_history', locals: {academic_records: academic_records, enabled_options: (enrolling or active)}
+      = render partial: 'academic_records/index_to_history', locals: {academic_records: academic_records, enabled_delete: false, enabled_change: active, enabled_retire: active}

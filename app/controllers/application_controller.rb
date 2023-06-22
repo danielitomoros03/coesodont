@@ -1,8 +1,23 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :set_paper_trail_whodunnit
+  before_action :set_current_process
 
-  helper_method :logged_as_teacher_or_admin?, :logged_as_teacher?, :logged_as_student?, :logged_as_admin?, :current_admin, :current_teacher, :current_student
+  # around_action :set_session_data
+
+  helper_method :logged_as_teacher_or_admin?, :logged_as_teacher?, :logged_as_student?, :logged_as_admin?, :current_admin, :current_teacher, :current_student, :current_academic_process#, :set_current_course
+
+
+  def set_current_process
+    @academic_process = AcademicProcess.where(id: session[:academic_process_id]).first
+  end
+
+  # def set_session_data
+  #   Course.session_academic_process_id = session[:academic_process_id]
+  #   yield
+  #   Course.session_academic_process_id = nil
+  # end
+
 
   def models_list
     aux = ActiveRecord::Base.connection.tables-['schema_migrations', 'ar_internal_metadata'].map{|model| model.capitalize.singularize.camelize}
@@ -39,7 +54,6 @@ class ApplicationController < ActionController::Base
     !current_user.nil? and !current_user.admin.nil? and session[:rol].eql? 'admin'
   end
 
-
   def current_schools
     if current_admin
       env = current_admin.env_authorizable
@@ -57,6 +71,7 @@ class ApplicationController < ActionController::Base
 
 
   def after_sign_in_path_for(resource)
+    # session[:academic_process_id] = AcademicProcess.first.id
 
     if (current_user and !current_user.updated_password?)
       edit_password_user_path(current_user)

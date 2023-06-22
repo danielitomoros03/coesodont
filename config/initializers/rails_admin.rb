@@ -26,9 +26,12 @@ RailsAdmin.config do |config|
   ## To disable Gravatar integration in Navigation Bar set to false
   config.show_gravatar = false
 
+  config.label_methods << :description # Default is [:name, :title]
+
+  # NO FUNCIONA
   # config.show_gravatar do |config|
   #   config.gravatar_url do
-  #     current_user.profile_picture
+  #     main_app.url_for(current_user.profile_picture_as_thumbs)
   #   end
   # end
 
@@ -47,29 +50,53 @@ RailsAdmin.config do |config|
   # config.navigation_static_label = "Opciones"
 
   config.actions do
-    dashboard                     # mandatory
-    require_relative '../../lib/rails_admin/config/actions/dashboard'
+    dashboard do                     # mandatory
+      # require_relative '../../lib/rails_admin/config/actions/dashboard'
+      show_in_menu false
+      show_in_navigation false
+      visible false
+    end
     index do                         # mandatory
 
       except [SectionTeacher, Profile, Address, EnrollmentDay, Qualification, SubjectLink]
       # except [Address, SectionTeacher, Profile, User, StudyPlan, Period, Course, Faculty]
 
     end
+
+    member :programation do 
+      # subclass Base. Accessible at /admin/<model_name>/<id>/my_member_action
+      only [AcademicProcess]
+      # i18n_key :edit # will have the same menu/title labels as the Edit action.
+      link_icon do
+          'fa-solid fa-shapes'
+      end
+    end
+
+    member :enrollment_day do 
+
+      only [AcademicProcess]
+      link_icon do
+          'fa-solid fa-bell'
+      end
+    end
+
     new do
-      except [School, Faculty]
+      except [School, Faculty, EnrollAcademicProcess, AcademicRecord]
     end
     export do
       except [Faculty, School, StudyPlan]
     end
     bulk_delete do
-      only [AcademicRecord, Section, Course]
+      only [AcademicRecord, Section]
     end
-    show
+    show do
+      except [School, StudyPlan, AcademicRecord]
+    end
     edit do
       except [EnrollAcademicProcess]
     end
     delete do
-      except [School, StudyPlan, Faculty, EnrollAcademicProcess]
+      except [School, StudyPlan, Faculty, EnrollAcademicProcess, AcademicRecord]
     end
     import do
       only [Student, Teacher, Subject, Section, AcademicRecord]
@@ -78,10 +105,10 @@ RailsAdmin.config do |config|
 
     ## With an audit adapter, you can add:
     history_index do
-      except [EnrollAcademicProcess]
+      except [EnrollAcademicProcess, School, StudyPlan]
     end
     history_show do
-      except [EnrollAcademicProcess]
+      except [EnrollAcademicProcess, School, StudyPlan]
     end
   end
 
