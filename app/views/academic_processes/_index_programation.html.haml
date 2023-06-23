@@ -2,7 +2,7 @@
   - Subject.modalities.keys.each do |moda|
     - active = (moda.eql? params[:scope]) ? 'active' : ''
     %li.nav-item
-      %a.nav-link{:href => "/admin/academic_process/18/programation?scope=#{moda}", class: active}
+      %a.nav-link{:href => "/admin/academic_process/#{academic_process.id}/programation?scope=#{moda}", class: active}
         = moda.titleize
 %br
 .border{style: 'overflow-y:scroll;max-height:320px'}

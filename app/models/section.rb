@@ -279,7 +279,6 @@ class Section < ApplicationRecord
 
     list do
       search_by :custom_search
-      # sidescroll(num_frozen_columns: 5)
       
       # filters [:period_name, :code, :subject_code]
       # sort_by 'courses.name'
@@ -292,6 +291,7 @@ class Section < ApplicationRecord
       # end
 
       field :course do
+        sticky true
         label 'Período'
         filterable 'courses.name'
         associated_collection_cache_all false
@@ -321,6 +321,7 @@ class Section < ApplicationRecord
       # end
 
       field :subject do
+        sticky true
         label 'Asignatura'
         column_width 240
         searchable 'subjects.code'
@@ -329,6 +330,7 @@ class Section < ApplicationRecord
       end
 
       field :code do
+        sticky true
         label 'Sec'
         column_width 30
         formatted_value do
@@ -405,6 +407,7 @@ class Section < ApplicationRecord
       end
       field :total_aplazados do
         label 'AP'
+        help 'Aplazados'
         pretty_value do
           ApplicationController.helpers.label_status('bg-danger', value)
         end         
@@ -417,6 +420,7 @@ class Section < ApplicationRecord
       end 
       field :total_pi do
         label 'PI'
+        # header 'Pérdida'
         pretty_value do
           ApplicationController.helpers.label_status('bg-danger', value)
         end         
@@ -471,14 +475,21 @@ class Section < ApplicationRecord
     end
 
     edit do
-      field :course
+      field :course do
+        inline_edit false
+      end
       field :code do
         html_attributes do
           {:length => 8, :size => 8, :onInput => "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9]/g,''))"}
         end
       end
 
-      fields :modality, :teacher
+      field :modality do
+
+      end
+      field :teacher do
+        inline_edit false
+      end
 
       # field :course_id do
       #   formatted_value do
@@ -516,7 +527,7 @@ class Section < ApplicationRecord
     end
 
     export do
-      fields :period, :code, :subject, :user, :qualified, :modality, :schedules, :capacity
+      fields :period, :subject, :code, :classroom, :user, :qualified, :modality, :schedules, :capacity
 
       field :total_students do 
         label 'Total inscritos'

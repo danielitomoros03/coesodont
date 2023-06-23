@@ -81,7 +81,7 @@ RailsAdmin.config do |config|
     end
 
     new do
-      except [School, Faculty, EnrollAcademicProcess, AcademicRecord]
+      except [School, Faculty, EnrollAcademicProcess, AcademicRecord, Course, Section]
     end
     export do
       except [Faculty, School, StudyPlan]
@@ -90,13 +90,13 @@ RailsAdmin.config do |config|
       only [AcademicRecord, Section]
     end
     show do
-      except [School, StudyPlan, AcademicRecord]
+      except [School, StudyPlan, AcademicRecord, EnrollAcademicProcess, Course]
     end
     edit do
-      except [EnrollAcademicProcess]
+      except [EnrollAcademicProcess, AcademicRecord, Course, Section]
     end
     delete do
-      except [School, StudyPlan, Faculty, EnrollAcademicProcess, AcademicRecord]
+      except [School, StudyPlan, Faculty, EnrollAcademicProcess, AcademicRecord, Course, Section]
     end
     import do
       only [Student, Teacher, Subject, Section, AcademicRecord]
@@ -105,10 +105,10 @@ RailsAdmin.config do |config|
 
     ## With an audit adapter, you can add:
     history_index do
-      except [EnrollAcademicProcess, School, StudyPlan]
+      except [School, StudyPlan]
     end
     history_show do
-      except [EnrollAcademicProcess, School, StudyPlan]
+      except [School, StudyPlan]
     end
   end
 

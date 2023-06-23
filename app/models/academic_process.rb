@@ -222,7 +222,9 @@ class AcademicProcess < ApplicationRecord
       # group :default do
       #   hide
       # end      
-      field :period
+      field :period do
+        inline_edit false
+      end
       field :school do
         hide
         inline_edit false
@@ -230,6 +232,8 @@ class AcademicProcess < ApplicationRecord
       end
       field :modality
       field :process_before do
+        inline_edit false
+        inline_add false
         help 'Atención: Aún cuando este campo no es obligatorio y puede ser omitido (en caso de que se encuentre realizando migraciones de periodos anteriores) es muy importante para las Citas Horarias e Inscripciones'
         pretty_value do
           bindings[:object].period_name

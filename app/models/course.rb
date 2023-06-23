@@ -31,7 +31,7 @@ class Course < ApplicationRecord
   validates :subject, presence: true
   validates :academic_process, presence: true
 
-  # validates_uniqueness_of :subject_id, scope: [:academic_process_id], message: 'Ya existe la asignatura para el proceso académico.', field_name: false
+  validates_uniqueness_of :subject_id, scope: [:academic_process_id], message: 'Ya existe la asignatura para el proceso académico.', field_name: false
 
   # SCOPE
   scope :of_academic_process, ->(academic_process_id){where(academic_process_id: academic_process_id)}
@@ -105,7 +105,7 @@ class Course < ApplicationRecord
 
   rails_admin do
     # visible false
-    navigation_label 'Config Específica'
+    navigation_label 'Reportes'
     navigation_icon 'fa-solid fa-shapes'
     weight -2
 
@@ -197,7 +197,16 @@ class Course < ApplicationRecord
     end
 
     edit do
-      fields :academic_process, :subject, :sections
+      field :academic_process do
+        inline_edit false
+        inline_add false        
+      end
+
+      field :subject do
+        inline_edit false
+        inline_add false        
+      end
+      field :sections
     end
 
     export do

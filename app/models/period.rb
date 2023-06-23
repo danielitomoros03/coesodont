@@ -39,7 +39,7 @@ class Period < ApplicationRecord
 	end
 
   rails_admin do
-    navigation_label 'Inscripciones'
+    navigation_label 'Config Específica'
     navigation_icon 'fa-solid fa-clock'
     visible false
 

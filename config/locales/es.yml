@@ -54,7 +54,7 @@ es:
         breadcrumb: "Cita Horaria"
         link: "Cita Horaria"      
       programation: 
-        title: "Programación"
+        title: "Periodo"
         menu: "Programación"
         breadcrumb: "Programación"
         link: "Programación"
@@ -375,8 +375,8 @@ es:
         one: 'Cartelera'
         other: 'Carteleras'
       course:
-        one: 'Programación'
-        other: 'Programaciones'
+        one: 'Curso'
+        other: 'Cursos'
       enroll_academic_process:
         one: 'Inscripción en Periodo'
         other: 'Inscripciones en Periodo'

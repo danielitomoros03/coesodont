@@ -382,7 +382,7 @@ class AcademicRecord < ApplicationRecord
 
   # RAILS_ADMIN
   rails_admin do
-    navigation_label 'Config Específica'
+    navigation_label 'Reportes'
     navigation_icon 'fa-solid fa-signature'
     weight 1
     # visible false
