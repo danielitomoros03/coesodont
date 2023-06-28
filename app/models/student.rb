@@ -52,6 +52,7 @@ class Student < ApplicationRecord
   # VALIDATIONS:
   validates :user, presence: true, uniqueness: true
   validates :grades, presence: true
+  validates :sede, presence: true
   # validates :nacionality, presence: true, unless: :new_record?
   # validates :marital_status, presence: true, unless: :new_record?
   # validates :origin_country, presence: true, unless: :new_record?

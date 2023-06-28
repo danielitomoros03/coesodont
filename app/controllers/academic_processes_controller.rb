@@ -1,5 +1,27 @@
 class AcademicProcessesController < ApplicationController
-  before_action :set_academic_process, only: %i[ show edit update destroy clone_sections clean_courses ]
+  before_action :set_academic_process, only: %i[ show edit update destroy clone_sections clean_courses run_regulation ]
+
+  def run_regulation
+    total_actualizados = 0
+    total_error = 0
+    EnrollmentDay.destroy_all
+    @academic_process.enroll_academic_processes.each do |iep|
+      reglamento = iep.get_regulation
+      grade = iep.grade
+
+      if grade.update(current_permanence_status: reglamento, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
+        total_actualizados += 1
+      else
+        total_error += 1
+      end
+    end
+    
+    flash[:danger] = "#{ total_error} #{'Error'.pluralize(total_error)} en la actualización del estado de reglamento" if total_error > 0 
+    flash[:success] = "#{ total_actualizados} #{'inscripción'.pluralize(total_actualizados)} en total actualizados" if total_actualizados > 0
+    
+    redirect_to "/admin/academic_process/#{@academic_process.id}/enrollment_day"
+  end
+
 
   # GET /academic_processes or /academic_processes.json
   def index

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_26_154756) do
+ActiveRecord::Schema[7.0].define(version: 2023_06_28_210348) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -237,6 +237,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_26_154756) do
     t.integer "duration_slot_time"
     t.integer "enrollment_status", default: 0, null: false
     t.bigint "enabled_enroll_process_id"
+    t.integer "current_permanence_status", default: 0, null: false
     t.index ["admission_type_id"], name: "index_grades_on_admission_type_id"
     t.index ["enabled_enroll_process_id"], name: "index_grades_on_enabled_enroll_process_id"
     t.index ["student_id", "study_plan_id"], name: "index_grades_on_student_id_and_study_plan_id", unique: true

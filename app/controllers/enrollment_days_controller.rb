@@ -65,7 +65,7 @@ class EnrollmentDaysController < ApplicationController
     else
       flash[:danger] = @enrollment_day.errors.full_messages.to_sentence
     end
-    redirect_to "/admin/academic_process/#{@enrollment_day.academic_process.id}"
+    redirect_to "/admin/academic_process/#{@enrollment_day.academic_process.id}/enrollment_day"
 
   end
 
@@ -83,13 +83,18 @@ class EnrollmentDaysController < ApplicationController
   #   end
   # end
 
+  def destroy_all
+    flash[:info] = 'Eliminadas todas las Citas Horarias' if EnrollmentDay.destroy_all
+    redirect_back fallback_location: '/admin/academic_process'
+  end
+
   # DELETE /enrollment_days/1 or /enrollment_days/1.json
   def destroy
     academic_process_id = @enrollment_day.academic_process_id
     @enrollment_day.destroy
 
     respond_to do |format|
-      format.html { redirect_to "/admin/academic_process/#{academic_process_id}", notice: "Jornadas de Inscripción por Cita Horaria eliminada con éxito. Todos sus respectivas citas horarias fueron limpiadas " }
+      format.html { redirect_to "/admin/academic_process/#{academic_process_id}/enrollment_day", notice: "Jornadas de Inscripción por Cita Horaria eliminada con éxito. Todos sus respectivas citas horarias fueron limpiadas " }
       format.json { head :no_content }
     end
   end

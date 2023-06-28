@@ -58,6 +58,31 @@ class EnrollAcademicProcess < ApplicationRecord
   scope :custom_search, -> (keyword) { joins(:user, :period).where("users.ci ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'") }
 
   # FUNCTIONS:
+  def get_regulation
+    reglamento_aux = :regular
+    if enrolled_but_not_approved_any?
+      reglamento_aux = :articulo3
+      iep_anterior = self.before_enrolled
+      if iep_anterior and iep_anterior.enrolled_but_not_approved_any?
+        reglamento_aux = :articulo6
+        iep_anterior2 = iep_anterior.before_enrolled
+        if iep_anterior2 and iep_anterior2.enrolled_but_not_approved_any?
+          reglamento_aux = :articulo7
+        end
+      end
+    end
+    return reglamento_aux
+  end
+
+  def enrolled_but_not_approved_any?
+    self.academic_records.any? and !(self.academic_records.aprobado.any?)
+  end
+
+  def before_enrolled
+    before_process = self.academic_process.process_before
+    EnrollAcademicProcess.where(grade_id: self.grade_id, academic_process_id: before_process.id).first
+  end
+
   def any_permanence_articulo?
     (self.articulo3? or self.articulo6? or self.articulo7?)
   end

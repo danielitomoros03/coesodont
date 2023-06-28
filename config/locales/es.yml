@@ -52,12 +52,12 @@ es:
 
     actions:
       enrollment_day: 
-        title: "Cita Horaria"
+        title: "Período"
         menu: "Cita Horaria"
         breadcrumb: "Cita Horaria"
         link: "Cita Horaria"      
       programation: 
-        title: "Periodo"
+        title: "Período"
         menu: "Programación"
         breadcrumb: "Programación"
         link: "Programación"
