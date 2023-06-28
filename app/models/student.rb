@@ -18,7 +18,7 @@ class Student < ApplicationRecord
 
   DISCAPACIDADES = ['Sensorial Visual', 'Sensorial Auditiva', 'Motora Miembros Inferiores', 'Motora Medios Superiores', 'Motora Ambos Miembros']
 
-  SEDES = ['Caracas', 'Barquisimeto']
+  SEDES = ['Caracas']
 
   enum nacionality: NACIONALIDAD
   enum disability: DISCAPACIDADES
