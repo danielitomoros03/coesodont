@@ -1,0 +1,88 @@
+
+
+- if (current_user&.admin&.authorized_read? 'Student')
+  - user = @object&.user
+  %h3.text-center.bg-primary.text-light.mb-4 Datos Personales
+
+  .card.mb-3
+    .row.g-0
+      .col-md-4
+        .row
+          - profile_image = (user&.profile_picture&.attached?) ? main_app.url_for(user&.profile_picture) : "foto_perfil_default.png"
+          = link_to profile_image, target: '_blank', rel: 'noopener noreferrer' do
+            = image_tag profile_image, width: '100px', class: 'card-img-top'
+        .row
+          - ci_image = (user&.ci_image&.attached?) ? main_app.url_for(user&.ci_image) : "foto_perfil_default.png"
+          = link_to ci_image, target: '_blank', rel: 'noopener noreferrer' do
+            = image_tag ci_image, width: '100px', class: 'card-img-top'        
+      
+      .col-md-8
+        .card-body
+          %table.table.table-sm.table-striped{style: 'overflow-x:scroll'}
+            %tbody
+              %tr
+                %td.col-4 Nombres:
+                %td.fw-bold= user&.first_name
+              %tr
+                %td.col-4 Apellidos:
+                %td.fw-bold= user&.last_name
+              %tr
+                %td.col-4 Cédula de Identidad:
+                %td.fw-bold= user&.ci
+              %tr
+                %td.col-4 Nacionalidad:
+                %td.fw-bold= @object.nacionality
+              %tr
+                %td.col-4 Correo Electrónico:
+                %td.fw-bold= user&.email
+              %tr
+                %td.col-4 Sexo:
+                %td.fw-bold= user&.sex
+              %tr
+                %td.col-4 Sede:
+                %td.fw-bold= @object.sede&.titleize
+              %tr
+                %td.col-4 Dirección:
+                %td.fw-bold{title: @object.address&.full_address}= @object.address&.full_address
+              %tr
+                %td.col-4 Origen:
+                %td.fw-bold= @object.origin_location
+              %tr
+                %td.col-4 Fecha de Nacimiento:
+                %td.fw-bold= @object.birth_date&.strftime('%d/%m/%Y')
+              %tr
+                %td.col-4 Número Telefónico:
+                %td.fw-bold= user&.number_phone
+              %tr
+                %td.col-4 Grados Obtenidos:
+                %td.fw-bold= @object.university_degree
+              %tr
+                %td.col-4 Discapacidad:
+                %td.fw-bold= @object.disability&.titleize
+              %tr
+                %td.col-4 Estado Civil:
+                %td.fw-bold= @object.marital_status&.titleize
+
+
+  - if false
+    .row.float-start.p-3
+      .col-4
+        .card{:style => "width: 22rem;"}
+
+          - image_value = (user&.profile_picture&.attached?) ? main_app.url_for(user&.profile_picture) : "foto_perfil_default.png"
+          = link_to image_value, target: '_blank', rel: 'noopener noreferrer' do
+            = image_tag image_value, width: '100px', class: 'card-img-top'
+          .card-body
+            %h5.card-title= user&.first_name
+            %h5.card-title= user&.last_name
+            - 
+            %b.card-text= user&.ci
+          %ul.list-group.list-group-flush
+            %li.list-group-item= user&.email
+      .col-8
+        %table.table.table-sm.table-striped
+
+
+
+- else
+  %h1.text-center.alert.alert-warning Acceso Restringido

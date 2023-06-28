@@ -27,6 +27,9 @@
 
 	- # INSCRIPCIÓN ABIERTA PARA PROCESO ACADÉMICO:
 	- if academic_process and academic_process_before
+		- if academic_process.enroll_instructions
+			.border.m-2.p-2= academic_process.enroll_instructions.html_safe
+
 		- enrolling = (!enroll_in_process.nil? and enroll_in_process.reservado?)
 		- # NO INSCRITO O RESERVADO:
 		- if enroll_in_process.nil? or enrolling

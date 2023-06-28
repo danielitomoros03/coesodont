@@ -472,6 +472,13 @@ class Section < ApplicationRecord
           bindings[:view].render(partial: "sections/show_by_admin", locals: {section: bindings[:object]})
         end
       end
+
+      field :academic_records_table do
+        label 'Registros Académicos'
+        formatted_value do
+          bindings[:view].render(partial: 'academic_records/qualify', locals: {section: bindings[:object]})          
+        end
+      end
     end
 
     edit do

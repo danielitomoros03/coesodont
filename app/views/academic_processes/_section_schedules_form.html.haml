@@ -26,9 +26,11 @@
       .row
         .col-sm-4
           .input-group
-            %input#section_schedules_attributes_new_schedules_starttime.form-control{autocomplete: :off, "data-datetimepicker": true, "data-options" => "{\"allowInput\":true,\"altFormat\":\"H:i\",\"enableTime\":true,\"noCalendar\":true}", :name => "section[schedules_attributes][new_schedules][starttime]", :required => "required", :size => "22", :type => "text"}/
-            %label.input-group-text{:for => "section_schedules_attributes_new_schedules_starttime"}
-              %i.fa.fa-fw.fa-calendar
+            - if false
+              %input#section_schedules_attributes_new_schedules_starttime.form-control{autocomplete: :off, "data-datetimepicker": true, "data-options" => "{\"allowInput\":true,\"altFormat\":\"H:i\",\"enableTime\":true,\"noCalendar\":true}", :name => "section[schedules_attributes][new_schedules][starttime]", :required => "required", :size => "22", :type => "text"}/
+              %label.input-group-text{:for => "section_schedules_attributes_new_schedules_starttime"}
+                %i.fa.fa-fw.fa-calendar
+            = time_field_tag 'section[schedules_attributes][new_schedules][starttime]', nil, class: 'form-control', required: true
       .form-text
         %span.label.label-danger> Requerido
         \.
@@ -38,9 +40,11 @@
       .row
         .col-sm-4
           .input-group
-            %input#section_schedules_attributes_new_schedules_endtime.form-control{autocomplete: :off, "data-datetimepicker": true, "data-options" => "{\"allowInput\":true,\"altFormat\":\"H:i\",\"enableTime\":true,\"noCalendar\":true}", :name => "section[schedules_attributes][new_schedules][endtime]", :required => "required", :size => "22", :type => "text"}/
-            %label.input-group-text{:for => "section_schedules_attributes_new_schedules_endtime"}
-              %i.fa.fa-fw.fa-calendar
+            - if false
+              %input#section_schedules_attributes_new_schedules_endtime.form-control{autocomplete: :off, "data-datetimepicker": true, "data-options" => "{\"allowInput\":true,\"altFormat\":\"H:i\",\"enableTime\":true,\"noCalendar\":true}", :name => "section[schedules_attributes][new_schedules][endtime]", :required => "required", :size => "22", :type => "text"}/
+              %label.input-group-text{:for => "section_schedules_attributes_new_schedules_endtime"}
+                %i.fa.fa-fw.fa-calendar
+            = time_field_tag 'section[schedules_attributes][new_schedules][endtime]', nil, class: 'form-control', required: true
       .form-text
         %span.label.label-danger> Requerido
         \.

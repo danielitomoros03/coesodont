@@ -35,7 +35,7 @@ module ApplicationHelper
 
 	def button_add_section course_id
 
-		content_tag :button, rel: :tooltip, 'data-bs-target': "#NewSectionModal", 'data-bs-placement': :top, 'data-bs-original-title': 'Agregar Nueva Sección', class: "btn btn-sm btn-success mx-1 addSection", "data-bs-toggle": :modal, course_id: course_id do
+		content_tag :button, rel: :tooltip, 'data-bs-target': "#NewSectionModal", 'data-bs-placement': :top, 'data-bs-original-title': 'Agregar Nueva Sección', class: "btn btn-sm btn-success mx-1 addSection", "data-bs-toggle": :modal, course_id: course_id, onclick: "$('#_sectioncourse_id').val(this.attributes['course_id'].value);" do
 			capture_haml{"<i class='fas fa-plus'></i>".html_safe }
 		end
 		

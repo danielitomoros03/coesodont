@@ -1,9 +1,8 @@
 %form#new_section.main{"accept-charset": "UTF-8", action: "/admin/section/new", "data-title": "Nuevo", enctype: "multipart/form-data", method: "post"}
   %input{:autocomplete => "off", :name => "authenticity_token", :type => "hidden", :value => "5wFuSrxjJtnaES-J8FBV4AyB1wVNuF6vCBpYPzanmPgjBZawAsZS4Jcc9EkN3LnbJoYKDTAmdLv96L9OQiy3bQ"}/
+  = hidden_field_tag '[section]course_id', nil
   %span.object-infos{"data-model-label" => "Sección", "data-object-label" => "Nuevo", :style => "display:none"}
   %fieldset
-    #section_course_id_field.control-group.row.mb-3.integer_type.course_id_field
-      %input#section_course_id.form-control{:autocomplete => "off", :name => "section[course_id]", :type => "hidden", :value => "value"}/
     #section_code_field.control-group.row.mb-3.string_type.code_field
       %label.col-sm-2.col-form-label.text-md-end{:for => "section_code"} Sección
       .col-sm-2.controls

@@ -12,6 +12,8 @@ class AcademicProcess < ApplicationRecord
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
 
+  has_rich_text :enroll_instructions
+
   before_create :paper_trail_create
   before_destroy :paper_trail_destroy
   before_update :paper_trail_update
@@ -142,6 +144,7 @@ class AcademicProcess < ApplicationRecord
     weight -3
     list do
       sort_by 'periods.name'
+
       field :school do
         column_width 150
 
@@ -179,13 +182,15 @@ class AcademicProcess < ApplicationRecord
       #   end
       # end
 
+
       field :total_sections do
+
         column_width 100
-        label 'T Sec.'
+        label 'Secciones'
         pretty_value do 
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'Section')
-            %{<a href='/admin/section?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+            %{<a href='/admin/section?query=#{bindings[:object].period.name}' title='Total Secciones'><span class='badge bg-info'>#{value}</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end
@@ -194,11 +199,11 @@ class AcademicProcess < ApplicationRecord
 
       field :total_enroll_academic_processes do
         column_width 100
-        label 'T Inscritos'
+        label 'Estudiantes'
         pretty_value do
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'EnrollAcademicProcess')
-            %{<a href='/admin/enroll_academic_process?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+            %{<a href='/admin/enroll_academic_process?query=#{bindings[:object].period.name}' title='Total Estudiantes Inscritos'><span class='badge bg-info'>#{value}</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end
@@ -206,11 +211,11 @@ class AcademicProcess < ApplicationRecord
       end
       field :total_academic_records do
         column_width 100
-        label 'T Inscripciones'
+        label 'Asignaturas'
         pretty_value do
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')          
-            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Totas Asignaturas Inscritas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end
@@ -246,6 +251,10 @@ class AcademicProcess < ApplicationRecord
       field :max_subjects do
         label 'Máximo de asignaturas permitidas a inscribir'
       end
+
+      field :enroll_instructions do
+        help 'Si desea agregar imágenes tome en cuenta el tamaño de misma y su ajuste a la pantalla dónde se desplegará'
+      end
     end
 
     show do
@@ -255,6 +264,7 @@ class AcademicProcess < ApplicationRecord
           bindings[:view].render(partial: "/academic_processes/desc_table", locals: {academic_process: bindings[:object]})
         end
       end
+      field :enroll_instructions
 
       # field :courses do
       #   visible do

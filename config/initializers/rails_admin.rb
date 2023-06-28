@@ -50,14 +50,17 @@ RailsAdmin.config do |config|
   # config.navigation_static_label = "Opciones"
 
   config.actions do
+    
     dashboard do                     # mandatory
       # require_relative '../../lib/rails_admin/config/actions/dashboard'
       show_in_menu false
       show_in_navigation false
       visible false
     end
+
     index do                         # mandatory
 
+      require_relative '../../lib/rails_admin/config/actions/index'
       except [SectionTeacher, Profile, Address, EnrollmentDay, Qualification, SubjectLink]
       # except [Address, SectionTeacher, Profile, User, StudyPlan, Period, Course, Faculty]
 
@@ -80,24 +83,38 @@ RailsAdmin.config do |config|
       end
     end
 
+    member :personal_data do 
+      only [Student]
+      link_icon do
+          'fa-solid fa-id-card'
+      end
+    end
+
     new do
-      except [School, Faculty, EnrollAcademicProcess, AcademicRecord, Course, Section]
+      except [School, Faculty, EnrollAcademicProcess, AcademicRecord, Course]
     end
+
     export do
-      except [Faculty, School, StudyPlan]
+      require_relative '../../lib/rails_admin/config/actions/export'
+      except [Faculty, School, StudyPlan, GroupTutorial, Tutorial]
     end
+
     bulk_delete do
       only [AcademicRecord, Section]
     end
+
     show do
-      except [School, StudyPlan, AcademicRecord, EnrollAcademicProcess, Course]
+      except [School, StudyPlan, AcademicRecord]
     end
+
     edit do
       except [EnrollAcademicProcess, AcademicRecord, Course, Section]
     end
+
     delete do
       except [School, StudyPlan, Faculty, EnrollAcademicProcess, AcademicRecord, Course, Section]
     end
+
     import do
       only [Student, Teacher, Subject, Section, AcademicRecord]
     end
@@ -107,6 +124,7 @@ RailsAdmin.config do |config|
     history_index do
       except [School, StudyPlan]
     end
+
     history_show do
       except [School, StudyPlan]
     end

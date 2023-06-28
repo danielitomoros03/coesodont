@@ -1,16 +1,17 @@
+- params[:scope] ||= Subject.modalities.keys.first
 %ul#scope_selector.nav.nav-tabs
   - Subject.modalities.keys.each do |moda|
-    - active = (moda.eql? params[:scope]) ? 'active' : ''
-    %li.nav-item
+
+    - active = (moda.eql? params[:scope]) ? 'active text-primary' : 'text-light'
+    %li.nav-item.bg-primary
       %a.nav-link{:href => "/admin/academic_process/#{academic_process.id}/programation?scope=#{moda}", class: active}
         = moda.titleize
-%br
-.border{style: 'overflow-y:scroll;max-height:320px'}
+
+.p-3.border.border-top-0{style: 'overflow-y:scroll;max-height:360px'}
   %table#programation.table.table-condensed.table-striped.table-hover
     %thead{style: "position: sticky;top: 0; background-color:#F4F4F4"}
       %tr
-        %th.col-1{scope: :col} #
-        %th.col-2{scope: :col}
+        %th.col-1{scope: :col}
           Área
           - if false
             = select_tag :section_code, options_for_select(Area.names), {class: "form-control filtrable", id: 'filterArea', style: 'width: 100%;', include_blank: '-- Filtrar -- '}   
@@ -25,12 +26,11 @@
           %th Secciones
     %tbody.table-group-divider
       - subjects = academic_process.school.subjects.where(modality: params[:scope]).sort_by_code
-      - subjects.each_with_index do |subject, i|
+      - subjects.each do |subject|
         - course = academic_process.courses.where(subject_id: subject.id).first
         - sections = course&.sections
         - has_sections = sections&.any?
         %tr
-          %td= i+1
           %td= subject.area.name
           %td{title: subject.desc}= subject.desc
           %td.text-center
@@ -47,26 +47,24 @@
                 %i.fas.fa-remove            
           %td
             - if course
-              - if has_sections
-                - if (current_user&.admin&.authorized_read? 'Section')
-                  = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: has_enrolled}
-              - if (current_user&.admin&.authorized_create? 'Section')
-                = ApplicationController.helpers.button_add_section course.id
+              %table
+                %tr
+                  - if has_sections
+                    - if (current_user&.admin&.authorized_read? 'Section')
+                      = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: has_enrolled}
+                  - if (current_user&.admin&.authorized_create? 'Section')
+                    %td.p-0= ApplicationController.helpers.button_add_section course.id
 
 :javascript
 
   document.addEventListener("rails_admin.dom_ready", function() {
 
-    $('.addSection').on('click', function(e){
-      $('#section_course_id').val(this.attributes['course_id'].value);
-    });
-
-    $('.activeSubject').on('change', function(e){
-      updateElem(this);
-    });
+    // $('.addSection').on('click', function(e){
+    //   $('#_sectioncourse_id').val(this.attributes['course_id'].value);
+    // });
 
     $('#filterSubject').on('keyup', function(e){
-      filterSections(this, 2);
+      filterSections(this);
       // let fliterSubjectValue = $('#filterArea');
       // filterSections(fliterSubjectValue, 1);
     });
@@ -113,14 +111,14 @@
 
   }
 
-  function filterSections(ele, col){
+  function filterSections(ele){
     var keyword = ele.value;
     keyword = keyword.toUpperCase();
     var table_1 = document.getElementById("programation");
     var all_tr = table_1.getElementsByTagName("tr");
 
     for(var i=0; i<all_tr.length; i++){
-        var name_column = all_tr[i].getElementsByTagName("td")[col];
+        var name_column = all_tr[i].getElementsByTagName("td")[1]; //[col];
         if(name_column){
             var name_value = name_column.textContent || name_column.innerText;
             name_value = name_value.toUpperCase();

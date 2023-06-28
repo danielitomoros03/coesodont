@@ -18,12 +18,14 @@ class Billboard < ApplicationRecord
 	end
 
 	rails_admin do
-		navigation_label 'Informativa'
+		navigation_label 'Informativos'
 		navigation_icon 'fa-regular fa-panorama'
 
 		edit do
 			field :active
-			field :content
+			field :content do
+				help 'Si desea agregar imágenes tome en cuenta el tamaño de la misma y su ajuste a la pantalla dónde se desplegará'
+			end
 		end		
 	end
 

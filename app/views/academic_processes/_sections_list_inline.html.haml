@@ -1,18 +1,21 @@
-- if (current_user&.admin&.authorized_read? 'Section')
-  = sections.map{|sec| ApplicationController.helpers.btn_link_with_tooptip("/admin/section/#{sec.id}", 'btn-info', sec.code, sec.schedule_teacher_desc_short)}.to_sentence.html_safe
-- else
-  = sections.map{|sec| ApplicationController.helpers.btn_link_with_tooptip("javascript:void(0)", 'btn-info', sec.code, sec.schedule_teacher_desc_short)}.to_sentence.html_safe
+- enabled = (current_user&.admin&.authorized_read? 'Section') ? true : false
+
+- sections.each do |sec|
+  - urlSec = enabled ? "/admin/section/#{sec.id}" : 'javascript:void(0)'
+  - btn = ApplicationController.helpers.btn_link_with_tooptip(urlSec, 'btn-info', sec.code, sec.schedule_teacher_desc_short)
+  = "<td class='p-1'>#{btn}</td>".html_safe
 
 - if (current_user&.admin&.authorized_delete? 'Section')
-  - if has_enrolled
-    %b{title: 'Elimine las inscripciones en la sección para activar esta opcíon'}
-      = link_to 'javascript:void(0)', class: 'btn btn-sm btn-danger disabled' do
-        %i.fas.fa-trash
-  - else
-    - url = '/sections/bulk_delete'
-    - sections.each_with_index do |sec, i|
-      - aux = (i.eql? 0) ? "?" : "&"
-      - url += "#{aux}bulk_ids%5B%5D=#{sec.id}"
+  %td
+    - if has_enrolled
+      %b{title: 'Elimine las inscripciones en la sección para activar esta opcíon'}
+        = link_to 'javascript:void(0)', class: 'btn btn-sm btn-danger disabled', disabled: true do
+          %i.fas.fa-trash
+    - else
+      - url = '/sections/bulk_delete'
+      - sections.each_with_index do |sec, i|
+        - aux = (i.eql? 0) ? "?" : "&"
+        - url += "#{aux}bulk_ids%5B%5D=#{sec.id}"
 
-    = link_to url, class: 'btn btn-sm btn-danger', title: 'Eliminar Todas Secciones', method: :post, 'data-confirm': "Está acción es irreversible, eliminará un total de #{sections.count}" do
-      %i.fas.fa-trash
+      = link_to url, class: 'btn btn-sm btn-danger', title: 'Eliminar Todas Secciones', method: :post, 'data-confirm': "Está acción es irreversible, eliminará un total de #{sections.count}" do
+        %i.fas.fa-trash

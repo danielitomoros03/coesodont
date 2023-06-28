@@ -1,11 +1,12 @@
-%h3.m-3= "Programación #{@object.short_desc}"
+%h3.text-center.bg-primary.text-light.mb-4= "#{@object.short_desc}"
 
 - if (current_user&.admin&.authorized_manage? 'Course')
-	- content = render("/academic_processes/form_section")
 
-	= render partial: 'layouts/scaffold-modal', locals: {id: "NewSectionModal", title: "Nueva Sección", content: content}
+  - content = render("/academic_processes/form_section")
+
+  = render partial: 'layouts/scaffold-modal', locals: {id: "NewSectionModal", title: "Nueva Sección", content: content}
 
 - if (current_user&.admin&.authorized_read? 'Course')
-	= render(partial: "/academic_processes/programation", locals: {academic_process: @object})
+  = render(partial: "/academic_processes/programation", locals: {academic_process: @object})
 - else
-	.text-center.alert.alert-warning Acceso Restringido
+  .text-center.alert.alert-warning Acceso Restringido

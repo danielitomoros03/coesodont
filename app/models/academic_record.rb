@@ -118,7 +118,10 @@ class AcademicRecord < ApplicationRecord
   # Esta función retorna la misma cuenta agrupadas por creditos de asignaturas
   scope :student_enrolled_by_credits2, -> { joins(:subject).group('academic_records.student_id', 'subjects.unit_credits').count} 
 
-  scope :by_subjects, -> {joins(:subject).order('subjects.code': :asc)}
+  scope :sort_by_subject_code, -> {joins(:subject).order('subjects.code': :asc)}
+  scope :sort_by_subject_name, -> {joins(:subject).order('subjects.name': :asc)}
+
+
   scope :by_subject_types, -> (tipo){joins(:subject).where('subjects.modality': tipo.downcase)}
   # scope :perdidos, -> {perdida_por_inasistencia}
 
@@ -212,6 +215,22 @@ class AcademicRecord < ApplicationRecord
 
   def name
     "#{user.ci_fullname} en #{section.name}" if (user and section)
+  end
+
+  def absolute?
+    subject&.absoluta?
+  end
+
+  def cal_alfa
+    if absolute? or pi? or rt?
+      desc_conv_absolute
+    else
+      'NF'
+    end
+  end
+
+  def rt?
+    retirado?
   end
 
   def desc_conv_absolute

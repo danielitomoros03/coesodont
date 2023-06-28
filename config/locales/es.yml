@@ -1,4 +1,5 @@
 es:
+  js: 'Javascript'
   delete: Eliminar
   edit: Editar
   new: Nuevo
@@ -37,6 +38,8 @@ es:
       more: 'Más'
       count: Total
       root_navigation: Otro
+      down: Ver Todos
+      up: Ocultar
     table_headers:
       model_name: 'Entidad'
       last_created: 'Último Creado'
@@ -58,6 +61,11 @@ es:
         menu: "Programación"
         breadcrumb: "Programación"
         link: "Programación"
+      personal_data: 
+        title: "Datos Personales"
+        menu: "Datos Personales"
+        breadcrumb: "Datos Personales"
+        link: "Datos Personales"
       index:
         title: 'Listado'
     flash:
@@ -289,11 +297,6 @@ es:
   activerecord:
     errors:
       models:
-        subject_type:
-          attributes:
-            required_credits:
-              required: requerido
-              in: dentro
         academic_record:
           attributes:
             final_q:
@@ -304,38 +307,47 @@ es:
           attributes:
             period:
               required: requerido
-        subject_link:
+        admin:
           attributes:
-            depend_subject:
-              required: requerido
+            env_authorizable:
+              required: 'requerido'
         grade:
           attributes:
             admission_type:
               required: requerido
-        students:
+        payment_report:
           attributes:
-            user:
-              required: requerido
-        admin:
-          attributes:
-            env_authorizable:
+            payable:
               required: 'requerido'
         school:
           attributes:
             faculty:
               required: 'requerida'
-        payment_report:
+        sections:
           attributes:
-            payable:
-              required: 'requerido'
-        subject:
+            course:
+              required: Curso
+        students:
           attributes:
-            area:
-              required: 'requerida'
+            user:
+              required: requerido
         student:
           attributes:
             user:
               required: requerido
+        subject_link:
+          attributes:
+            depend_subject:
+              required: requerido
+        subject_type:
+          attributes:
+            required_credits:
+              required: requerido
+              in: dentro
+        subject:
+          attributes:
+            area:
+              required: 'requerida'
         qualification:
           attributes:
             value:
@@ -428,6 +440,12 @@ es:
       teacher:
         one: 'Profesor'
         other: 'Profesores'
+      tutorial: 
+        one: 'Tutorial'
+        other: 'Tutoriales'
+      group_tutorial: 
+        one: 'Módulo de Tutorial'
+        other: 'Módulo de Tutoriales'
       user:
         one: 'Usuario'
         other: 'Usuarios'
@@ -444,6 +462,7 @@ es:
         modality: 'Tipo'
         process_before: Período Anterior
         enrollment_days: Jornadas de Inscripción por Cita Horaria
+        enroll_instructions: Instrucciones Para la Inscripción
       academic_record:
         section: 'Sección'
         enroll_academic_process: 'Inscripción en Período'
@@ -510,7 +529,7 @@ es:
         account_type: 'Tipo de Cuenta'
         school: 'Escuela'
       billboard:
-        active: 'Activa'
+        active: 'Publicar'
         content: 'Contenido de Cartelera'
         created_at: 'Fecha de Creación'
         updated_at: 'Fecha de Edición'
@@ -609,7 +628,7 @@ es:
         area: 'Departamento'
         code: 'Sección'
         capacity: 'Capacidad'
-        course: 'Proceso/Asignatura'
+        course: 'Curso (Período/Asignatura)'
         teacher: 'Profesor'
         qualified: '¿Calificada?'
         modality: 'Tipo'
@@ -678,6 +697,22 @@ es:
         user: 'Usuario'
         created_at: 'Fecha de Registro'
         sections: 'Secciones'
+      group_tutorial:
+        id: 'Módulo N°'
+        group_tutorial: 'Módulo de Tutoriales'
+        name_group: 'Nombre del Módulo'
+        description: 'Descripción'
+        tutorials: 'Tutoriales'
+        created_at: 'Creado'
+        updated_at: 'Actualizado'
+      tutorial:
+        id: 'Vídeo N°'
+        group_tutorial: 'Módulo'
+        name_function: 'Nombre'
+        description: 'Descripción'
+        video: 'Vídeo Demostrativo'
+        created_at: 'Creado'
+        updated_at: 'Actualizado'
       user:
         email: 'Correo Electrónico'
         ci: 'Cédula de identidad'

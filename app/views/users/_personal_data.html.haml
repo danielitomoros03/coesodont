@@ -15,3 +15,9 @@
           %td.string_type= user.number_phone
         - if user.sex  
           %td.string_type= user.sex.titleize 
+
+        %td
+          - if (current_user&.admin&.authorized_read? 'Student')
+            = link_to "/admin/student/#{student_id}/personal_data", title: 'Datos personales completos' do
+              .btn.btn-sm.btn-info
+                %i.fa-solid.fa-id-card

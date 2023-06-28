@@ -10,7 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_12_152854) do
+
+ActiveRecord::Schema[7.0].define(version: 2023_06_26_154756) do
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -244,6 +246,12 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_152854) do
     t.index ["study_plan_id"], name: "index_grades_on_study_plan_id"
   end
 
+  create_table "group_tutorials", force: :cascade do |t|
+    t.string "name_group"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "payment_reports", force: :cascade do |t|
     t.float "amount"
     t.string "transaction_id"
@@ -353,6 +361,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_152854) do
     t.string "grade_title"
     t.string "grade_university"
     t.integer "graduate_year"
+    t.integer "sede", default: 0, null: false
     t.index ["user_id"], name: "index_students_on_user_id"
   end
 
@@ -407,6 +416,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_152854) do
     t.datetime "updated_at", null: false
     t.index ["area_id"], name: "index_teachers_on_area_id"
     t.index ["user_id"], name: "index_teachers_on_user_id"
+  end
+
+  create_table "tutorials", force: :cascade do |t|
+    t.string "name_function"
+    t.bigint "group_tutorial_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_tutorial_id"], name: "index_tutorials_on_group_tutorial_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -487,4 +504,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_152854) do
   add_foreign_key "subjects", "areas"
   add_foreign_key "teachers", "areas"
   add_foreign_key "teachers", "users"
+  add_foreign_key "tutorials", "group_tutorials"
 end

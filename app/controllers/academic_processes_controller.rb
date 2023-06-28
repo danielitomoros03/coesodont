@@ -73,7 +73,7 @@ class AcademicProcessesController < ApplicationController
       rescue Exception => e
         flash[:danger] = e
       end  
-      flash[:danger] = "#{errros} Cargas con errores. Vuelva a intentarlo." if errors > 0
+      flash[:danger] = "#{errors} Cargas con errores. Vuelva a intentarlo." if errors > 0
       flash[:success] = "Clonación de #{completed} secciones." if completed > 0
 
     end

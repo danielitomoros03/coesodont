@@ -16,7 +16,7 @@
         %th.text-center{style: 'width:240px;'} Opciones
 
   %tbody
-    - academic_records.by_subjects.each do |academic_record|
+    - academic_records.sort_by_subject_name.each do |academic_record|
       - subject = academic_record.subject
       %tr{class: academic_record.tr_class_by_status_q}
         %td{title: 'Ir al detalle de la asignatura'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Subject'), subject.code, "/admin/subject/#{subject.id}"

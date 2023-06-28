@@ -15,13 +15,29 @@ class Address < ApplicationRecord
   #ASSOCIATIONS:  
   belongs_to :student, primary_key: :user_id
 
+  def full_address
+    aux = ""
+    aux += "Municipio #{municipality}, " if municipality
+    aux += "Sector #{sector}, " if sector
+    aux += "Calle #{street}, " if street
+    aux += "#{house_type} #{house_name}. " if (house_type and house_name)
+    aux += " #{city_and_state}"
+  end
 
   def city_and_state
+    aux = "#{city&.titleize}, " if city
+    unless state.blank?
+      aux += (state and state.downcase.eql? 'distrito capital') ? " #{state&.titleize}" : " Estado #{state&.titleize}"
+    end
+    return aux
+  end
+
+  def state_and_city
     "#{state.titleize} - #{city.titleize}" if (state and city)
   end
 
   def description
-    "#{city_and_state}: #{municipality}. #{sector}: #{street}, #{house_type} #{house_name}"
+    "#{state_and_city}: #{municipality}. #{sector}: #{street}, #{house_type} #{house_name}"
   end
 
   # VALIDATIONS:

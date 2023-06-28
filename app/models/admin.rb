@@ -30,8 +30,7 @@ class Admin < ApplicationRecord
   # VALIDATIONS:
   validates :user, presence: true, uniqueness: true
   # validates :env_authorizable, presence: true
-  # validates :user, presence: true
-  # validates :role, presence: true
+  validates :role, presence: true
 
   # validates :env_authorizable_type, presence: true
 

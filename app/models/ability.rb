@@ -16,7 +16,7 @@ class Ability
     if user.admin?
       can :access, :rails_admin
       can :manage, :dashboard
-      can :read, Faculty
+      can :read, [Faculty, Tutorial]
 
       if user.admin.desarrollador?
         can :manage, :all
@@ -25,6 +25,7 @@ class Ability
         can :import, Authorizable::IMPORTABLES
         can :manage, [Admin, Student, Teacher, Area, Subject, Course, Grade, AcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User]
         can :ru, [School]
+        #can :read, [Gr]
       else
         can :manage, [User]
         user.admin.authorizeds.each do |authd|
