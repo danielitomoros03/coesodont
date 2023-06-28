@@ -10,19 +10,11 @@ p '      Creada Facultad!    '.center(200, '=') if odont = Faculty.create(code: 
 
 p '      Creado Primer Usuario!    '.center(200, '=') if user = User.create!(email: 'moros.daniel@gmail.com', first_name: 'Daniel Josué', last_name: 'Moros Castillo', ci: '15573230', password: 123123)
 
-<<<<<<< HEAD
 p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :desarrollador, env_authorizable: odont)
 
 p '      Creado Segundo Usuario!    '.center(200, '=') if user = User.create!(email: 'saavedraazuaje73@gmail.com', first_name: 'Carlos Alberto', last_name: 'Saavedra Azuaje', ci: '10264009', password: 123123)
 
 p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :desarrollador, env_authorizable: odont)
-=======
-p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :desarrollador, env_authorizable: fau)
-
-p '      Creado Segundo Usuario!    '.center(200, '=') if user = User.create!(email: 'saavedraazuaje73@gmail.com', first_name: 'Carlos Alberto', last_name: 'Saavedra Azuaje', ci: '10264009', password: 123123)
-
-p '      Creado Primer Admin!    '.center(200, '=') if Admin.create!(user_id: user.id, role: :desarrollador, env_authorizable: fau)
->>>>>>> b7796d0618db2c252f31b0757d3bf14e389e9f09
 
 p '      Creada Escuela!    '.center(200, '=') if escuela = School.create(code: 'ODONT', name: 'Escuela de Odontología', faculty: odont)
 
