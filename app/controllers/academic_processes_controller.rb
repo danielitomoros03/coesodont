@@ -6,10 +6,10 @@ class AcademicProcessesController < ApplicationController
     total_error = 0
     EnrollmentDay.destroy_all
     @academic_process.enroll_academic_processes.each do |iep|
-      reglamento = iep.get_regulation
+
       grade = iep.grade
 
-      if grade.update(current_permanence_status: reglamento, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
+      if grade.update(current_permanence_status: iep.permanence_status, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
         total_actualizados += 1
       else
         total_error += 1
@@ -19,7 +19,7 @@ class AcademicProcessesController < ApplicationController
     flash[:danger] = "#{ total_error} #{'Error'.pluralize(total_error)} en la actualización del estado de reglamento" if total_error > 0 
     flash[:success] = "#{ total_actualizados} #{'inscripción'.pluralize(total_actualizados)} en total actualizados" if total_actualizados > 0
     
-    redirect_to "/admin/academic_process/#{@academic_process.id}/enrollment_day"
+    redirect_back fallback_location: "/admin/academic_process/#{params[:id_return]}/enrollment_day"
   end
 
 

@@ -79,8 +79,10 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   def before_enrolled
-    before_process = self.academic_process.process_before
-    EnrollAcademicProcess.where(grade_id: self.grade_id, academic_process_id: before_process.id).first
+    
+    if before_process = self.academic_process.process_before
+      EnrollAcademicProcess.where(grade_id: self.grade_id, academic_process_id: before_process.id).first
+    end
   end
 
   def any_permanence_articulo?
@@ -99,6 +101,11 @@ class EnrollAcademicProcess < ApplicationRecord
   def historical?
     !enrolling?
   end
+
+  def finished?
+    academic_records.any? and (academic_records.count.eql? academic_records.qualified.count)
+  end
+
 
   def total_academic_records
     self.subjects.count
@@ -221,6 +228,9 @@ class EnrollAcademicProcess < ApplicationRecord
     end
   end
 
+  def self.update_all_permanence_status
+    EnrollAcademicProcess.all.each{|ap| ap.update(permanence_status: ap.get_regulation) if ap.finished?}
+  end
 
   private
 

@@ -49,7 +49,7 @@ class Tutorial < ApplicationRecord
       items_per_page 10
       field :group_tutorial
       field :name_function
-      field :video do
+      field :video, :active_storage do
         filterable false
         sortable false
         pretty_value do

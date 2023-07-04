@@ -551,7 +551,7 @@ es:
       enrollment_day:
         start: Inicio
         total_duration_hours: Total Duración de la Jornada
-        max_grades: Total Inscritos Perimitidos
+        max_grades: Total Inscritos Permitidos
         slot_duration_minutes: Duración franja horaria (en minutos)
       faculty:
         code: 'Código'

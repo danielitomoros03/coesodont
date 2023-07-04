@@ -22,10 +22,9 @@
 #myTabContent.tab-content
   #withoutAppointment.tab-pane.fade.show.active{"aria-labelledby": "withoutAppointment-tab", role: "tabpanel"}
 
-    - if grades_without_appointment and grades_without_appointment.any?
+    - if grades_without_appointment&.any?
       %h6.text-center.alert.alert-warning
-        %b Atención:
-        = "A Continuación, lista de estudiantes sin cita horaria e inscritos en periodo anterior: <b>#{academic_process.process_before.period.name}</b> de <b>#{academic_process.school.name}</b>".html_safe
+        = "Estudiantes sin Cita Horaria e Inscritos en el periodo anterior: <b>#{academic_process.process_before.period_name}</b> de <b>#{academic_process.school.short_name}</b>".html_safe
       = render partial: '/enrollment_days/grades', locals: {grades: grades_without_appointment, academic_process: academic_process}
     - else
       %h5.alert.alert-info Sin estudiantes pendientes por asignar Cita Horaria  

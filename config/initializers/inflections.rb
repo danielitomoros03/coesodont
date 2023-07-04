@@ -10,6 +10,14 @@
 #   inflect.uncountable %w( fish sheep )
 # end
 
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  inflect.plural "inscripción", "inscripciones"
+  inflect.plural "Inscripción", "Inscripciones"
+  inflect.plural "Error", "Errores"
+  inflect.plural "error", "errores"
+end
+
+
 # These inflection rules are supported but not enabled by default:
 # ActiveSupport::Inflector.inflections(:en) do |inflect|
 #   inflect.acronym "RESTful"
