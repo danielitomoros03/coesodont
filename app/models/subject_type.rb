@@ -19,7 +19,7 @@ class SubjectType < ApplicationRecord
   validates :code, presence: true, uniqueness: true
   validates :name, presence: true, uniqueness: true
   validates_format_of :code, with: /\A[a-z]+\z/i
-  validates :required_credits, presence: true, numericality: { only_integer: true, in: 0..200 }
+  validates :required_credits, presence: true, numericality: { only_integer: true, in: 0..230 }
 
   # RAILS_ADMIN:
   rails_admin do
