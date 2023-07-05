@@ -7,6 +7,7 @@ class AcademicProcess < ApplicationRecord
     # t.integer "modality"
     # t.bigint "process_before_id"
     # t.string "name"
+    # has_rich_text :enroll_instructions
     # AcademicProcess.all.map{|ap| ap.update(name: 'x')}
 
   # HISTORY:
@@ -136,6 +137,11 @@ class AcademicProcess < ApplicationRecord
     # end
     self.school.grades.without_appointment_time.enrolled_in_academic_process(self.process_before.id).sort_by_numbers.uniq if process_before
     
+  end
+
+
+  def update_enroll_academic_processes_permanence_status
+      self.enroll_academic_processes.each{|eap| eap.update(permanence_status: eap.get_regulation) if eap.finished?}
   end
 
   rails_admin do

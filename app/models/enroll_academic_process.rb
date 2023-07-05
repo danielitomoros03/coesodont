@@ -57,25 +57,39 @@ class EnrollAcademicProcess < ApplicationRecord
 
   scope :custom_search, -> (keyword) { joins(:user, :period).where("users.ci ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'") }
 
+  def total_retire?
+    academic_records.any? and (academic_records.count.eql? academic_records.retirado.count)
+  end
+
   # FUNCTIONS:
   def get_regulation
-    reglamento_aux = :regular
-    if enrolled_but_not_approved_any?
-      reglamento_aux = :articulo3
-      iep_anterior = self.before_enrolled
-      if iep_anterior and iep_anterior.enrolled_but_not_approved_any?
-        reglamento_aux = :articulo6
-        iep_anterior2 = iep_anterior.before_enrolled
-        if iep_anterior2 and iep_anterior2.enrolled_but_not_approved_any?
-          reglamento_aux = :articulo7
+    reglamento_aux = :nuevo
+    if total_retire?
+      reglamento_aux = :desertor
+    elsif self.academic_records.qualified.any?
+      reglamento_aux = :regular
+      if self.academic_records.coursed.any?
+        if coursed_but_not_approved_any?
+          reglamento_aux = :articulo3
+          iep_anterior = self.before_enrolled
+          if iep_anterior&.coursed_but_not_approved_any?
+            reglamento_aux = :articulo6
+            iep_anterior2 = iep_anterior.before_enrolled
+            if iep_anterior2&.coursed_but_not_approved_any?
+              reglamento_aux = :articulo7
+            end
+          end
         end
       end
     end
     return reglamento_aux
   end
 
-  def enrolled_but_not_approved_any?
-    self.academic_records.any? and !(self.academic_records.aprobado.any?)
+  def coursed_but_not_approved_any?
+    self.academic_records.coursed.any? and !(self.academic_records.aprobado.any?)
+  end
+  def finished?
+    academic_records.any? and (academic_records.count.eql? academic_records.qualified.count)
   end
 
   def before_enrolled
@@ -84,6 +98,7 @@ class EnrollAcademicProcess < ApplicationRecord
       EnrollAcademicProcess.where(grade_id: self.grade_id, academic_process_id: before_process.id).first
     end
   end
+
 
   def any_permanence_articulo?
     (self.articulo3? or self.articulo6? or self.articulo7?)
@@ -102,9 +117,6 @@ class EnrollAcademicProcess < ApplicationRecord
     !enrolling?
   end
 
-  def finished?
-    academic_records.any? and (academic_records.count.eql? academic_records.qualified.count)
-  end
 
 
   def total_academic_records
@@ -229,7 +241,12 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   def self.update_all_permanence_status
-    EnrollAcademicProcess.all.each{|ap| ap.update(permanence_status: ap.get_regulation) if ap.finished?}
+
+    AcademicProcess.reorder(name: :asc).each do |ap|
+      # ap.enroll_academic_processes.reject{|eap| !eap.finished?}.each{|eap| eap.update(permanence_status: eap.get_regulation)}
+      ap.enroll_academic_processes.each{|eap| eap.update(permanence_status: eap.get_regulation) if eap.finished?}
+    end
+
   end
 
   private

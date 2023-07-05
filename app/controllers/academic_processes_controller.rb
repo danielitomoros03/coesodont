@@ -96,7 +96,10 @@ class AcademicProcessesController < ApplicationController
         flash[:danger] = e
       end  
       flash[:danger] = "#{errors} Cargas con errores. Vuelva a intentarlo." if errors > 0
-      flash[:success] = "Clonación de #{completed} secciones." if completed > 0
+      if completed > 0
+        flash[:success] = "Clonación de #{completed} secciones." 
+        flash[:success] += " Incluida clonación de Inscrucciones de Inscripción" if @academic_process.update(enroll_instructions: cloneble_academic_process.enroll_instructions)
+      end
 
     end
 
