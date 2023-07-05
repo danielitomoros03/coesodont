@@ -499,7 +499,9 @@ es:
       area_authorizable:
         name: Nombre
         description: Descripción
-        icon: Ícono 
+        icon: Ícono
+        created_at: 'Creado'
+        updated_at: 'Actualizado'
         authorizables: Accesibles       
       admin:
         user: 'Usuario'
