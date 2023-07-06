@@ -286,7 +286,11 @@ class Subject < ApplicationRecord
       field :periods do
         label 'Períodos en los que se ha dictado'
         pretty_value do
-          bindings[:object].periods.map{|pe| pe.name}.to_sentence
+          if bindings[:object].periods.any?
+            bindings[:object].periods.map{|pe| pe.name}.to_sentence
+          else
+            'Aún no se ha dictado la asignatura'
+          end
         end        
       end
       field :desc_show do
@@ -294,7 +298,7 @@ class Subject < ApplicationRecord
         formatted_value do
           bindings[:view].render(partial: "subjects/desc_table", locals: {subject: bindings[:object]})
         end
-      end      
+      end
 
       field :prelate_subjects do
         pretty_value do

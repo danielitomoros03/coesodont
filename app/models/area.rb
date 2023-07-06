@@ -4,6 +4,14 @@ class Area < ApplicationRecord
   # t.bigint "school_id", null: false
   # t.bigint "parent_area_id"
   
+  # HISTORY:
+  has_paper_trail on: [:create, :destroy, :update]
+
+  before_create :paper_trail_create
+  before_destroy :paper_trail_destroy
+  before_update :paper_trail_update
+
+
   # ASSOCITATIONS:
   belongs_to :school
   belongs_to :parent_area, optional: true, class_name: 'Area', primary_key: :parent_area_id
@@ -11,7 +19,7 @@ class Area < ApplicationRecord
 
   has_many :subareas, class_name: 'Area', foreign_key: :parent_area_id
 
-  has_many :subjects
+  has_many :subjects, dependent: :destroy
   # accepts_nested_attributes_for :subjects
 
   # VALIDATIONS:
@@ -24,7 +32,6 @@ class Area < ApplicationRecord
 
   # CALLBACKS:
   before_save :clean_name
-
 
   # HOOKS:
   def clean_name
@@ -47,7 +54,7 @@ class Area < ApplicationRecord
   end
 
   rails_admin do
-    visible false
+    # visible false
     navigation_label 'Config General'
     navigation_icon 'fa-regular fa-brain'
 
@@ -89,5 +96,23 @@ class Area < ApplicationRecord
       self.school_id ||= School.first.id
     end
   end
+
+  private
+
+
+    def paper_trail_update
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡#{object} actualizada!"
+    end  
+
+    def paper_trail_create
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡#{object} registrada!"
+    end  
+
+    def paper_trail_destroy
+      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+      self.paper_trail_event = "¡Asignatura eliminada!"
+    end  
 
 end

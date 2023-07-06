@@ -151,9 +151,23 @@ class EnrollAcademicProcess < ApplicationRecord
     else
       label_color = 'secondary'
     end
-    return ApplicationController.helpers.label_status("bg-#{label_color}", self.enroll_status.titleize)
+    return ApplicationController.helpers.label_status("bg-#{label_color}", self.enroll_status&.titleize)
+  end
 
-  end  
+  def label_permanence_status
+    # [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]  
+    label_color = 'info'
+    case self.permanence_status
+    when 'articulo3'
+      label_color = 'warning'
+    when 'articulo6'
+      label_color = 'darger'
+    when 'articulo7'
+      label_color = 'dark'
+    end
+    return ApplicationController.helpers.label_status("bg-#{label_color}", self.permanence_status&.titleize)
+  end
+
 
   rails_admin do
     navigation_label 'Reportes'

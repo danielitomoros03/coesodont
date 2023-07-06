@@ -26,9 +26,9 @@
           %i.fa-solid.fa-graduation-cap.text-success{title: titulo_inscrip}
         = period.name
       %td.text-center
-        .badge.bg-info= enroll_academic_process.enroll_status&.titleize
+        = enroll_academic_process.label_status
       %td.text-center
-        .badge.bg-info= enroll_academic_process.permanence_status&.titleize
+        = enroll_academic_process.label_permanence_status
         %a{"data-bs-target": "#ChangePermanenceStatus", "data-bs-toggle": :modal, type: :button, onclick: "setValuesPermanenceStatus(#{enroll_academic_process.id}, '#{enroll_academic_process.permanence_status}');"}
           .fa.fa-pencil-alt        
       %td.text-center= academic_records.count
