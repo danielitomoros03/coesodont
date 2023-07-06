@@ -12,6 +12,8 @@ class EnrollAcademicProcess < ApplicationRecord
   before_destroy :paper_trail_destroy
   before_update :paper_trail_update
 
+  after_save :update_current_permanence_status_on_grade
+
   # ASSOCIATIONS:
   belongs_to :grade
   has_one :student, through: :grade
@@ -28,7 +30,7 @@ class EnrollAcademicProcess < ApplicationRecord
   # ENUMERIZE:
   # IDEA CON ESTADO DE INSCRIPCIÓN EN GRADE Y ENROLL ACADEMIC PROCESS
   enum enroll_status: [:preinscrito, :reservado, :confirmado, :retirado]
-  enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]  
+  enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar]  
 
   # VALIDATIONS:
   validates :grade, presence: true
@@ -256,6 +258,9 @@ class EnrollAcademicProcess < ApplicationRecord
 
   private
 
+    def update_current_permanence_status_on_grade
+      grade.update(current_permanence_status: self.permanence_status) if grade.last_enroll&.id.eql? self.id
+    end
 
     def paper_trail_update
       changed_fields = self.changes#.keys - ['created_at', 'updated_at']

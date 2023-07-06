@@ -16,7 +16,7 @@ class CodigoQr
       module_px_size: 6,
       resize_exactly_to: false,
       resize_gte_to: false,
-      size: 180
+      size: 120
     )
 
     return "#{Rails.root.to_s}/tmp/barcode.png"
