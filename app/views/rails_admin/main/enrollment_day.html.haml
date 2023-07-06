@@ -8,11 +8,11 @@
   - if @object.process_before
     .alert.alert-danger
       %b Atención
-      Si está planificando una nueva jornada de inscripción por Cita Horaria, es importante que corra el enlace abajo para que COES actualice tanto el estado de permanecia como los valores de eficiencia y promedios de cada estudiante antes de agregar la nueva cita.
+      Si está planificando una nueva jornada de inscripción por Cita Horaria, es importante que corra la función 'Actualizar Estados Estudiantes' indicada con el enlace abajo para que COES actualice tanto el estado de permanecia como los valores de eficiencia y promedios de cada estudiante antes de agregar la nueva cita. 
       .text-center
         = link_to "/academic_processes/#{@object.process_before.id}/run_regulation?id_return=#{@object.id}", class: 'btn m-3 btn-lg btn-primary', title: "Actualiza tanto el estado de permanecia como la eficiencia y los promedios de los estudiantes basado en los períodos anteriores al actual #{@object.period_name}. Incluye eliminación de Citas", data: {confirm: "Esta acción actualizará el estado de permanencia y los promedios de notas de cada estudiante que cursó materias en el periodo anterior #{@object.process_before.period_name} ¿Está completamente seguro?"} do
           %i.fa-regular.fa-refresh
-          Actualizar Estados de los Estudiantes
+          Actualizar Estados Estudiantes
 
     - enrollment_days = @object.enrollment_days
     - grades_without_appointment = @object.readys_to_enrollment_day

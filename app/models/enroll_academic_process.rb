@@ -240,15 +240,6 @@ class EnrollAcademicProcess < ApplicationRecord
     end
   end
 
-  def self.update_all_permanence_status
-
-    AcademicProcess.reorder(name: :asc).each do |ap|
-      # ap.enroll_academic_processes.reject{|eap| !eap.finished?}.each{|eap| eap.update(permanence_status: eap.get_regulation)}
-      ap.enroll_academic_processes.each{|eap| eap.update(permanence_status: eap.get_regulation) if eap.finished?}
-    end
-
-  end
-
   private
 
 

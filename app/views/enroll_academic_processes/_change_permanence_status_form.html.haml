@@ -1,0 +1,14 @@
+
+= form_tag("/enroll_academic_processes/update_permanece_status", class: 'form-horizontal', id: 'formChangePermanenceStatus') do
+  = hidden_field_tag :id, nil, id: 'EnrollAcademicProcessId'
+  #labelPermanenceStatus.badge.bg-info
+  .modal-body
+    .control-group
+      %span.control-label Seleccione estado de permanencia:
+      .controls
+        = select_tag 'enroll_academic_process[permanence_status]', options_for_select(EnrollAcademicProcess.permanence_statuses.keys.map{|k| [k.titleize, k]}), {class: "form-control", id: "permanenceStatusId", required: true} 
+
+    .modal-footer
+
+      = submit_tag 'Cambiar Estado de Permanencia', class: "btn btn-success float-end", 'data-disable-with': 'Enviando'
+

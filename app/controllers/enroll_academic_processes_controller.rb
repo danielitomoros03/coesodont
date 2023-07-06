@@ -1,5 +1,5 @@
 class EnrollAcademicProcessesController < ApplicationController
-  before_action :set_enroll_academic_process, only: %i[ show edit update destroy study_constance total_retire ]
+  before_action :set_enroll_academic_process, only: %i[ show edit update destroy study_constance total_retire update_permanece_status]
 
   # GET /enroll_academic_processes or /enroll_academic_processes.json
   def index
@@ -211,6 +211,15 @@ class EnrollAcademicProcessesController < ApplicationController
       flash[:danger] = aux
     end
     redirect_back fallback_location: "/admin/student/#{@enroll_academic_process.student.id}"
+  end
+
+  def update_permanece_status
+    if @enroll_academic_process.update(enroll_academic_process_params)
+      flash[:success] = 'Actualizado el estado de permanecia del Estudiante'
+    else
+      flash[:danger] = @enroll_academic_process.errors.full_messages.to_sentence
+    end
+    redirect_back fallback_location: '/admin/student'
   end
 
   # PATCH/PUT /enroll_academic_processes/1 or /enroll_academic_processes/1.json
