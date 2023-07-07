@@ -26,13 +26,6 @@ module ApplicationHelper
 		capture_haml{"<span class='text-center badge #{klazz}'>#{content}</span>".html_safe }
 	end
 
-	def label_link_with_tooptip(href, klazz, content, title, placement='top')
-
-		content_tag :a, href: href, rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-placement': placement, 'data-bs-original-title': title do
-			capture_haml{"<span class='text-center badge #{klazz}'>#{content}</span>".html_safe }
-		end	
-	end
-
 	def button_add_section course_id
 
 		content_tag :button, rel: :tooltip, 'data-bs-target': "#NewSectionModal", 'data-bs-placement': :top, 'data-bs-original-title': 'Agregar Nueva Sección', class: "btn btn-sm btn-success mx-1 addSection", "data-bs-toggle": :modal, course_id: course_id, onclick: "$('#_sectioncourse_id').val(this.attributes['course_id'].value);" do
@@ -41,6 +34,12 @@ module ApplicationHelper
 		
 	end
 
+	def label_link_with_tooptip(href, klazz, content, title, placement='top')
+
+		content_tag :a, href: href, rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-placement': placement, 'data-bs-original-title': title do
+			capture_haml{"<span class='text-center badge #{klazz}'>#{content}</span>".html_safe }
+		end	
+	end	
 	def btn_link_with_tooptip(href, klazz, content, title, placement='top')
 
 		content_tag :a, href: href, rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-placement': placement, 'data-bs-original-title': title, class: "btn btn-sm #{klazz}" do

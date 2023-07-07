@@ -40,7 +40,7 @@ class Grade < ApplicationRecord
   enum registration_status: [:universidad, :facultad, :escuela]
   enum enrollment_status: [:preinscrito, :asignado, :confirmado]
   enum graduate_status: [:no_graduable, :tesista, :posible_graduando, :graduando, :graduado]
-  enum current_permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]
+  enum current_permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar]
 
   # VALIDATIONS:
   # validates :student, presence: true
@@ -100,6 +100,10 @@ class Grade < ApplicationRecord
     else
       ""
     end
+  end
+
+  def last_enroll
+    enroll_academic_processes.first
   end
 
   def academic_processes_unenrolled

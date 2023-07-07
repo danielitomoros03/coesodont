@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  skip_before_action :authenticate_user!, only: [ :edit ]
   before_action :set_user, only: [:edit, :update, :edit_images]
   # before_action :authenticate_student_or_teacher!
 

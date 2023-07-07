@@ -3,8 +3,8 @@
 -# @period_name = academic_process.period.name if (academic_process and academic_process.period)
 
 - logged_as_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
-
 .mb-0= render partial: 'layouts/main_banner', locals: {bg_color: 'bg-info bg-opacity-20 '}
+.text-center.m-3= image_tag 'logo_completo.svg', width: '15%'
 
 .row
 	- School.all.each do |school|

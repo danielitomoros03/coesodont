@@ -128,6 +128,6 @@ class AcademicRecordsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def academic_record_params
-      params.require(:academic_record).permit(:section_id, :enroll_academic_process_id)
+      params.require(:academic_record).permit(:section_id, :enroll_academic_process_id, :status)
     end
 end

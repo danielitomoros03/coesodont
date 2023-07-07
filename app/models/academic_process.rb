@@ -25,14 +25,14 @@ class AcademicProcess < ApplicationRecord
   belongs_to :period
   has_one :period_type, through: :period
 
-  belongs_to :process_before, class_name: 'AcademicProcess', optional: true
+  belongs_to :process_before, class_name: 'AcademicProcess', optional: true, dependent: :delete
 
   #has_many:
   has_many :enrollment_days, dependent: :destroy
   has_many :enroll_academic_processes, dependent: :destroy
   has_many :grades, through: :enroll_academic_processes
   has_many :students, through: :grades
-  has_many :courses
+  has_many :courses, dependent: :destroy
   has_many :sections, through: :courses
   has_many :academic_records, through: :sections
   has_many :subjects, through: :courses
@@ -89,15 +89,40 @@ class AcademicProcess < ApplicationRecord
     self.enroll_academic_processes.count
   end
 
+  def link_to_massive_confirmation
+    "<a href='/academic_processes/#{id}/massive_confirmation' title='Confirmar todos los preinscritos' data-confirm='Está acción confirmará todos los preinscritos. ¿Está completamente seguro?' class='label bg-info'><i class= 'fa-regular fa-list-check'></i></a>".html_safe
+  end
+
   def label_total_enrolls_by_status
     total = []
+
+    # [:preinscrito, :reservado, :confirmado, :retirado]
+    total << ApplicationController.helpers.label_status_with_tooptip('bg-secondary', self.enroll_academic_processes.count, 'Total') 
+
     EnrollAcademicProcess.enroll_statuses.map do |k,v|
       total_aux = self.enroll_academic_processes.where(enroll_status: v).count 
-      value = v
-      total << ApplicationController.helpers.label_status_with_tooptip('bg-secondary', total_aux, k.titleize)
+      tipo = EnrollAcademicProcess.type_label_by_enroll k
+      total << ApplicationController.helpers.label_status_with_tooptip("bg-#{tipo}", total_aux, k&.pluralize&.titleize)
     end
-    return total
+    return total.join
   end
+
+  def btn_total_enrolls_by_status 
+    total = []
+    link = "/admin/enroll_academic_process?query=#{period_name}"
+    total << ApplicationController.helpers.label_link_with_tooptip(link, 'bg-secondary', self.enroll_academic_processes.count, 'Total')
+
+    EnrollAcademicProcess.enroll_statuses.map do |k,v|
+      total_aux = self.enroll_academic_processes.where(enroll_status: v).count 
+      tipo = EnrollAcademicProcess.type_label_by_enroll k
+      p "   TIPO: #{tipo}   ".center(500, "#")
+      url = link+"&scope=#{k}"
+      total << ApplicationController.helpers.label_link_with_tooptip(url, "bg-#{tipo}", total_aux, k&.pluralize&.titleize)
+    end
+    return total.join
+    
+  end
+  
 
   def label_total_sections
     total = []
@@ -168,7 +193,7 @@ class AcademicProcess < ApplicationRecord
       end
 
       field :process_before do
-        column_width 100
+        column_width 80
         pretty_value do
           value.period.name if value
         end
@@ -191,42 +216,47 @@ class AcademicProcess < ApplicationRecord
 
       field :total_sections do
 
-        column_width 100
+        column_width 130
         label 'Secciones'
         pretty_value do 
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'Section')
-            %{<a href='/admin/section?query=#{bindings[:object].period.name}' title='Total Secciones'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+            %{<a href='/admin/section?query=#{bindings[:object].period.name}' title='Total Secciones'><span class='badge bg-info'>#{value} en #{bindings[:object].courses.count} Cursos</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end
         end
       end
 
-      field :total_enroll_academic_processes do
-        column_width 100
+      field :numbers_enrolled do
+        column_width 200
         label 'Estudiantes'
-        pretty_value do
-          user = bindings[:view]._current_user
-          if (user and user.admin and user.admin.authorized_read? 'EnrollAcademicProcess')
-            %{<a href='/admin/enroll_academic_process?query=#{bindings[:object].period.name}' title='Total Estudiantes Inscritos'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+        formatted_value do
+          if (bindings[:view]._current_user&.admin&.authorized_read? 'EnrollAcademicProcess')
+            link_to_massive_confirmation = ''
+            if bindings[:object].enroll_academic_processes.not_confirmado.any?
+              link_to_massive_confirmation = bindings[:object].link_to_massive_confirmation
+            end
+            "#{bindings[:object].btn_total_enrolls_by_status} #{link_to_massive_confirmation}".html_safe
+
           else
-            %{<span class='badge bg-info'>#{value}</span>}.html_safe
+            "#{bindings[:object].label_total_enrolls_by_status}".html_safe
           end
         end
       end
       field :total_academic_records do
         column_width 100
-        label 'Asignaturas'
+        label 'En Asignaturas'
         pretty_value do
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')          
-            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Totas Asignaturas Inscritas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Totas Inscripciones En Asignaturas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end
         end
-      end      
+      end
+
     end
 
     edit do

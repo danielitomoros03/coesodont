@@ -12,6 +12,8 @@ class EnrollAcademicProcess < ApplicationRecord
   before_destroy :paper_trail_destroy
   before_update :paper_trail_update
 
+  after_save :update_current_permanence_status_on_grade
+
   # ASSOCIATIONS:
   belongs_to :grade
   has_one :student, through: :grade
@@ -27,8 +29,8 @@ class EnrollAcademicProcess < ApplicationRecord
 
   # ENUMERIZE:
   # IDEA CON ESTADO DE INSCRIPCIÓN EN GRADE Y ENROLL ACADEMIC PROCESS
-  enum enroll_status: [:preinscrito, :reservado, :confirmado, :retirado]
-  enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]  
+  enum enroll_status: [:preinscrito, :reservado, :confirmado]#, :retirado]
+  enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar]  
 
   # VALIDATIONS:
   validates :grade, presence: true
@@ -62,6 +64,56 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   # FUNCTIONS:
+
+  def self.url_by_enroll_type type, period_name
+    # [:preinscrito, :reservado, :confirmado, :retirado]
+
+    link = "/admin/enroll_academic_process?query=#{period_name}"
+    
+    case type
+    when :preinscrito 
+      link+'&scope=preinscrito'
+    when :reservado 
+      link+'&scope=preinscrito'
+      'warning'
+    when :confirmado 
+      'success'
+    else
+      ''
+    end
+
+
+    link_pre = "/admin/enroll_academic_process?query=#{bindings[:object].period.name}&scope=preinscrito"
+
+    link_confirm = "/admin/enroll_academic_process?query=#{bindings[:object].period.name}&scope=confimado"
+
+
+    case type
+    when :preinscrito 
+      'secondary'
+    when :reservado 
+      'warning'
+    when :confirmado 
+      'success'
+    else
+      ''
+    end
+  end
+
+  def self.type_label_by_enroll type
+    # [:preinscrito, :reservado, :confirmado, :retirado]
+    case type
+    when 'preinscrito' 
+      'info'
+    when 'reservado' 
+      'warning'
+    when 'confirmado' 
+      'success'
+    else
+      ''
+    end
+  end
+
   def get_regulation
     reglamento_aux = :nuevo
     if total_retire?
@@ -151,9 +203,23 @@ class EnrollAcademicProcess < ApplicationRecord
     else
       label_color = 'secondary'
     end
-    return ApplicationController.helpers.label_status("bg-#{label_color}", self.enroll_status.titleize)
+    return ApplicationController.helpers.label_status("bg-#{label_color}", self.enroll_status&.titleize)
+  end
 
-  end  
+  def label_permanence_status
+    # [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]  
+    label_color = 'info'
+    case self.permanence_status
+    when 'articulo3'
+      label_color = 'warning'
+    when 'articulo6'
+      label_color = 'darger'
+    when 'articulo7'
+      label_color = 'dark'
+    end
+    return ApplicationController.helpers.label_status("bg-#{label_color}", self.permanence_status&.titleize)
+  end
+
 
   rails_admin do
     navigation_label 'Reportes'
@@ -240,17 +306,11 @@ class EnrollAcademicProcess < ApplicationRecord
     end
   end
 
-  def self.update_all_permanence_status
-
-    AcademicProcess.reorder(name: :asc).each do |ap|
-      # ap.enroll_academic_processes.reject{|eap| !eap.finished?}.each{|eap| eap.update(permanence_status: eap.get_regulation)}
-      ap.enroll_academic_processes.each{|eap| eap.update(permanence_status: eap.get_regulation) if eap.finished?}
-    end
-
-  end
-
   private
 
+    def update_current_permanence_status_on_grade
+      grade.update(current_permanence_status: self.permanence_status) if grade.last_enroll&.id.eql? self.id
+    end
 
     def paper_trail_update
       changed_fields = self.changes#.keys - ['created_at', 'updated_at']

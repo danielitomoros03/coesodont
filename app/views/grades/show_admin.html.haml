@@ -25,6 +25,25 @@
 				- content = render partial: '/enroll_academic_processes/enroll_in_period_form', locals: {grade: grade}
 			= render partial: '/layouts/scaffold-modal', locals: {content: content, title: title, id: id}
 
+- id = 'ChangePermanenceStatus'
+- title = 'Cambiar Estado de Permanencia'
+
+- content = render '/enroll_academic_processes/change_permanence_status_form'
+= render partial: '/layouts/scaffold-modal', locals: {content: content, title: title, id: id, long: ' '}
+
 = render partial: 'grades/academic_resume', locals: {grade: grade}
 
 = render template: 'enroll_academic_processes/index', locals: {grade: grade}
+
+
+:javascript
+
+	function setValuesPermanenceStatus(id, status){
+		// $('#formChangePermanenceStatus').action(`/enroll_academic_processes/${id}/update_permanece_status`);
+
+		$('#formChangePermanenceStatus').attr('action', `/enroll_academic_processes/${id}/update_permanece_status`);
+		$('#permanenceStatusId').val(status);
+		console.log('This: '+this);
+		console.log('$(This): '+$(this));
+		// $('#_sectioncourse_id').val(this.attributes['course_id'].value);
+	}

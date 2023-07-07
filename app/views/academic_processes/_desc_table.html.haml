@@ -18,9 +18,8 @@
         .label.bg-info= academic_process.modality.titleize
       %td= academic_process.max_credits
       %td.text-center= academic_process.max_subjects
-      %td.text-center
-        - academic_process.label_total_enrolls_by_status.map do |e|
-          = e.html_safe
+      %td.text-center= academic_process.label_total_enrolls_by_status.html_safe
+
 
       %td.text-center
         - academic_process.label_total_sections.map do |e|

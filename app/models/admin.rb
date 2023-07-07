@@ -187,12 +187,12 @@ class Admin < ApplicationRecord
 
     edit do
       field :user 
-      field :role do
-        visible do
-          user = bindings[:view]._current_user
-          (user and user.admin and user.admin.yo? )
-        end
-      end
+      field :role # do
+        # visible do
+        #   user = bindings[:view]._current_user
+        #   (user and user.admin and user.admin.yo? )
+        # end
+      # end
 
       # field :env_authorizable
       # field :authorizeds

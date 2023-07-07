@@ -34,6 +34,7 @@ Rails.application.routes.draw do
   resources :enroll_academic_processes do
     member do
       put :total_retire
+      post :update_permanece_status
     end
     collection do
       post :reserve_space
@@ -57,6 +58,7 @@ Rails.application.routes.draw do
 
   resources :academic_processes do
     member do
+      get 'massive_confirmation'
       get 'clean_courses'
       get 'run_regulation'
     end
