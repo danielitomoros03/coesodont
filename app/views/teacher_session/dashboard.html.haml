@@ -10,7 +10,7 @@
           - headers.each do |head|
             %th= head.titleize
       %tbody.table-group-divider
-        - current_teacher.sections.each_with_index do |sec,i|
+        - current_teacher.sections.sort_by_period_reverse.each_with_index do |sec,i|
           %tr
             %td= i+1
             %td= sec.code
@@ -18,6 +18,11 @@
             %td= sec.period.name
             %td= sec.academic_records.count
             %td
-              = link_to section_path(sec), class: 'btn btn-sm btn-primary' do
-                .fa.fa-search
-                Ir al detalle
+              - if !sec.qualified? and sec.is_in_process_active?
+                = link_to section_path(sec), class: 'btn btn-sm btn-success' do
+                  .fa.fa-list-check
+                  Ir al detalle y calificar
+              - else
+                = link_to section_path(sec), class: 'btn btn-sm btn-primary' do
+                  .fa.fa-search
+                  Ir al detalle

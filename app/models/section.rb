@@ -58,6 +58,7 @@ class Section < ApplicationRecord
   # SCOPE:
   # default_scope {joins(:course).order('courses.name')}
   scope :sort_by_period, -> {joins(:period).order('periods.name')}
+  scope :sort_by_period_reverse, -> {joins(:period).order('periods.name DESC')}
 
   scope :custom_search, -> (keyword) { joins(:period, :subject).where("sections.code ILIKE '%#{keyword}%' OR subjects.name ILIKE '%#{keyword}%' OR subjects.code ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'").sort_by_period }
   
@@ -172,7 +173,7 @@ class Section < ApplicationRecord
   end
 
   def qualified?
-    qualified.eql? true    
+    qualified.eql? true
   end
 
   def teacher_desc
@@ -198,6 +199,9 @@ class Section < ApplicationRecord
     end
   end
 
+  def is_in_process_active?
+    self.academic_process&.id&.eql? self.school.active_process_id
+  end
 
   def number_acta
     "#{self.subject.code.upcase}#{self.code.upcase} #{self.period.name_revert}"
