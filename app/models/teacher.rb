@@ -156,6 +156,16 @@ class Teacher < ApplicationRecord
       else
         return [0,0,3]
       end
+
+    if row[4]
+      row[4].strip!
+      row[4].delete! '^A-Za-z'
+      row[4] = :Masculino if row[4][0].upcase.eql? 'M'
+      row[4] = :Femenino if row[4][0].upcase.eql? 'F'
+      usuario.sex = row[4] 
+    end
+
+    usuario.number_phone = row[5] if row[5]
       
       nuevo = usuario.new_record?
 
