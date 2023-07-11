@@ -146,7 +146,7 @@ class AcademicRecord < ApplicationRecord
     if self.enroll_academic_process
       data << self.enroll_academic_process.enroll_status.titleize if self.enroll_academic_process.enroll_status
 
-      if self.enroll_academic_process.retirado?
+      if self.retirado?
         data += ['--', '--']
       else
         data += [self.user.email, self.user.number_phone]

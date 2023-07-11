@@ -1,4 +1,4 @@
 - academic_records = section.academic_records.sort_by_user_name
-- total_by_page = 23
+- total_by_page = 21
 - if academic_records and academic_records.any?
 	= render partial: '/sections/acta_academic_records', locals: {academic_records: academic_records, total_by_page: total_by_page, section: @section}
