@@ -28,6 +28,7 @@ class Area < ApplicationRecord
 
   # SCOPES:
   scope :main, -> {where(parent_area_id: nil)}
+  scope :catedras, -> {where.not(parent_area_id: nil)}
   scope :names, -> {select(:name).map{|ar| ar.name}}
 
   # CALLBACKS:
@@ -61,6 +62,7 @@ class Area < ApplicationRecord
     navigation_icon 'fa-regular fa-brain'
 
     list do
+      scopes [:catedras]
       field :name
       field :parent_area
       field :total_subjects do
