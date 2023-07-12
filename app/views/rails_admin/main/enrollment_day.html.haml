@@ -1,4 +1,4 @@
-%h4.bg-dark.text-light.text-center= "Cita Horaria #{@object.short_desc}"
+%h4.bg-primary.text-light.text-center= "Cita Horaria #{@object.short_desc}"
 - if (current_user&.admin&.authorized_read? 'AcademicProcess')
   - if EnrollmentDay.any?
     = link_to "/enrollment_days/#{-1}/destroy_all", class: 'btn btn-danger mx-2 float-end', title: 'Eliminar todas las citas horarias', data: {confirm: 'Esta acción eliminará todas las citas horarias registradas en COES ¿Está completamente seguro?'} do

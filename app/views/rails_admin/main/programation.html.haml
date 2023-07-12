@@ -1,4 +1,5 @@
-%h3.text-center.bg-primary.text-light.mb-4= "#{@object.short_desc}"
+%h4.bg-primary.text-light.text-center.mb-4= "Programación #{@object.short_desc}"
+
 
 - if (current_user&.admin&.authorized_manage? 'Course')
 

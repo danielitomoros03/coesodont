@@ -115,7 +115,6 @@ class AcademicProcess < ApplicationRecord
     EnrollAcademicProcess.enroll_statuses.map do |k,v|
       total_aux = self.enroll_academic_processes.where(enroll_status: v).count 
       tipo = EnrollAcademicProcess.type_label_by_enroll k
-      p "   TIPO: #{tipo}   ".center(500, "#")
       url = link+"&scope=#{k}"
       total << ApplicationController.helpers.label_link_with_tooptip(url, "bg-#{tipo}", total_aux, k&.pluralize&.titleize)
     end

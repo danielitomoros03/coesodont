@@ -14,7 +14,7 @@ class Area < ApplicationRecord
 
   # ASSOCITATIONS:
   belongs_to :school
-  belongs_to :parent_area, optional: true, class_name: 'Area', primary_key: :parent_area_id
+  belongs_to :parent_area, optional: true, class_name: 'Area', foreign_key: :parent_area_id
   has_many :admins, as: :env_authorizable 
 
   has_many :subareas, class_name: 'Area', foreign_key: :parent_area_id
@@ -80,7 +80,10 @@ class Area < ApplicationRecord
 
     edit do
       field :name
-      field :parent_area
+      field :parent_area do
+        inline_edit false
+        inline_add false
+      end
     end 
 
     export do
