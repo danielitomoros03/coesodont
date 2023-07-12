@@ -375,8 +375,8 @@ es:
         one: 'Tipo de Admisión'  
         other: 'Tipos de Admisión'
       area:
-        one: 'Departamento'
-        other: 'Departamentos'
+        one: 'Cátedra'
+        other: 'Cátedras'
       bank:
         one: 'Banco'
         other: 'Bancos'
@@ -518,7 +518,7 @@ es:
       area:
         name: 'Nombre'
         school: 'Escuela'
-        parent_area: 'Área Madre'
+        parent_area: 'Departamento'
         subjects: 'Asignaturas'
         subarea: 'Subáreas'
       bank:
@@ -536,7 +536,7 @@ es:
         created_at: 'Fecha de Creación'
         updated_at: 'Fecha de Edición'
       course:
-        area: 'Departamento'
+        area: 'Cátedra'
         period: Período
         school: Escuela
         sections: Secciones
@@ -627,7 +627,7 @@ es:
         starttime: Hora Inicio
         endtime: Hora Final
       section:
-        area: 'Departamento'
+        area: 'Cátedra'
         code: 'Sección'
         capacity: 'Capacidad'
         course: 'Curso (Período/Asignatura)'
@@ -682,7 +682,7 @@ es:
         ordinal: 'Orden'
         qualification_type: 'Tipo de calificación'
         modality: 'Modalidad'
-        area: 'Departamento'
+        area: 'Cátedra'
         prelate_subjects: Prelada por
         depend_subjects: Asignaturas que prela
         created_at: 'Fecha de Registro'

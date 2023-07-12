@@ -82,9 +82,14 @@ class Area < ApplicationRecord
       field :name
       field :parent_area do
         inline_edit false
-        inline_add false
       end
     end 
+
+    modal do
+      field :name
+      exclude_fields :parent_area
+    end
+
 
     export do
       fields :name
