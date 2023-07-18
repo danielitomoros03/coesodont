@@ -27,12 +27,13 @@
     %tbody.table-group-divider
       - subjects = academic_process.school.subjects.where(modality: params[:scope]).sort_by_code
       - subjects.each do |subject|
-        - course = academic_process.courses.where(subject_id: subject.id).first
+        -# course = academic_process.courses.where(subject_id: subject.id).first
+        - course = Course.where(academic_process_id: academic_process.id, subject_id: subject.id).first
         - sections = course&.sections
         - has_sections = sections&.any?
-        %tr
+        %tr.trFiltrable
           %td= subject.area.name
-          %td{title: subject.desc}= subject.desc
+          %td{title: subject.desc}= link_to_if (current_user&.admin&.authorized_read? 'Subject'), subject.desc, "/admin/subject/#{subject.id}"
           %td.text-center
             - if course
               - if (current_user&.admin&.authorized_delete? 'Course')
@@ -44,14 +45,14 @@
               - if (current_user&.admin&.authorized_create? 'Course')
                 = render partial: 'academic_processes/form_active_subject', locals: {academic_process: academic_process, subject_id: subject.id, has_sections: has_sections, course: course}
               - else
-                %i.fas.fa-remove            
+                %i.fas.fa-remove
           %td
             - if course
               %table
-                %tr
+                %tr{}
                   - if has_sections
                     - if (current_user&.admin&.authorized_read? 'Section')
-                      = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: has_enrolled}
+                      = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: subject.academic_records.any?}
                   - if (current_user&.admin&.authorized_create? 'Section')
                     %td.p-0= ApplicationController.helpers.button_add_section course.id
 
@@ -115,7 +116,7 @@
     var keyword = ele.value;
     keyword = keyword.toUpperCase();
     var table_1 = document.getElementById("programation");
-    var all_tr = table_1.getElementsByTagName("tr");
+    var all_tr = table_1.getElementsByClassName("trFiltrable");
 
     for(var i=0; i<all_tr.length; i++){
         var name_column = all_tr[i].getElementsByTagName("td")[1]; //[col];

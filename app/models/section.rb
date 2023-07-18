@@ -487,7 +487,9 @@ class Section < ApplicationRecord
 
     edit do
       field :course do
-        inline_edit false
+        read_only true
+        label 'Curso'
+
       end
       field :code do
         html_attributes do
@@ -500,6 +502,7 @@ class Section < ApplicationRecord
       end
       field :teacher do
         inline_edit false
+        inline_add false
       end
 
       # field :course_id do

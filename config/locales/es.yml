@@ -454,6 +454,7 @@ es:
       academic_process:
         school: 'Escuela'
         period: 'Período'
+        subjects: Asignaturas
         max_credits: 'Máximo Créditos'
         max_subjects: 'Máximas Asignaturas'
         enroll_academic_processes: 'Inscripciones en Período'
@@ -550,6 +551,7 @@ es:
         permanence_status: 'Estado de Permanencia'
         student: 'Estudiante'
         period: 'Período'
+        user: Usuario
       enrollment_day:
         start: Inicio
         total_duration_hours: Total Duración de la Jornada

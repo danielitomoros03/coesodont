@@ -1,12 +1,24 @@
-- enabled = (current_user&.admin&.authorized_read? 'Section') ? true : false
+- enabled_read = (current_user&.admin&.authorized_read? 'Section') ? true : false
+- enabled_delete = (current_user&.admin&.authorized_delete? 'Section') ? true : false
 
 - sections.each do |sec|
-  - urlSec = enabled ? "/admin/section/#{sec.id}" : 'javascript:void(0)'
+  - urlSec = enabled_read ? "/admin/section/#{sec.id}" : 'javascript:void(0)'
   - btn = ApplicationController.helpers.btn_link_with_tooptip(urlSec, 'btn-info', sec.code, sec.schedule_teacher_desc_short)
-  = "<td class='p-1'>#{btn}</td>".html_safe
+  %td.p-1.m-3
+    = btn.html_safe
+    - if enabled_delete 
+      - if false #!sec.academic_records.any?
+        - url = "/sections/bulk_delete?bulk_ids%5B%5D=#{sec.id}"
+        = link_to url, class: 'btn btn-sm btn-danger ml-0', title: "Eliminar #{sec.code}", method: :post, 'data-confirm': "Está acción es irreversible, eliminará la sección" do
+          %i.fas.fa-trash
+      - if false #else
+        %b{title: 'Elimine las inscripciones para habilitar esta opción'}
+          = link_to "javascript:void(0)", class: 'btn btn-sm btn-danger disabled ml-0', disabled: true do
+            %i.fas.fa-trash      
 
-- if (current_user&.admin&.authorized_delete? 'Section')
-  %td
+
+- if enabled_delete
+  %td.border-start.border-3.border-secondary.m-3
     - if has_enrolled
       %b{title: 'Elimine las inscripciones en la sección para activar esta opcíon'}
         = link_to 'javascript:void(0)', class: 'btn btn-sm btn-danger disabled', disabled: true do

@@ -90,7 +90,11 @@ class Teacher < ApplicationRecord
     end
 
     edit do
-      fields :user, :area
+      fields :user
+      fields :area do
+        inline_edit false
+        inline_add false
+      end
     end
 
     export do

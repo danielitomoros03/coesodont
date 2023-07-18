@@ -108,7 +108,7 @@ RailsAdmin.config do |config|
     end
 
     edit do
-      except [EnrollAcademicProcess, AcademicRecord, Course, Section]
+      except [EnrollAcademicProcess, AcademicRecord, Course]
     end
 
     delete do

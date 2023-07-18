@@ -215,7 +215,7 @@ class AcademicProcess < ApplicationRecord
 
       field :total_sections do
 
-        column_width 130
+        column_width 150
         label 'Secciones'
         pretty_value do 
           user = bindings[:view]._current_user
@@ -228,7 +228,7 @@ class AcademicProcess < ApplicationRecord
       end
 
       field :numbers_enrolled do
-        column_width 200
+        column_width 240
         label 'Estudiantes'
         formatted_value do
           if (bindings[:view]._current_user&.admin&.authorized_read? 'EnrollAcademicProcess')
@@ -340,6 +340,21 @@ class AcademicProcess < ApplicationRecord
   after_initialize do
     if new_record?
       self.school_id ||= School.first.id
+    end
+  end
+
+  def redundant_subjects
+    subj = self.courses.group(:subject_id).having('count(*) > 1').count
+    sub_ids = subj.keys
+    self.subjects.where(id: sub_ids) 
+  end
+
+  def remove_redundant_courses
+    aux = redundant_subjects
+    if aux.any?
+      aux.each{|su| su.remove_redundant_courses_of self.id}
+    else
+      '            Sin cursos Redundates        '.center(500, '-')
     end
   end
 

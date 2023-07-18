@@ -82,7 +82,6 @@ class User < ApplicationRecord
   validates :last_name, presence: true#, unless: :new_record?
   validates_format_of :email, with: URI::MailTo::EMAIL_REGEXP
 
-
   # validates :profile_picture , presence: true, on: :update, if: lambda{ |object| (object.profile_picture.present? or object.ci_image.present?)}
   
   # validates :ci_image , presence: true, on: :update, if: lambda{ |object| (object.profile_picture.present? or object.ci_image.present?)}
@@ -105,9 +104,10 @@ class User < ApplicationRecord
   before_validation(on: :create) do
     self.password ||= self.ci #if self.password.blank?
     self.email = "temp#{self.ci}@mailinator.com" if self.email.blank? and attribute_present?("ci")
+    
   end
 
-  before_save :set_clean_values
+  before_validation :set_clean_values
   # HOOKS:
   def after_import_save(record)
     # called on the model after it is saved
@@ -115,8 +115,9 @@ class User < ApplicationRecord
   end
 
   def set_clean_values
+    # self.password ||= self.ci 
     self.clean_names if (first_name and last_name)
-    self.ci.delete! '^0-9'
+    self.ci&.delete! '^0-9'
     self.clean_phone if number_phone
     self.clean_email if email
   end
@@ -124,7 +125,7 @@ class User < ApplicationRecord
   def clean_email
     self.email.strip!
     self.email.downcase!
-    self.email.gsub!("mailto:", "") 
+    self.email&.remove!("mailto:")
     self.email.delete! '^A-Za-z|0-9|@. '
   end
 

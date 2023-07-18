@@ -102,8 +102,8 @@ class Grade < ApplicationRecord
     end
   end
 
-  def last_enroll
-    enroll_academic_processes.first
+  def last_enrolled
+    enroll_academic_processes.joins(:academic_process).order('academic_processes.name': :desc).first
   end
 
   def academic_processes_unenrolled

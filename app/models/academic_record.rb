@@ -412,6 +412,7 @@ class AcademicRecord < ApplicationRecord
       search_by :custom_search
       sort_by 'periods.name'
       # filters [:period_name, :section_code, :subject_code, :student_desc]
+
       # field :period_name do
       #   label 'Período'
       #   column_width 100
@@ -424,7 +425,7 @@ class AcademicRecord < ApplicationRecord
       # end
 
       field :period do
-        label 'Period'
+        label 'Periodo'
         column_width 120
 
         associated_collection_cache_all false
