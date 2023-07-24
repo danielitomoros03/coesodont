@@ -8,7 +8,7 @@
 .nobreak { page-break-inside: avoid; }
 
 .h-30{height:30px;}
-
+.w-15{width: 18% !important;}
 .image_profile{
   position: absolute;
   left: 20px;
@@ -39,6 +39,10 @@ font-size: 14px;
 
 .font-xs{
 font-size: 13px;
+}
+
+.font-mini{
+font-size: 11px;
 }
 
 .text-justify {

@@ -1,4 +1,4 @@
-- unless @section.qualified?
+- if !@section.qualified? and @section.is_in_process_active?
 	.alert.alert-warning
 		%b
 			%i.fa.fa-alert
@@ -16,13 +16,18 @@
 		%br
 		.fixed-top.alert.text-center.text-small#message{role: :alert}
 		=# render partial: 'academic_records/show', locals: {section: section}
-		- if @section.qualified?
-			- @academic_record = @section.academic_records
-			= render template: 'academic_records/index'
-		- else
+
+
+		- teacher_authorized_to_qualify = (logged_as_teacher? and current_user&.teacher&.id.eql? @section.teacher&.id)
+
+		- 
+		- if @section.is_in_process_active? and teacher_authorized_to_qualify and !@section.qualified?
 			= form_for(@section) do |f|
 				= render partial: 'academic_records/qualify', locals: {section: @section}
 				= f.hidden_field :qualified, {value: true}
 				= f.button :submit, class: 'float-end btn btn-success' do
 					%i.fa.fa-check
 					= 'Finalizar Calificación'
+		- else
+			- @academic_records = @section.academic_records
+			= render template: 'academic_records/index'

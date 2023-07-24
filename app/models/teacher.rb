@@ -90,7 +90,11 @@ class Teacher < ApplicationRecord
     end
 
     edit do
-      fields :user, :area
+      fields :user
+      fields :area do
+        inline_edit false
+        inline_add false
+      end
     end
 
     export do
@@ -138,7 +142,7 @@ class Teacher < ApplicationRecord
       
       if row[1]
         row[1].strip!
-        usuario.email = row[1]
+        usuario.email = row[1].remove("mailto:")
       else
         return [0,0,1]
       end
@@ -156,6 +160,16 @@ class Teacher < ApplicationRecord
       else
         return [0,0,3]
       end
+
+      if row[4]
+        row[4].strip!
+        row[4].delete! '^A-Za-z'
+        row[4] = :Masculino if row[4][0].upcase.eql? 'M'
+        row[4] = :Femenino if row[4][0].upcase.eql? 'F'
+        usuario.sex = row[4] 
+      end
+
+      usuario.number_phone = row[5] if row[5]
       
       nuevo = usuario.new_record?
 
@@ -174,7 +188,8 @@ class Teacher < ApplicationRecord
         else
           no_registred = row
         end
-      else  
+      else
+        p "     #{usuario.errors.full_messages.to_sentence  } ... #{usuario.attributes}   ".center(500, "$")
         no_registred = row
       end
     else

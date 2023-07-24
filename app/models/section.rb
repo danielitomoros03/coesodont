@@ -55,9 +55,13 @@ class Section < ApplicationRecord
   validates :course, presence: true
   validates :modality, presence: true
 
+  #CALLBACKS
+  before_save :set_code_to_02i
+  
   # SCOPE:
   # default_scope {joins(:course).order('courses.name')}
   scope :sort_by_period, -> {joins(:period).order('periods.name')}
+  scope :sort_by_period_reverse, -> {joins(:period).order('periods.name DESC')}
 
   scope :custom_search, -> (keyword) { joins(:period, :subject).where("sections.code ILIKE '%#{keyword}%' OR subjects.name ILIKE '%#{keyword}%' OR subjects.code ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'").sort_by_period }
   
@@ -172,7 +176,7 @@ class Section < ApplicationRecord
   end
 
   def qualified?
-    qualified.eql? true    
+    qualified.eql? true
   end
 
   def teacher_desc
@@ -198,6 +202,9 @@ class Section < ApplicationRecord
     end
   end
 
+  def is_in_process_active?
+    self.academic_process&.id&.eql? self.school.active_process_id
+  end
 
   def number_acta
     "#{self.subject.code.upcase}#{self.code.upcase} #{self.period.name_revert}"
@@ -483,7 +490,9 @@ class Section < ApplicationRecord
 
     edit do
       field :course do
-        inline_edit false
+        # read_only true
+        label 'Curso'
+
       end
       field :code do
         html_attributes do
@@ -496,6 +505,7 @@ class Section < ApplicationRecord
       end
       field :teacher do
         inline_edit false
+        inline_add false
       end
 
       # field :course_id do
@@ -634,6 +644,16 @@ class Section < ApplicationRecord
       no_registred = 1
     end
     [total_newed, total_updated, no_registred]
+  end
+
+  def set_code_to_02i
+    self.code&.upcase!
+    begin
+      aux = sprintf("%02i", self.code)
+      self.code = aux
+    rescue Exception => e
+
+    end
   end
 
   private

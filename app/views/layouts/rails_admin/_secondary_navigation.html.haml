@@ -40,10 +40,11 @@
       ELEMENT.innerHTML = `#{modal.html_safe}`;
       document.body.appendChild(ELEMENT);
     });
-:javascript
-  document.addEventListener('rails_admin.dom_ready', function(){
-    let ele = $('.navbar-brand')
-    let elem = `#{image_tag 'logo_coes_simple.png', width: '40px'}`
-    elem.src = 'logo_coes_simple.png'
-    ele.prepend(elem);
-  });
+- if false
+  :javascript
+    document.addEventListener('rails_admin.dom_ready', function(){
+      let ele = $('.navbar-brand')
+      let elem = `#{image_tag 'logo_coes_simple.png', width: '40px'}`
+      elem.src = 'logo_coes_simple.png'
+      ele.prepend(elem);
+    });

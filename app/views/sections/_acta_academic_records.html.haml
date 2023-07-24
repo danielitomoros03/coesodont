@@ -7,30 +7,33 @@
       %th CÉDULA
       %th APELLIDOS Y NOMBRES
       %th PLAN
-      %th DESC
+      %th CAL.
+      %th TIPO
       - unless section.subject.as_absolute?
         %th NUM
-      %th LETRAS
+      %th.w-15 LETRAS
 
   %tbody
     - academic_records.each_with_index do |ar, i|
       - if !ar.qualifications.any? or section.subject.as_absolute?
-        %tr.h-30
+        %tr.h-30.font-sm
           %td.text-center= i+1
           %td.text-center= ar.user.ci
           %td.padding-x= ar.user.reverse_name
           %td.text-center= ar.study_plan.code
           %td.text-center= ar.desc_conv_absolute
+          %td.text-center= "--"
           - unless section.subject.as_absolute?
             %td
           %td.padding-x= ar.num_to_s
       - else
         - ar.qualifications.each do |q|
-          %tr.h-30
+          %tr.h-30.font-sm
             %td.text-center= i+1
             %td.text-center= ar.user.ci
             %td.padding-x= ar.user.reverse_name
             %td.text-center= ar.study_plan.code
+            %td.text-center= ar.desc_conv_absolute
             %td.text-center= q.desc_conv
             %td.text-center= q.value_to_02i
             %td.padding-x= ar.num_to_s
@@ -38,12 +41,13 @@
     - if rest > 0
       - loops = (total_by_page-rest)-1 
       - loops.times do
-        %tr.h-30
+        %tr.h-30.font-sm
           %td= '**'
           %td.text-center= '********'
           %td.padding-x= '***************************************************'
           %td.text-center= '****'
           - unless section.subject.as_absolute?
-            %td.text-center= '*****'
+            %td.text-center= '****'
+          %td.text-center= '**'
           %td.text-center= '**'
           %td.padding-x= '*************'

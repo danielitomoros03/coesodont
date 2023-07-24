@@ -1,4 +1,9 @@
-- enabled_to_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false 
+- enabled_to_admin = (current_user&.admin? and session[:rol].eql? 'admin') ? true : false 
+- admin_authorized_to_qualify = enabled_to_admin and (current_user&.admin&.authorized_update? 'Qualification')
+- teacher_authorized_to_qualify = current_user&.teacher&.id.eql? section.teacher&.id
+
+- if teacher_authorized_to_qualify
+  %h5.alert.alert-success.text-center Profesor Autorizado para Calificar
 %table.table.table-condensed.table-striped.table-hover.border.table-bordered.table-sm.table-responsive
   %thead
     %tr.text-center
@@ -13,7 +18,7 @@
       %th Estudiante
       
       - if section.subject.numerica?
-        - if (enabled_to_admin and current_user.admin.authorized_update? 'Qualification')
+        - if (admin_authorized_to_qualify or teacher_authorized_to_qualify)
           %th.text-center PI
         %th.text-center Cal. Final
         - if false
@@ -44,14 +49,14 @@
         %td.text-center= user.ci
         %td.text-center= acre.enroll_academic_process.label_status
         %td{title: user.reverse_name}
-          - if current_user.admin? and session[:rol].eql? 'admin'
+          - if enabled_to_admin and current_user&.admin&.authorized_read? 'Student'
             %a{href: "/admin/student/#{acre.student.id}"}= user.reverse_name 
           - else
             = user.reverse_name
         - if retirado
           %td{colspan: 2}
         - else
-          - if (enabled_to_admin and current_user.admin.authorized_update? 'Qualification')
+          - if (admin_authorized_to_qualify or teacher_authorized_to_qualify)
             - @academic_record = acre
             = render partial: '/academic_records/form_qualify', locals: {academic_record: acre, disable_row: disable_row, status: status, id: id, preinscrito: preinscrito}
           - else

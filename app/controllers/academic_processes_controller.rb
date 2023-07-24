@@ -1,5 +1,16 @@
 class AcademicProcessesController < ApplicationController
-  before_action :set_academic_process, only: %i[ show edit update destroy clone_sections clean_courses run_regulation ]
+  before_action :set_academic_process, only: %i[ show edit update destroy clone_sections clean_courses run_regulation massive_confirmation]
+
+  def massive_confirmation
+    total = @academic_process.enroll_academic_processes.not_confirmado
+
+    if total.update_all(enroll_status: :confirmado)
+      flash[:success] = "Se actualizaron #{total.count} inscripciones"
+    else
+      flash[:danger] = "No fue posible completar la operación: #{total.errors.full_messages.to_sentence}"
+    end
+    redirect_back fallback_location: '/admin/enroll_academic_process'
+  end
 
   def run_regulation
     total_actualizados = 0
@@ -9,11 +20,20 @@ class AcademicProcessesController < ApplicationController
 
       grade = iep.grade
 
-      if grade.update(current_permanence_status: iep.permanence_status, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
-        total_actualizados += 1
+      if iep.is_the_last_enroll_of_grade?
+
+        if grade.update(current_permanence_status: iep.permanence_status, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
+          total_actualizados += 1
+        else
+          total_error += 1
+        end
       else
-        total_error += 1
-      end
+        if grade.update(efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
+          total_actualizados += 1
+        else
+          total_error += 1
+        end
+      end        
     end
     
     flash[:danger] = "#{ total_error} #{'Error'.pluralize(total_error)} en la actualización del estado de reglamento" if total_error > 0 

@@ -182,7 +182,8 @@ class EnrollAcademicProcessesController < ApplicationController
     if grade = Grade.find(params[:grade_id]) and academic_process = AcademicProcess.find(params[:academic_process_id])
       school = grade.school
 
-      @enroll_academic_process = EnrollAcademicProcess.new(grade_id: grade.id, academic_process_id: academic_process.id, permanence_status: :regular)
+      permanence_status = !(grade.enroll_academic_processes.any?) ? :nuevo : :regular
+      @enroll_academic_process = EnrollAcademicProcess.new(grade_id: grade.id, academic_process_id: academic_process.id, permanence_status: permanence_status)
       @enroll_academic_process.enroll_status = @enroll_academic_process.historical? ?
       :confirmado : :reservado
       if @enroll_academic_process.save!

@@ -29,7 +29,7 @@ class EnrollAcademicProcess < ApplicationRecord
 
   # ENUMERIZE:
   # IDEA CON ESTADO DE INSCRIPCIÓN EN GRADE Y ENROLL ACADEMIC PROCESS
-  enum enroll_status: [:preinscrito, :reservado, :confirmado, :retirado]
+  enum enroll_status: [:preinscrito, :reservado, :confirmado]
   enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar]  
 
   # VALIDATIONS:
@@ -44,6 +44,8 @@ class EnrollAcademicProcess < ApplicationRecord
   scope :todos, -> {where('0 = 0')}
 
   scope :of_academic_process, -> (academic_process_id) {where(academic_process_id: academic_process_id)}
+
+  # scope :preinscrito_or_reservado, -> (){where(enroll_status: [:preinscrito, :reservado])}
 
   scope :sort_by_period, -> {joins(period: :period_type).order('periods.year': :desc, 'period_types.name': :desc)}
 
@@ -64,13 +66,31 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   # FUNCTIONS:
+
+  def self.type_label_by_enroll type
+    # [:preinscrito, :reservado, :confirmado, :retirado]
+    case type
+    when 'preinscrito' 
+      'info'
+    when 'reservado' 
+      'warning'
+    when 'confirmado' 
+      'success'
+    else
+      ''
+    end
+  end
+
   def get_regulation
-    reglamento_aux = :nuevo
-    if total_retire?
-      reglamento_aux = :desertor
-    elsif self.academic_records.qualified.any?
+    if permiso_para_no_cursar?
+      reglamento_aux = :permiso_para_no_cursar
+    else
       reglamento_aux = :regular
-      if self.academic_records.coursed.any?
+      if !(self.grade.academic_records.qualified.any?)
+        reglamento_aux = :nuevo
+      elsif total_retire?
+        reglamento_aux = :desertor
+      elsif self.academic_records.coursed.any?
         if coursed_but_not_approved_any?
           reglamento_aux = :articulo3
           iep_anterior = self.before_enrolled
@@ -84,6 +104,7 @@ class EnrollAcademicProcess < ApplicationRecord
         end
       end
     end
+
     return reglamento_aux
   end
 
@@ -119,7 +140,9 @@ class EnrollAcademicProcess < ApplicationRecord
     !enrolling?
   end
 
-
+  def resume_sections
+    self.academic_records.includes(:section).map{|ar| ar.section.desc_subj_code}
+  end
 
   def total_academic_records
     self.subjects.count
@@ -253,13 +276,28 @@ class EnrollAcademicProcess < ApplicationRecord
 
     export do
       fields :enroll_status, :permanence_status, :grade, :period, :student, :user
+
+      field :resume_sections do
+        label 'Resumen Asignaturas'
+      end
+      field :total_subjects do
+        label 'Total Asignaturas'
+      end
+      field :total_credits do
+        label 'Total Créditos'
+      end
     end
+  end
+
+  def is_the_last_enroll_of_grade?
+    self.grade.last_enrolled.eql? self
   end
 
   private
 
     def update_current_permanence_status_on_grade
-      grade.update(current_permanence_status: self.permanence_status) if grade.last_enroll&.id.eql? self.id
+      grade.update(current_permanence_status: self.permanence_status) if is_the_last_enroll_of_grade?
+      
     end
 
     def paper_trail_update

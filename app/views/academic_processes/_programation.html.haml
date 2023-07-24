@@ -19,7 +19,7 @@
       - content = render partial: '/academic_processes/clonation_form', locals: {academic_process: academic_process}
       = render partial: '/layouts/scaffold-modal', locals: {content: content, title: title, id: id}
 
-    - if academic_process.sections.any? and (current_user&.admin&.authorized_delete? 'Course')
+    - if academic_process.sections.any? and !has_enrolled and (current_user&.admin&.authorized_delete? 'Course')
       - period_name = academic_process.period.name
       - total = academic_process.sections.count
 
