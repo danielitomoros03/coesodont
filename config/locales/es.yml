@@ -552,6 +552,7 @@ es:
         student: 'Estudiante'
         period: 'Período'
         user: Usuario
+        academic_records: Registros Académicos
       enrollment_day:
         start: Inicio
         total_duration_hours: Total Duración de la Jornada

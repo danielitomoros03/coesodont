@@ -4,7 +4,7 @@
     - if StudyPlan.count.eql? 1 and School.count.eql? 1
       - study_plan = StudyPlan.first
       - @study_plan_id = study_plan.id
-      - period = study_plan.school.periods.last
+      - period = study_plan.school.periods.first
       - @period_nombre = period.name if period
 
     = grouped_collection_select nil, :study_plan_id, School.all, :study_plans, :description, :id, :desc, {:prompt => "Seleccione plan de estudio por defecto...", selected: @study_plan_id}, { class: 'form-control', required: true}

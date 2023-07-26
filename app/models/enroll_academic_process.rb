@@ -82,12 +82,15 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   def get_regulation
-    reglamento_aux = :nuevo
-    if total_retire?
-      reglamento_aux = :desertor
-    elsif self.academic_records.qualified.any?
+    if permiso_para_no_cursar?
+      reglamento_aux = :permiso_para_no_cursar
+    else
       reglamento_aux = :regular
-      if self.academic_records.coursed.any?
+      if !(self.grade.academic_records.qualified.any?)
+        reglamento_aux = :nuevo
+      elsif total_retire?
+        reglamento_aux = :desertor
+      elsif self.academic_records.coursed.any?
         if coursed_but_not_approved_any?
           reglamento_aux = :articulo3
           iep_anterior = self.before_enrolled
@@ -101,6 +104,7 @@ class EnrollAcademicProcess < ApplicationRecord
         end
       end
     end
+
     return reglamento_aux
   end
 
@@ -292,7 +296,7 @@ class EnrollAcademicProcess < ApplicationRecord
   private
 
     def update_current_permanence_status_on_grade
-      grade.update(current_permanence_status: self.permanence_status) if self.is_the_last_enroll_of_grade?
+      grade.update(current_permanence_status: self.permanence_status) if is_the_last_enroll_of_grade?
       
     end
 

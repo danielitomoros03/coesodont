@@ -14,10 +14,9 @@
           %i.fa-regular.fa-refresh
           Actualizar Estados Estudiantes
 
-    - enrollment_days = @object.enrollment_days
-    - grades_without_appointment = @object.readys_to_enrollment_day
+    .text-center.alert.alert-warning.p-2.mb-3= "Sólo se permitirá la inscripción a estudiantes: Regulares, Reincorporados, en Artículo 3 o con un Permiso Especial.".html_safe
 
-    = render partial: "/enrollment_days/index", locals: {enrollment_days: enrollment_days, grades_without_appointment: grades_without_appointment, academic_process: @object}
+    = render partial: "/enrollment_days/index", locals: {academic_process: @object}
 
   - else
     .alert.alert-warning= 'Sin proceso academico anterio vinculado. Para habilitar el sistema de Cita Horaria en este proceso académico, por favor edítelo y agregue un proceso anteriór. También es importante limpiar toda cita horaria anterior'

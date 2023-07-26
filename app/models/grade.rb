@@ -11,8 +11,9 @@ class Grade < ApplicationRecord
   # t.datetime "appointment_time"
   # t.integer "duration_slot_time"
   # t.integer "current_permanence_status"
+  # t.bigint "enabled_enroll_process_id"
 
-  TITULO_NORMATIVA = "NORMAS SOBRE EL RENDIMIENTO MÍNIMO Y CONDICIONES DE PERMANENCIA DE LOS ALUMNOS EN LA U.C.V"
+  NORMATIVE_TITLE = "NORMAS SOBRE EL RENDIMIENTO MÍNIMO Y CONDICIONES DE PERMANENCIA DE LOS ALUMNOS EN LA U.C.V"
 
   ARTICULO7 = 'Artículo 7°. El alumno que, habiéndose reincorporado conforme al artículo anterior, dejare nuevamente de aprobar el 25% de la carga que curse, o en todo caso, el que no apruebe ninguna asignatura durante dos períodos consecutivos, no podrá incorporarse más a la misma Escuela o Facultad, a menos que el Consejo de Facultad, previo estudio del caso, autorice su reincorporación.'
 
@@ -75,6 +76,20 @@ class Grade < ApplicationRecord
   scope :sort_by_numbers, -> () {order([efficiency: :desc, simple_average: :desc, weighted_average: :desc])}
   
   scope :total_with_enrollments_in_period, -> (period_id) { with_enrollments_in_period(period_id).uniq.count }
+  
+  scope :valid_to_enrolls, -> (academic_process_id, process_before_id) {valid_to_enrolls_pre(process_before_id).or(Grade.special_authorized(academic_process_id))}
+
+  scope :valid_to_enrolls_pre, -> (process_before_id) {without_appointment_time.current_permanence_valid_to_enroll.enrolled_in_academic_process(process_before_id)}
+
+  scope :current_permanence_valid_to_enroll, -> {where(current_permanence_status: [:regular, :reincorporado, :articulo3])}
+
+  scope :others_permanence_invalid_to_enroll, -> {where(current_permanence_status: [:nuevo, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar])}
+
+  scope :special_authorized, -> (academic_process_id) {where(enabled_enroll_process_id:academic_process_id )}
+
+  # without_appointment_time.enrolled_in_academic_process(process_before_id)
+
+
 
   # scope :with_academic_records, -> { where('(SELECT COUNT(*) FROM  "grades" INNER JOIN "enroll_academic_processes" ON "enroll_academic_processes"."grade_id" = "grades"."id" INNER JOIN "academic_records" ON "academic_records"."enroll_academic_process_id" = "enroll_academic_processes"."id") > 0') }
 
@@ -90,6 +105,16 @@ class Grade < ApplicationRecord
   scope :custom_search, -> (keyword) { joins(:user, :school).where("users.ci ILIKE '%#{keyword}%' OR schools.name ILIKE '%#{keyword}%'") }
 
   # FUNCTIONS:
+  def help_msg
+    unless self.school.contact_email.blank?
+      "Puede escribir al correo: #{self.school.contact_email} para solicitar ayuda."
+    end
+  end
+
+  def self.normative
+    NORMATIVE_TITLE
+  end
+
   def normative_by_article
     if self.articulo7?
       ARTICULO7
@@ -110,16 +135,53 @@ class Grade < ApplicationRecord
     school.academic_processes.joins(period: :period_type).order('periods.year DESC, period_types.code DESC').reject{|ap|self.academic_processes.ids.include?(ap.id)}
   end
 
+  # ENROLLMENT
+  def valid_to_enroll_in academic_process
+    valid = false
+    if self.enabled_enroll_process.eql?(academic_process)
+      valid = true
+    else
+      academic_process_before = academic_process&.process_before
+      if (academic_process_before and self.enroll_academic_processes.of_academic_process(academic_process_before.id).any?) and (['regular', 'reincorporado', 'articulo3'].include? self.current_permanence_status)
+        valid = true
+      end
+    end
+    return valid
+  end
+
   # APPOINTMENT_TIME:
+  def has_a_appointment_time?
+    (self.appointment_time.nil? or self.duration_slot_time.nil?) ? false : true
+  end
+
+
+  def can_enroll_by_apponintment? #puede_inscribir?
+    ((has_a_appointment_time?) and (Time.zone.now > self.appointment_time) and (Time.zone.now < self.appointment_slot_time) ) ? true : false
+  end
+
+  def enroll_is_in_future?
+    if self.appointment_slot_time
+      (self.appointment_slot_time > Time.zone.now) 
+    else
+      false
+    end
+  end
+
   def appointment_slot_time
-    (self.appointment_time and self.duration_slot_time) ? self.appointment_time+self.duration_slot_time.minutes : nil    
+    (has_a_appointment_time?) ? self.appointment_time+self.duration_slot_time.minutes : nil    
   end
 
   def appointment_from_to
     if self.appointment_time and self.appointment_slot_time
       aux = (I18n.localize(self.appointment_time, format: "%A, %d de %B de %Y de %I:%M%p")) 
-      aux += (I18n.localize(self.appointment_slot_time, format: "a %I:%M%p,"))
+      aux += (I18n.localize(self.appointment_slot_time, format: " a %I:%M%p"))
       return aux
+    end
+  end
+
+  def appointment_passed
+    if self.appointment_slot_time
+      (I18n.localize(self.appointment_slot_time, format: "%A %d de %B de %Y hasta las %I:%M%p"))
     end
   end
 
@@ -204,10 +266,6 @@ class Grade < ApplicationRecord
 
   def academic_records_any?
     self.academic_records.any?
-  end
-
-  def can_enroll_by_apponintment? #puede_inscribir?
-    ((self.appointment_time and self.duration_slot_time) and (Time.zone.now > self.appointment_time) and (Time.zone.now < self.appointment_time+self.duration_slot_time.minutes) ) ? true : false
   end
 
   def user

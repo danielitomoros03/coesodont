@@ -11,7 +11,8 @@
 - courses_offer = courses_offer.order_by_subject_code
 - limitCredits = academic_process.max_credits
 - limitSubjects = academic_process.max_subjects
-- msgDanger = "Seleccione las asignaturas que desea preinscribir. Recuerde mover el scroll para ver todas las asignaturas ofertadas."
+- msgDanger = "Seleccione las asignaturas que desea preinscribir. Recuerde mover el scroll para ver todas las asignaturas ofertadas. Finalmente haga clíc en 'Completar' "
+
 
 - if current_user.admin? and session[:rol].eql? 'admin'
   .bg-info.text-primary.p-3.text-center

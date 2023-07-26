@@ -1,0 +1,7 @@
+- unless grado.regular?
+  .alert.alert-danger 
+    %h5.text-center= Grade.normative
+    %h5.alert Atención, usted ha incurrido en la siguiente falta:
+    %h6.alert.alert-warning.text-justify= grado.normative_by_article&.html_safe
+    - if grado.articulo6? or grado.articulo7?
+      %h5.alert Por favor comuníquese con el personal administrativo para solventar su situación.

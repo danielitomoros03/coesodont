@@ -159,7 +159,7 @@ class AcademicProcess < ApplicationRecord
     #   grades_ids = self.grades.ids
     #   self.school.grades.without_appointment_time.joins(:academic_processes).where("academic_processes.id IN (?)", grades_before_ids).sort_by_numbers.uniq if process_before
     # end
-    self.school.grades.without_appointment_time.enrolled_in_academic_process(self.process_before.id).sort_by_numbers.uniq if process_before
+    self.school.grades.valid_to_enrolls(self.id,self.process_before.id).sort_by_numbers.uniq if process_before
     
   end
 
@@ -167,6 +167,14 @@ class AcademicProcess < ApplicationRecord
   def update_enroll_academic_processes_permanence_status
       self.enroll_academic_processes.each{|eap| eap.update(permanence_status: eap.get_regulation) if eap.finished?}
   end
+
+  def update_enroll_academic_processes_with_grade
+      self.enroll_academic_processes.each do |eap| 
+        eap.update(permanence_status: eap.get_regulation)
+        eap.grade.update(current_permanence_status: eap.get_regulation)
+      end
+  end
+
 
   rails_admin do
     navigation_label 'Config Específica'

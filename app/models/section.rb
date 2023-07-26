@@ -55,6 +55,9 @@ class Section < ApplicationRecord
   validates :course, presence: true
   validates :modality, presence: true
 
+  #CALLBACKS
+  before_save :set_code_to_02i
+  
   # SCOPE:
   # default_scope {joins(:course).order('courses.name')}
   scope :sort_by_period, -> {joins(:period).order('periods.name')}
@@ -487,7 +490,7 @@ class Section < ApplicationRecord
 
     edit do
       field :course do
-        read_only true
+        # read_only true
         label 'Curso'
 
       end
@@ -641,6 +644,16 @@ class Section < ApplicationRecord
       no_registred = 1
     end
     [total_newed, total_updated, no_registred]
+  end
+
+  def set_code_to_02i
+    self.code&.upcase!
+    begin
+      aux = sprintf("%02i", self.code)
+      self.code = aux
+    rescue Exception => e
+
+    end
   end
 
   private

@@ -1,7 +1,10 @@
 - if false #current_user.sign_in_count.eql? 1
   =# render template: 'devise/passwords/edit', locals: {resource: current_user, resource_name: 'User'}
-= render partial: '/users/personal_data', locals: {user: @student.user}
 
-.mt-4.p-4= render partial: '/students/show', locals: {student: @student}
 
-/= link_to show_path(@grade, format: :pdf), target: '_blank', title: 'Click para Exportar como PDF', class: 'btn btn-default'
+.p-3
+  = render partial: '/users/personal_data', locals: {user: @student.user}
+
+  = render partial: '/students/show', locals: {student: @student}
+
+=# link_to show_path(@grade, format: :pdf), target: '_blank', title: 'Click para Exportar como PDF', class: 'btn btn-default'

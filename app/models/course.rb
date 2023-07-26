@@ -149,6 +149,7 @@ class Course < ApplicationRecord
       end
 
       field :sections do
+        column_width '300'
         pretty_value do
           bindings[:object].sections.map{|sec| ApplicationController.helpers.link_to(sec.code, "/admin/section/#{sec.id}")}.to_sentence.html_safe
         end
