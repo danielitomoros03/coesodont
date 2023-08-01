@@ -15,7 +15,7 @@ class Area < ApplicationRecord
   # ASSOCITATIONS:
   belongs_to :school
   belongs_to :parent_area
-  # belongs_to :other_parent, optional: true, class_name: 'Area', foreign_key: :other_parent_id
+  belongs_to :other_parent, optional: true, class_name: 'Area', foreign_key: :other_parent_id
   has_many :admins, as: :env_authorizable 
 
   has_many :subareas, class_name: 'Area', foreign_key: :parent_area_id
