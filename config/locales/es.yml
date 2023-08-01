@@ -405,8 +405,8 @@ es:
         one: 'Reporte de Pago'
         other: 'Reportes de Pago'
       parent_area:
-        one: 'Área Madre'
-        other: 'Áreas Madres'
+        one: 'Departamento'
+        other: 'Departamentos'
       period:
         one: 'Período'
         other: 'Períodos'
