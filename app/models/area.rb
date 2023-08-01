@@ -59,7 +59,6 @@ class Area < ApplicationRecord
     weight 1
 
     list do
-      scopes [:catedras]
       field :name
       field :parent_area
       # field :other_parent
