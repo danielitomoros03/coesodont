@@ -311,6 +311,11 @@ es:
           attributes:
             env_authorizable:
               required: 'requerido'
+        area:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: 'Tiene asignaturas asociadas'
         grade:
           attributes:
             admission_type:
@@ -319,6 +324,13 @@ es:
           attributes:
             payable:
               required: 'requerido'
+        parent_area:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: 'Tiene áreas de conocimiento asociadas'
+            school:
+              required: 'requerida'
         school:
           attributes:
             faculty:

@@ -17,9 +17,7 @@ class Area < ApplicationRecord
   belongs_to :other_parent, optional: true, class_name: 'Area', foreign_key: :other_parent_id
   has_many :admins, as: :env_authorizable 
 
-  # has_many :subareas, class_name: 'Area', foreign_key: :parent_area_id
-
-  has_many :subjects, dependent: :destroy
+  has_many :subjects, dependent: :restrict_with_error
   # accepts_nested_attributes_for :subjects
 
   # VALIDATIONS:
@@ -61,7 +59,6 @@ class Area < ApplicationRecord
     list do
       field :name
       field :parent_area
-      # field :other_parent
       field :total_subjects do
         label 'Total Asignaturas'
       end
@@ -69,20 +66,18 @@ class Area < ApplicationRecord
     show do
       field :name
       field :parent_area
-      # field :other_parent
       field :subjects
     end 
 
     edit do
-      field :name
+      field :name do
+        html_attributes do
+          {:onInput => "$(this).val($(this).val().toUpperCase())"}
+        end         
+      end
 
       field :parent_area do
         inline_edit false
-      end
-
-
-      field :other_parent do
-        read_only true
       end
 
     end 
