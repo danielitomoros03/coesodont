@@ -22,6 +22,7 @@ class AdmissionType < ApplicationRecord
   rails_admin do
     navigation_label 'Config General'
     navigation_icon 'fa-regular fa-user-tag'
+    weight -1
 
     list do
       field :name

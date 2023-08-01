@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_28_210348) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_31_204010) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -123,9 +123,11 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_28_210348) do
   create_table "areas", force: :cascade do |t|
     t.string "name", null: false
     t.bigint "school_id", null: false
-    t.bigint "parent_area_id"
+    t.bigint "other_parent_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "parent_area_id"
+    t.index ["other_parent_id"], name: "index_areas_on_other_parent_id"
     t.index ["parent_area_id"], name: "index_areas_on_parent_area_id"
     t.index ["school_id"], name: "index_areas_on_school_id"
   end
@@ -249,6 +251,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_28_210348) do
     t.string "name_group"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "parent_areas", force: :cascade do |t|
+    t.string "name"
+    t.bigint "school_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["school_id"], name: "index_parent_areas_on_school_id"
   end
 
   create_table "payment_reports", force: :cascade do |t|
@@ -470,7 +480,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_28_210348) do
   add_foreign_key "addresses", "students", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "admins", "users"
   add_foreign_key "admission_types", "schools"
-  add_foreign_key "areas", "areas", column: "parent_area_id"
+  add_foreign_key "areas", "areas", column: "other_parent_id"
   add_foreign_key "areas", "schools"
   add_foreign_key "authorizables", "area_authorizables"
   add_foreign_key "authorizeds", "admins", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
@@ -486,6 +496,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_28_210348) do
   add_foreign_key "grades", "admission_types"
   add_foreign_key "grades", "students", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "grades", "study_plans"
+  add_foreign_key "parent_areas", "schools"
   add_foreign_key "payment_reports", "banks", column: "origin_bank_id"
   add_foreign_key "qualifications", "academic_records"
   add_foreign_key "schedules", "sections"

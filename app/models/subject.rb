@@ -229,7 +229,7 @@ class Subject < ApplicationRecord
   rails_admin do
     navigation_label 'Config General'
     navigation_icon 'fa-regular fa-book'
-    weight -1
+    weight 2
 
     object_label_method do
       :desc
