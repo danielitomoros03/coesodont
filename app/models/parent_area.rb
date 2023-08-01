@@ -16,7 +16,7 @@ class ParentArea < ApplicationRecord
 		weight 0
 
 		edit do
-			fields :name, :school
+			fields :name, :school, :areas
 		end
 
 		list do

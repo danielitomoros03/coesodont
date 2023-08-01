@@ -2,7 +2,6 @@ class Area < ApplicationRecord
   # SCHEMA:
   # t.string "name", null: false
   # t.bigint "school_id", null: false
-  # t.bigint "parent_area_id"
   
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -18,7 +17,7 @@ class Area < ApplicationRecord
   belongs_to :other_parent, optional: true, class_name: 'Area', foreign_key: :other_parent_id
   has_many :admins, as: :env_authorizable 
 
-  has_many :subareas, class_name: 'Area', foreign_key: :parent_area_id
+  # has_many :subareas, class_name: 'Area', foreign_key: :parent_area_id
 
   has_many :subjects, dependent: :destroy
   # accepts_nested_attributes_for :subjects
@@ -28,8 +27,8 @@ class Area < ApplicationRecord
   validates :school_id, presence: true
 
   # SCOPES:
-  scope :main, -> {where(parent_area_id: nil)}
-  scope :catedras, -> {where.not(parent_area_id: nil)}
+  # scope :main, -> {where(parent_area_id: nil)}
+  # scope :catedras, -> {where.not(parent_area_id: nil)}
   scope :names, -> {select(:name).map{|ar| ar.name}}
 
   # CALLBACKS:
@@ -51,10 +50,6 @@ class Area < ApplicationRecord
     subjects.count
   end
 
-  def total_subareas
-    subareas.count
-  end
-
   rails_admin do
     visible do
       bindings[:controller].current_user&.admin?
@@ -71,17 +66,12 @@ class Area < ApplicationRecord
       field :total_subjects do
         label 'Total Asignaturas'
       end
-
-      field :total_subareas do
-        label 'Total Subareas'
-      end
     end
     show do
       field :name
       field :parent_area
       # field :other_parent
       field :subjects
-      field :subareas
     end 
 
     edit do
@@ -91,9 +81,10 @@ class Area < ApplicationRecord
         inline_edit false
       end
 
-      field :other_parent do
-        read_only true
-      end
+
+      # field :other_parent do
+      #   read_only true
+      # end
 
     end 
 
