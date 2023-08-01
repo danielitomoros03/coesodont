@@ -528,6 +528,7 @@ es:
       parent_area:
         name: 'Nombre'
         school: 'Escuela'
+        areas: 'Cátedras'
       bank:
         code: 'Código'
         name: 'Nombre'
