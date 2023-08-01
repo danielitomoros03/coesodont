@@ -81,9 +81,9 @@ class Area < ApplicationRecord
       end
 
 
-      # field :other_parent do
-      #   read_only true
-      # end
+      field :other_parent do
+        read_only true
+      end
 
     end 
 
