@@ -196,6 +196,11 @@ class Subject < ApplicationRecord
 
   end
 
+
+  def label_credits
+    return ApplicationController.helpers.label_status("bg-info", self.unit_credits)
+  end
+
   def label_modality
     return ApplicationController.helpers.label_status("bg-info", self.modality.titleize) if self.modality
   end
