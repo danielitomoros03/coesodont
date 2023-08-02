@@ -717,7 +717,7 @@ es:
         created_at: Creado en
         updated_at: Actualizado en
       teacher:
-        area: 'Departamento'
+        area: 'Cátedra'
         user: 'Usuario'
         created_at: 'Fecha de Registro'
         sections: 'Secciones'
