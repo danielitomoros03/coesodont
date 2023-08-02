@@ -18,6 +18,7 @@ class Area < ApplicationRecord
   has_many :admins, as: :env_authorizable 
 
   has_many :subjects, dependent: :restrict_with_error
+  has_many :teachers, dependent: :restrict_with_error
   # accepts_nested_attributes_for :subjects
 
   # VALIDATIONS:
@@ -62,11 +63,17 @@ class Area < ApplicationRecord
       field :total_subjects do
         label 'Total Asignaturas'
       end
+      field :teachers do
+        label 'Profesores'
+      end
     end
     show do
       field :name
       field :parent_area
       field :subjects
+      field :teachers do
+        label 'Profesores'
+      end      
     end 
 
     edit do

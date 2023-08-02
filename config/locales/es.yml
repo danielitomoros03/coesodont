@@ -315,7 +315,7 @@ es:
           attributes:
             base:
               restrict_dependent_destroy:
-                has_many: 'Tiene asignaturas asociadas'
+                has_many: 'Tiene asignaturas o profesores asociadas'
         grade:
           attributes:
             admission_type:
