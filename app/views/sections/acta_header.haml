@@ -3,7 +3,7 @@
   .font-title UNIVERSIDAD CENTRAL DE VENEZUELA
   PLANILLA DE EXAMENES
   %br
-  = "TIPO DE EXAMEN: FINAL #{section.academic_process.exame_type.upcase}"
+  = "TIPO DE EXAMEN: #{section.academic_process.exame_type.upcase}"
 
 = render partial: '/sections/acta_title', locals: {period_name: section.period.name, faculty_name: school.faculty.name, section: section, school_name: school.name} 
 

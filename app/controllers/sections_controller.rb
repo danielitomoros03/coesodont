@@ -29,7 +29,9 @@ class SectionsController < ApplicationController
       respond_to do |format|
         format.html
         format.pdf do
-          render pdf: "acta_#{@section.number_acta}", template: "sections/acta", locals: {section: @section}, formats: [:html], page_size: 'letter', header: {html: {template: '/sections/acta_header', formats: [:html], layout: false, locals: {school: @section.school, section: @section}}}, footer: {html: {template: '/sections/signatures', formats: [:html]}}, margin: {top: 72, bottom: 68}#, dpi: 150
+          top = 72
+          # top += 10 if @section.subject&.name&.length > 52
+          render pdf: "acta_#{@section.number_acta}", template: "sections/acta", locals: {section: @section}, formats: [:html], page_size: 'letter', header: {html: {template: '/sections/acta_header', formats: [:html], layout: false, locals: {school: @section.school, section: @section}}}, footer: {html: {template: '/sections/signatures', formats: [:html]}}, margin: {top: top, bottom: 68}#, dpi: 150
         end
       end
     else

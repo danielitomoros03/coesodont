@@ -21,10 +21,11 @@ module ApplicationHelper
 		btn_toggle classes, 'fa fa-download', href, title_tooltip, value, onclick_action
 	end
 
-
 	def label_status(klazz, content)
-		capture_haml{"<span class='text-center badge #{klazz}'>#{content}</span>".html_safe }
+		text_color = (klazz.eql? 'bg-info') ? 'text-dark' : ''
+		capture_haml{"<span class='text-center badge #{klazz} #{text_color}'>#{content}</span>".html_safe }
 	end
+
 
 	def button_add_section course_id
 

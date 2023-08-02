@@ -1,17 +1,23 @@
 - logged_as_admin = (current_user&.admin? and session[:rol].eql? 'admin') ? true : false
+- enrollment_days = academic_process.enrollment_days
+- grades_without_appointment = academic_process.readys_to_enrollment_day
+- grades_others = Grade.enrolled_in_academic_process(academic_process.process_before.id).others_permanence_invalid_to_enroll
+
 - if logged_as_admin and grades_without_appointment.any? and (current_user&.admin&.authorized_create? 'AcademicProcess')
   - id = 'newEnrollmentDayModal'
   %button.btn.btn-success.float-end{"data-bs-target": "##{id}", "data-bs-toggle": :modal, type: :button}
     .fa.fa-plus
     Nueva Jornada por Cita Horaria
-
+  - total_grades = grades_without_appointment.count
   - title = 'Nueva Jornada por Cita Horaria'
-  - content = render partial: '/enrollment_days/form', locals: {enrollment_day: EnrollmentDay.new(academic_process_id: academic_process.id), total_grades_without_appointment: grades_without_appointment.count}
+  - content = render partial: '/enrollment_days/form', locals: {enrollment_day: EnrollmentDay.new(academic_process_id: academic_process.id), total_grades_without_appointment: total_grades}
   = render partial: '/layouts/scaffold-modal', locals: {content: content, title: title, id: id}
 
 %ul#myTab.nav.nav-tabs{role: "tablist"}
   %li.nav-item{role: "presentation"}
-    %button#withoutAppointment-tab.nav-link.active{"aria-controls": "withoutAppointment", "aria-selected": true, "data-bs-target": "#withoutAppointment", "data-bs-toggle": :tab, role: :tab, type: "button"}= "#{grades_without_appointment.count} Estudiante(s) válido(s) para aplicar en Nueva Jornada"
+    %button#otherGrades-tab.nav-link{"aria-controls": "otherGrades", "aria-selected": true, "data-bs-target": "#otherGrades", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{grades_others.count} Estudiante(s) que no aplican a Nueva Jornada por Cita Horaria"}= "No Aplican"
+  %li.nav-item{role: "presentation"}
+    %button#withoutAppointment-tab.nav-link.active{"aria-controls": "withoutAppointment", "aria-selected": true, "data-bs-target": "#withoutAppointment", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{total_grades} Estudiante(s) válido(s) para aplicar en Nueva Jornada"}= "Válidos para Aplicar"
 
   - enrollment_days.each do |day|
     %li.nav-item{role: "presentation"}
@@ -20,11 +26,17 @@
         .badge.bg-dark= day.own_grades_count
 
 #myTabContent.tab-content
+  #otherGrades.tab-pane.fade{"aria-labelledby": "otherGrades-tab", role: "tabpanel"}
+    %h6.text-center.alert.alert-warning
+      = "Estudiantes con situaciones que impide su inscripción. Puede cambiar su situación entrando al detalle de cada uno luego de correr 'Actualizar Estados Estudantes'.".html_safe  
+    = render partial: '/enrollment_days/grades', locals: {grades: grades_others, academic_process: academic_process}
+
   #withoutAppointment.tab-pane.fade.show.active{"aria-labelledby": "withoutAppointment-tab", role: "tabpanel"}
 
     - if grades_without_appointment&.any?
       %h6.text-center.alert.alert-warning
         = "Estudiantes sin Cita Horaria e Inscritos en el periodo anterior: <b>#{academic_process.process_before.period_name}</b> de <b>#{academic_process.school.short_name}</b>".html_safe
+
       = render partial: '/enrollment_days/grades', locals: {grades: grades_without_appointment, academic_process: academic_process}
     - else
       %h5.alert.alert-info Sin estudiantes pendientes por asignar Cita Horaria  

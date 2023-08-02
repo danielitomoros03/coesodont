@@ -311,6 +311,11 @@ es:
           attributes:
             env_authorizable:
               required: 'requerido'
+        area:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: 'Tiene asignaturas asociadas'
         grade:
           attributes:
             admission_type:
@@ -319,6 +324,13 @@ es:
           attributes:
             payable:
               required: 'requerido'
+        parent_area:
+          attributes:
+            base:
+              restrict_dependent_destroy:
+                has_many: 'Tiene áreas de conocimiento asociadas'
+            school:
+              required: 'requerida'
         school:
           attributes:
             faculty:
@@ -404,6 +416,9 @@ es:
       payment_report:
         one: 'Reporte de Pago'
         other: 'Reportes de Pago'
+      parent_area:
+        one: 'Área Madre'
+        other: 'Áreas Madres'
       period:
         one: 'Período'
         other: 'Períodos'
@@ -522,6 +537,9 @@ es:
         parent_area: 'Área Madre'
         subjects: 'Asignaturas'
         subarea: 'Subáreas'
+      parent_area:
+        name: 'Nombre'
+        school: 'Escuela'
       bank:
         code: 'Código'
         name: 'Nombre'

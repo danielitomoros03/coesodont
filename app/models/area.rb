@@ -2,7 +2,6 @@ class Area < ApplicationRecord
   # SCHEMA:
   # t.string "name", null: false
   # t.bigint "school_id", null: false
-  # t.bigint "parent_area_id"
   
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -14,12 +13,11 @@ class Area < ApplicationRecord
 
   # ASSOCITATIONS:
   belongs_to :school
-  belongs_to :parent_area, optional: true, class_name: 'Area', foreign_key: :parent_area_id
+  belongs_to :parent_area
+  belongs_to :other_parent, optional: true, class_name: 'Area', foreign_key: :other_parent_id
   has_many :admins, as: :env_authorizable 
 
-  has_many :subareas, class_name: 'Area', foreign_key: :parent_area_id
-
-  has_many :subjects, dependent: :destroy
+  has_many :subjects, dependent: :restrict_with_error
   # accepts_nested_attributes_for :subjects
 
   # VALIDATIONS:
@@ -27,7 +25,8 @@ class Area < ApplicationRecord
   validates :school_id, presence: true
 
   # SCOPES:
-  scope :main, -> {where(parent_area_id: nil)}
+  # scope :main, -> {where(parent_area_id: nil)}
+  # scope :catedras, -> {where.not(parent_area_id: nil)}
   scope :names, -> {select(:name).map{|ar| ar.name}}
 
   # CALLBACKS:
@@ -49,16 +48,13 @@ class Area < ApplicationRecord
     subjects.count
   end
 
-  def total_subareas
-    subareas.count
-  end
-
   rails_admin do
     visible do
       bindings[:controller].current_user&.admin?
     end
     navigation_label 'Config General'
     navigation_icon 'fa-regular fa-brain'
+    weight 1
 
     list do
       field :name
@@ -66,25 +62,31 @@ class Area < ApplicationRecord
       field :total_subjects do
         label 'Total Asignaturas'
       end
-
-      field :total_subareas do
-        label 'Total Subareas'
-      end
     end
     show do
       field :name
       field :parent_area
       field :subjects
-      field :subareas
     end 
 
     edit do
-      field :name
+      field :name do
+        html_attributes do
+          {:onInput => "$(this).val($(this).val().toUpperCase())"}
+        end         
+      end
+
       field :parent_area do
         inline_edit false
-        inline_add false
       end
+
     end 
+
+    modal do
+      field :name
+      exclude_fields :parent_area
+    end
+
 
     export do
       fields :name

@@ -1,14 +1,13 @@
 - grade.update(efficiency: grade.calculate_efficiency, simple_average: grade.calculate_average, weighted_average: grade.calculate_weighted_average)
 
-.mb-3
+
+.border.border-info.mb-3
 	%h4.text-center.bg-info.py-2 Resumen Académico
-	= render partial: '/grades/download_options', locals: {grade: grade}
-	
-	= render partial: '/grades/general', locals: {grade: grade}
-	.container
+	.p-3
+		= render partial: '/grades/download_options', locals: {grade: grade}
+		
+		= render partial: '/grades/general', locals: {grade: grade}
+		
 		.row
-			.col
-				= render partial: '/grades/total_table', locals: {grade: grade}
-			.col
-				= render partial: '/grades/numbers_table', locals: {grade: grade}
-%br
+			.col= render partial: '/grades/total_table', locals: {grade: grade}
+			.col= render partial: '/grades/numbers_table', locals: {grade: grade}

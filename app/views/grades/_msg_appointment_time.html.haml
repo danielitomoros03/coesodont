@@ -3,4 +3,5 @@
     %b Atención:
     = "Estimad#{grade.student.user.genero} #{grade.student.user.nick_name.titleize}, le informamos que su Cita Horaria es el"
     %b= grade.appointment_from_to
-    = "usted podrá inscribirse <b>ÚNICAMENTE</b> durante este lapso de tiempo. </br></br> Recuerde que para completar su inscripción usted debe; seleccionar la(s) asignatura(s) que desea cursar, realizar el pago del aransel correspondiente y reportar su pago aquí.".html_safe
+    %br
+    = render partial: 'enroll_academic_processes/msg_enroll_info_complete', locals: {grade: grade}

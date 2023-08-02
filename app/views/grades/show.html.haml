@@ -1,62 +1,107 @@
+- if false
+  .toast{"aria-atomic" => "true", "aria-live" => "assertive", :role => "alert", autohide: false}
+    .toast-header
+      %img.rounded.me-2{:alt => "...", :src => "..."}/
+      %strong.me-auto Bootstrap
+      %small 11 mins ago
+      %button.btn-close{"aria-label" => "Close", "data-bs-dismiss" => "toast", :type => "button"}
+    .toast-body
+      Hello, world! This is a toast message.
+
+
 - if false #current_user.eql? @student.user and grade and grade.reportepago.nil? and grade.asignado? and !@grado.enroll_academic_process.any?
-	- # REPORTE DE PAGO DE LA ESCUELA
-	- # 
-	= # render template: 'payment_reports/new'que contenga lo de abajo 👇🏽
-	- reportable = grado
-	- payment_report = PaymentReport.new
-	- content = render partial: "/payment_reports/form"
-	= render partial: '/layouts/scaffold-modal', locals: {id_modal: "paymentReportGrade#{@grado.id}", content: content, title: 'Reportar Pago a la Facultad de Ingreso a Escuela'}
+  - # REPORTE DE PAGO DE LA ESCUELA
+  - # 
+  = # render template: 'payment_reports/new'que contenga lo de abajo 👇🏽
+  - reportable = grado
+  - payment_report = PaymentReport.new
+  - content = render partial: "/payment_reports/form"
+  = render partial: '/layouts/scaffold-modal', locals: {id_modal: "paymentReportGrade#{@grado.id}", content: content, title: 'Reportar Pago a la Facultad de Ingreso a Escuela'}
 
-	= link_to '#', onclick: "$('#paymentReportGrade#{grado.id}').modal()", class: 'm-3 btn btn-success' do
-		= glyph 'plus'
-		= "Reportar Pago Ingreso a #{grade.school.code}"
+  = link_to '#', onclick: "$('#paymentReportGrade#{grado.id}').modal()", class: 'm-3 btn btn-success' do
+    = glyph 'plus'
+    = "Reportar Pago Ingreso a #{grade.school.code}"
 
-- if session[:rol] and session[:rol].eql? 'admin' and current_user and current_user.admin and (current_user.admin.authorized_manage? 'AcademicRecord')
-	.m-3.p-3= render partial: 'enroll_academic_processes/new', locals: {grade: grade}
+
+- if session[:rol]&.eql? 'admin' and (current_user&.admin&.authorized_manage? 'AcademicRecord')
+  .m-3.p-3= render partial: 'enroll_academic_processes/new', locals: {grade: grade}
 - else
-	- school = grade.school
-	- academic_process = school.enroll_process
-	- academic_process_before = academic_process.process_before if academic_process
-	- enroll_in_process = grade.enroll_academic_processes.where(academic_process_id: academic_process.id).first if academic_process
+  - school = grade.school
+  - # NUEVO SECUENCIA DE INSCRIPCIÓN:
 
-	- # VALIDA QUE TENGA CITA HORARIA, QUE NO SE HAYA PREINSCRITO
-	- # >>>>> OJO: FALTA VALIDAR QUE NO HAYA OCURRIDO LA CITA, ES DECIR, QUE ESTÉ EN EL FUTURO <<<<<
-	- if (grade.appointment_time and grade.duration_slot_time and grade.appointment_time > Time.zone.now and enroll_in_process.nil?)
-		- # MENSAJE DE CITA HORARIA:
-		= render partial: 'grades/msg_appointment_time', locals: {grade: grade}
+  - if academic_process = school&.enroll_process
+    - academic_process_before = academic_process&.process_before
+    - # INSCRIPCIÓN ABIERTA!
+    .border.border-success.mb-3
+      - title = "PROCESO DE INSCRIPCIÓN #{academic_process.period.name} ABIERTO "
+      %h4#title.text-center.bg-success.text-light.py-2.mt-0
+      .p-2
+        - if grade.valid_to_enroll_in academic_process
+          - # "REGULAR"
 
-	- # INSCRIPCIÓN ABIERTA PARA PROCESO ACADÉMICO:
-	- if academic_process and academic_process_before
-		- if academic_process.enroll_instructions
-			.border.m-2.p-2= academic_process.enroll_instructions.html_safe
+          - if grade.articulo3?
+            - # ROYER RABIT
+            = render partial: '/grades/regulation', locals: {grado: grade}
 
-		- enrolling = (!enroll_in_process.nil? and enroll_in_process.reservado?)
-		- # NO INSCRITO O RESERVADO:
-		- if enroll_in_process.nil? or enrolling
-			- totalCreditsReserved = enroll_in_process ? enroll_in_process.total_credits : 0
-			- totalSubjectsReserved = enroll_in_process ? enroll_in_process.total_subjects : 0
-			-# process_before = academic_process.process_before 
-			- current_enrollment_day = academic_process.enrollment_days.of_today.first
-			- active_enrollment_day = (current_enrollment_day and current_enrollment_day.active_now?)? true : false
-			- if active_enrollment_day
-				%h4.text-center.alert.alert-success= "Jornada por Cita Horaria Activa"
+          - enrolling = grade.enroll_academic_processes.where(academic_process_id: academic_process.id).first
+          - if (enrolling.nil? or enrolling&.reservado?)
+            - # PROCESO DE INSCRIPCIÓN NO COMPLETADO
+            - if academic_process.enroll_instructions
+              .border.m-2.p-2.text-center
+                = raw academic_process.enroll_instructions
 
-			- enabled_enroll_by_appointment = (!active_enrollment_day.nil? and grade.can_enroll_by_apponintment?)
+            - if academic_process.enrollment_days.any?
+              - # PLANIFICACIÓN POR CITA HORARIA
+              - current_enrollment_day = academic_process.enrollment_days.of_today.first
+              - if current_enrollment_day&.active_now?
+                - title += " CON CITA HORARIA"
 
-			- enrolled_in_before_progress = grade.enroll_academic_processes.of_academic_process(academic_process_before.id).any?
+              - if grade.has_a_appointment_time?
+                - if grade.can_enroll_by_apponintment?
+                  - if enrolling&.reservado?
+                    - # InProgress
+                    = render partial: 'grades/msg_enroll_in_progress', locals: {grade: grade}
 
-			- special_enabled_to_enroll = (grade.enabled_enroll_process.eql? academic_process.id)
+                  - # It's Time!
+                  = render partial: 'grades/msg_its_time_to_enroll', locals: {grade: grade}
+                  - # Incluir cuenta regresiva js
 
-			- valid_to_regular_enroll = (current_enrollment_day.nil? and ((grade.confirmado?) and (grade.is_new? or enrolled_in_before_progress) or special_enabled_to_enroll ))
+                  - enabled_to_enroll = true
+                - elsif (grade.enroll_is_in_future? and enrolling.nil?)
+                  - # message future enrollment_day:
+                  = render partial: 'grades/msg_appointment_time', locals: {grade: grade}
+                - else
+                  = render partial: 'enroll_academic_processes/msg_the_time_to_enroll_passed', locals: {grade: grade}
 
-			- #permitida = !(@grado.articulo_7? or @grado.articulo_6? or @grado.iniciado_periodo_id.eql? @periodo_inscripcion.id)
-			- #NOTA INTERNA: La siguiente línea no funciona con or. por lo que fue cambiada a || 
-			- #Tiene que ver con que el or pareciera un or exclusivo, es decir que tienen que ser todos true. O tiene que ver con que algunos valores no son binarios (true or flase) sino que son null u otra cosa
-			- enabled_enroll_by_general = enrolling || valid_to_regular_enroll 
+            - else
+              - # PLANIFICACION DIRECTA, SIN CITA HORARIA
+              - enabled_to_enroll = true
 
-			- if (enabled_enroll_by_appointment || enabled_enroll_by_general)
-				%h4.text-center.text-success.mt-1= "INSCRIPCIÓN  #{academic_process.period.name} ABIERTA"
-				.m-3.p-3.text-center= render partial: 'enroll_academic_processes/new', locals: {grade: grade, academic_process: academic_process}
+          - if enabled_to_enroll
+            .m-3.p-3.text-center= render partial: 'enroll_academic_processes/new', locals: {grade: grade, academic_process: academic_process}
+        - elsif ['articulo3', 'articulo6', 'articulo7'].include? grade.current_permanence_status
+          - # ROYER RABIT
+          = render partial: '/grades/regulation', locals: {grado: grade}
+        - elsif ['nuevo', 'intercambio', 'egresado', 'egresado_doble_titulo'].include? grade.current_permanence_status
+          .alert.alert-warning
+            %b ATENCIÓN:
+            Su estado actual indica que su inscripción debe realizarse directamente por Control de Estudio.
+            = grade.help_msg
+        - elsif ['desertor', 'permiso_para_no_cursar'].include? grade.current_permanence_status
+          .alert.alert-danger 
+            %b ATENCIÓN: 
+            Su estado actual de permanencia lo imposibilita para inscribirse. Contacte al personal de Control de Estudio de la escuela para solventar su situación si considera que el caso lo amerita.
+            = grade.help_msg
+        - elsif (academic_process_before and self.enroll_academic_processes.of_academic_process(academic_process_before.id).any?)
+          .alert.alert-danger 
+            %b ATENCIÓN: 
+            = "Usted no realizó un proceso de inscripción en el período anterior (#{academic_process_before.period_name}) por lo que su preinscripción no podrá realizarla. Debe dirigirse a Control de Estudio para solventar su situación."
+            = grade.help_msg
+
+    - unless title&.blank?
+      :javascript
+        let ele = document.getElementById('title')
+        ele.innerText = `#{title}`;
 
 
 = render partial: 'grades/academic_resume', locals: {grade: grade}

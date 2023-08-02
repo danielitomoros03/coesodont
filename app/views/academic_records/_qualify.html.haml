@@ -2,8 +2,8 @@
 - admin_authorized_to_qualify = enabled_to_admin and (current_user&.admin&.authorized_update? 'Qualification')
 - teacher_authorized_to_qualify = current_user&.teacher&.id.eql? section.teacher&.id
 
-- if teacher_authorized_to_qualify
-  %h5.alert.alert-success.text-center Profesor Autorizado para Calificar
+- if !enabled_to_admin and teacher_authorized_to_qualify
+  %h5.alert.alert-success.text-center Autorizado para Calificar
 %table.table.table-condensed.table-striped.table-hover.border.table-bordered.table-sm.table-responsive
   %thead
     %tr.text-center

@@ -1,22 +1,19 @@
-
 %table.table.table-sm.text-center
   %thead
     %tr
       %td Código
       %td{style: 'width:30%'} Nombre
-      %td{style: 'width:30%'} Area
+      %td{style: 'width:30%'} Área de Conocimiento
       %td Orden
       %td Tipo
       %td Créd
 
   %tbody
     %tr
-      %td
-        .label.bg-info= subject.code
-      %td= subject.name
-      - active_link = false #(subject.area and current_user and current_user.admin and current_user.admin.authorized_read? 'Area')
-      %td= link_to_if active_link, subject.area.name, "/admin/area/#{subject.area}"
-      %td
-        .label.bg-info= subject.ordinal
+      %td= ApplicationController.helpers.label_status("bg-info", subject.code)
+      %td{title: subject.name}= subject.name
+      - active_link = (subject.area and current_user&.admin&.authorized_read? 'Area')
+      %td= link_to_if active_link, subject.area.name, "/admin/area/#{subject.area_id}"
+      %td= ApplicationController.helpers.label_status("bg-info", subject.ordinal)
       %td= subject.label_modality
-      %td.text-center= subject.unit_credits
+      %td.text-center= subject.label_credits

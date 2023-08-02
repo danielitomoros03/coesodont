@@ -159,7 +159,7 @@ class AcademicProcess < ApplicationRecord
     #   grades_ids = self.grades.ids
     #   self.school.grades.without_appointment_time.joins(:academic_processes).where("academic_processes.id IN (?)", grades_before_ids).sort_by_numbers.uniq if process_before
     # end
-    self.school.grades.without_appointment_time.enrolled_in_academic_process(self.process_before.id).sort_by_numbers.uniq if process_before
+    self.school.grades.valid_to_enrolls(self.id,self.process_before.id).sort_by_numbers.uniq if process_before
     
   end
 
