@@ -1,6 +1,7 @@
 %table.table.table-sm.border.text-center.table-info
 	%tr
-		%td.text-center Plan
+		%td.text-center Plan de Estudio
+		%td.text-center Periodo Ingreso
 		%td.text-center Admisión
 		- if grade.registration_status
 			%td.text-center Estado de Registro
@@ -10,6 +11,7 @@
 
 	%tr
 		%td.text-center.fw-bold= grade.study_plan.desc
+		%td.text-center.fw-bold= grade.start_process&.period_name
 		%td.text-center.fw-bold= grade.admission_type.name
 		- if grade.registration_status
 			%td.text-center

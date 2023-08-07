@@ -18,19 +18,27 @@
   #admission_type_field.control-group.row.mb-3.enum_type
     %label.col-sm-2.col-form-label.text-md-end{for: "admission_type_field"} Tipo de Admisión
     .col-sm-10.controls
-      = grouped_collection_select nil, :admission_type_id, School.all, :admission_types, :description, :id, :name, {:prompt => "Selecciona el tipo de Admisión a la escuela...", selected: @school_id}, { class: 'form-control', required: true}
+      = grouped_collection_select nil, :admission_type_id, School.all, :admission_types, :description, :id, :name, {:prompt => "Seleccione el tipo de Admisión a la escuela...", selected: @school_id}, { class: 'form-control', required: true}
       .form-text
         %span.label.label-danger Requerido
 
-#registration_status_field.control-group.row.mb-3
-  %label.col-sm-2.col-form-label.text-md-end{for: "registration_status_field"} Estado de Registro
-  .col-sm-10.controls
-    - Grade.registration_statuses.map do |k,v|
-      %label.btn.btn-secondary.btn-sm.tooltip-btn{'data_toggle': :tooltip, title: k.titleize}
-        = radio_button_tag 'registration_status', k, false
-        = "#{k.upcase}"
-    .form-text
-      %span.label.label-default Optional
+  #start_process_field.control-group.row.mb-3.enum_type
+    %label.col-sm-2.col-form-label.text-md-end{for: "start_process_field"} Periodo de Inicio
+    .col-sm-10.controls
+      = grouped_collection_select nil, :start_process_id, School.all, :academic_processes, :description, :id, :name, {:prompt => "Seleccione el Periodo de Inicio por defecto..."}, { class: 'form-control'}
+      .form-text
+        %span.label.label-default Opcional
+
+- if false
+  #registration_status_field.control-group.row.mb-3
+    %label.col-sm-2.col-form-label.text-md-end{for: "registration_status_field"} Estado de Registro
+    .col-sm-10.controls
+      - Grade.registration_statuses.map do |k,v|
+        %label.btn.btn-secondary.btn-sm.tooltip-btn{'data_toggle': :tooltip, title: k.titleize}
+          = radio_button_tag 'registration_status', k, false
+          = "#{k.upcase}"
+      .form-text
+        %span.label.label-default Optional
 
 :javascript
 

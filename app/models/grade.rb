@@ -12,6 +12,7 @@ class Grade < ApplicationRecord
   # t.integer "duration_slot_time"
   # t.integer "current_permanence_status"
   # t.bigint "enabled_enroll_process_id"
+  # t.bigint "start_process_id"
 
   NORMATIVE_TITLE = "NORMAS SOBRE EL RENDIMIENTO MÍNIMO Y CONDICIONES DE PERMANENCIA DE LOS ALUMNOS EN LA U.C.V"
 
@@ -27,6 +28,7 @@ class Grade < ApplicationRecord
   belongs_to :study_plan
   belongs_to :admission_type
   belongs_to :enabled_enroll_process, foreign_key: 'enabled_enroll_process_id', class_name: 'AcademicProcess', optional: true
+  belongs_to :start_process, foreign_key: 'start_process_id', class_name: 'AcademicProcess', optional: true
 
   has_one :school, through: :study_plan
   has_one :user, through: :student
@@ -450,8 +452,20 @@ class Grade < ApplicationRecord
     end
 
     edit do
-      fields :study_plan, :admission_type, :registration_status
+      field :study_plan do
+        inline_add false
+        inline_edit false
+      end
+      fields :admission_type do
+        inline_add false        
+        inline_edit false        
+      end
+      fields :registration_status
       field :enrollment_status
+      field :start_process do
+        inline_edit false
+        inline_add false
+      end
       field :appointment_time do
         label 'Fecha y Hora Cita Horaria'
       end

@@ -167,7 +167,9 @@ class Student < ApplicationRecord
     weight 4
 
     update do
-      field :user
+      field :user do
+        inline_add false
+      end
 
       fields :grades, :address do
         inline_add false
@@ -178,7 +180,9 @@ class Student < ApplicationRecord
     end
 
     edit do
-      field :user
+      field :user do
+        inline_edit false
+      end
 
       field :grades
 
@@ -311,10 +315,10 @@ class Student < ApplicationRecord
   end
 
   def self.import row, fields
-
     total_newed = total_updated = 0
     no_registred = nil
 
+    # Cédula de Identidad
     if row[0]
       row[0].strip!
       row[0].delete! '^0-9'
@@ -324,6 +328,7 @@ class Student < ApplicationRecord
     
     usuario = User.find_or_initialize_by(ci: row[0])
     
+    # Email
     if row[1]
       row[1].strip!
       usuario.email = row[1].remove("mailto:")
@@ -331,6 +336,7 @@ class Student < ApplicationRecord
       return [0,0,1]
     end
 
+    # Nombres
     if row[2]
       row[2].strip!
       usuario.first_name = row[2]
@@ -338,6 +344,7 @@ class Student < ApplicationRecord
       return [0,0,2]
     end
 
+    # Apellidos
     if row[3]
       row[3].strip!
       usuario.last_name = row[3] if row[3]
@@ -345,7 +352,7 @@ class Student < ApplicationRecord
       return [0,0,3]
     end
 
-
+    # Sexo
     if row[4]
       row[4].strip!
       row[4].delete! '^A-Za-z'
@@ -354,6 +361,7 @@ class Student < ApplicationRecord
       usuario.sex = row[4] 
     end
 
+    # Numero Telefónico
     usuario.number_phone = row[5] if row[5]
 
     if usuario.save!
@@ -367,6 +375,14 @@ class Student < ApplicationRecord
         grado = Grade.find_or_initialize_by(student_id: estudiante.id, study_plan_id: fields[:study_plan_id])
         grado.admission_type_id = fields[:admission_type_id]
         grado.registration_status = fields[:registration_status]
+
+        if row[6]
+          year, type = row[6].split('-')
+          period = grado.school.academic_processes.joins(:period, :period_type).where('periods.year': year, 'period_types.code': type).first
+        elsif fields[:start_process_id]
+          grado.start_process_id = fields[:start_process_id]
+
+        end
         nuevo_grado = grado.new_record?
 
         if grado.save

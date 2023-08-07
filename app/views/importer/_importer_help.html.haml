@@ -4,6 +4,14 @@
   .control-group.row.mb-3
     %label.col-sm-2.col-form-label.text-md-end Ayuda
     .controls.col-sm-10{"data-nestedone": true}
+      - entity_str = I18n.t("activerecord.models.#{entity&.singularize}.other")
+      - entity_str = entity_str&.parameterize
+      = link_to "/example_import/plantilla-#{entity_str}.xlsx", class: 'btn btn-success float-end' do
+
+
+
+        %span.fa.fa-download
+        Descargar Plantilla
       %ul.nav.collapse{style: "display: none;"}
       .btn-group
         %a.btn.btn-info.toggler.active{"aria-expanded": true, rel: :tooltip, data: {'bs-original-title': title, 'bs-target': '#showInstructions'}, role: :button, onclick: "$('#showInstructions').toggleClass('d-none')"}

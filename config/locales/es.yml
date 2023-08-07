@@ -597,6 +597,7 @@ es:
         duration_slot_time: Duración Franja Horaria
         enabled_enroll_process: 'Permiso especial para inscribir en'
         enrollment_status: 'Estado de Inscripción en la Facultad'
+        start_process: 'Periodo de Inicio'
       address:
         state: 'Estado'
         municipality: 'Municipio'
