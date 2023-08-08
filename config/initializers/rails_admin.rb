@@ -3,7 +3,8 @@ RailsAdmin.config do |config|
   config.asset_source = :webpack
 
   ### Popular gems integration
-  config.main_app_name = Proc.new { |controller| [ "Coes", "ODONT - #{I18n.t(controller.params[:action]).try(:titleize)}" ] }
+  # config.main_app_name = Proc.new { |controller| [ "Coes", "ODONT - #{I18n.t(controller.params[:action]).try(:titleize)}" ] }
+  config.main_app_name = Proc.new { |controller| [ "Coes", "ODONT" ] }
 
   ## == Devise ==
   config.authenticate_with do
