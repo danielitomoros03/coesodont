@@ -322,6 +322,10 @@ es:
               required: requerido
         payment_report:
           attributes:
+            origin_bank:
+              required: requerido
+            receiving_bank_account:
+              required: requerido
             payable:
               required: 'requerido'
         parent_area:
@@ -479,6 +483,7 @@ es:
         process_before: Período Anterior
         enrollment_days: Jornadas de Inscripción por Cita Horaria
         enroll_instructions: Instrucciones Para la Inscripción
+        registration_amount: 'Arancel de Inscripción (Bs.)'
       academic_record:
         section: 'Sección'
         enroll_academic_process: 'Inscripción en Período'
@@ -614,6 +619,8 @@ es:
         transaction_date: 'Fecha de la Transacción'
         origin_bank: 'Banco Origen'
         payable: 'Pagable'
+        receiving_bank_account: 'Cuenta Receptora'
+        voucher: 'Imagen de Comprobante'
         created_at: 'Fecha Registro'
       period:
         year: 'Año'

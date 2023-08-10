@@ -3,6 +3,10 @@ module ApplicationHelper
 		Haml::Engine.new(haml.strip_heredoc, format: :html5).render(locals)
 	end
 
+	def to_bs value
+		ActionController::Base.helpers.number_to_currency(value, unit: 'Bs.', separator: ",", delimiter: ".")
+	end
+
 	def btn_toggle type, icon, href, title_tooltip, value, onclick_action=nil
 
 		target = ''

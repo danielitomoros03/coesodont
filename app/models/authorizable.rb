@@ -21,7 +21,7 @@ class Authorizable < ApplicationRecord
   end
   # RAILS_ADMIN:
   rails_admin do
-    visible false
+    # visible false
     navigation_label 'DESARROLLO'
     navigation_icon 'fa-solid fa-door-open'
 

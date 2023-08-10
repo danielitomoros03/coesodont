@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_07_124248) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_09_222114) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -24,6 +24,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_07_124248) do
     t.integer "modality", default: 0, null: false
     t.bigint "process_before_id"
     t.string "name"
+    t.float "registration_amount", default: 0.0
     t.index ["period_id"], name: "index_academic_processes_on_period_id"
     t.index ["process_before_id"], name: "index_academic_processes_on_process_before_id"
     t.index ["school_id"], name: "index_academic_processes_on_school_id"
@@ -273,8 +274,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_07_124248) do
     t.bigint "payable_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "receiving_bank_account_id"
     t.index ["origin_bank_id"], name: "index_payment_reports_on_origin_bank_id"
     t.index ["payable_type", "payable_id"], name: "index_payment_reports_on_payable"
+    t.index ["receiving_bank_account_id"], name: "index_payment_reports_on_receiving_bank_account_id"
   end
 
   create_table "period_types", force: :cascade do |t|
@@ -332,6 +335,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_07_124248) do
     t.bigint "active_process_id"
     t.bigint "enroll_process_id"
     t.string "boss_name", default: ""
+    t.boolean "enable_enroll_payment_report", default: false, null: false
     t.index ["active_process_id"], name: "index_schools_on_active_process_id"
     t.index ["enroll_process_id"], name: "index_schools_on_enroll_process_id"
     t.index ["faculty_id"], name: "index_schools_on_faculty_id"
@@ -499,6 +503,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_07_124248) do
   add_foreign_key "grades", "students", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "grades", "study_plans"
   add_foreign_key "parent_areas", "schools"
+  add_foreign_key "payment_reports", "bank_accounts", column: "receiving_bank_account_id", on_update: :cascade, on_delete: :nullify
   add_foreign_key "payment_reports", "banks", column: "origin_bank_id"
   add_foreign_key "qualifications", "academic_records"
   add_foreign_key "schedules", "sections"

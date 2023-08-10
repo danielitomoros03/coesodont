@@ -23,29 +23,33 @@ class PaymentReportsController < ApplicationController
   def create
     @payment_report = PaymentReport.new(payment_report_params)
 
-    respond_to do |format|
-      if @payment_report.save
-        format.html { redirect_to payment_report_url(@payment_report), notice: "Payment report was successfully created." }
-        format.json { render :show, status: :created, location: @payment_report }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @payment_report.errors, status: :unprocessable_entity }
-      end
+    if @payment_report.save
+      flash[:success] = "¡Reporte de pago realizado con éxito!"
+    else
+      flash[:danger] = @payment_report.errors.full_messages.to_sentence
     end
+
+    redirect_back fallback_location: root_path
+
   end
 
   # PATCH/PUT /payment_reports/1 or /payment_reports/1.json
-  def update
-    respond_to do |format|
-      if @payment_report.update(payment_report_params)
-        format.html { redirect_to payment_report_url(@payment_report), notice: "Payment report was successfully updated." }
-        format.json { render :show, status: :ok, location: @payment_report }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @payment_report.errors, status: :unprocessable_entity }
-      end
-    end
-  end
+  # def update
+    
+  #   if @payment_report.update(payment_report_params)
+  #     flash[:success] = "Payment report was successfully updated."
+
+  #     # format.html { redirect_to payment_report_url(@payment_report), notice: "Payment report was successfully updated." }
+  #     # format.json { render :show, status: :ok, location: @payment_report }
+  #   else
+  #     flash[:danger] = @payment_report.errors.full_messages.to_sentence
+  #     # format.html { render :edit, status: :unprocessable_entity }
+  #     # format.json { render json: @payment_report.errors, status: :unprocessable_entity }
+  #   end
+
+  #   redirect_back fallback_location: root_path
+
+  # end
 
   # DELETE /payment_reports/1 or /payment_reports/1.json
   def destroy
@@ -65,6 +69,6 @@ class PaymentReportsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def payment_report_params
-      params.require(:payment_report).permit(:amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank_id, :payable_id)
+      params.require(:payment_report).permit(:amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank_id, :payable_id, :payable_type, :receiving_bank_account_id, :voucher)
     end
 end

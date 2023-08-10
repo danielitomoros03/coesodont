@@ -23,9 +23,8 @@ class Ability
 
       elsif user.admin.jefe_control_estudio?
         can :import, Authorizable::IMPORTABLES
-        can :manage, [Admin, Student, Teacher, Area, ParentArea, Subject, Course, Grade, AcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User, EnrollAcademicProcess]
+        can :manage, [Admin, Student, Teacher, Area, ParentArea, Subject, Course, Grade, AcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User, EnrollAcademicProcess, PaymentReport, Bank, BankAccount]
         can :ru, [School]
-        #can :read, [Gr]
       else
         can :manage, [User]
         user.admin.authorizeds.each do |authd|

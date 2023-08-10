@@ -298,6 +298,12 @@ class AcademicProcess < ApplicationRecord
       field :enroll_instructions do
         help 'Si desea agregar imágenes tome en cuenta el tamaño de misma y su ajuste a la pantalla dónde se desplegará'
       end
+
+      field :registration_amount do
+        # pretty_value do
+        #   bindings[:view].content_tag()
+        # end
+      end
     end
 
     show do
