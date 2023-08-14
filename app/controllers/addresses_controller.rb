@@ -3,7 +3,7 @@ class AddressesController < ApplicationController
   before_action :set_student, only: %i[ new created ]
   before_action :authenticate_student!
 
-
+  layout 'logged'
   # GET /addresses/new
   def new
     @address = Address.new

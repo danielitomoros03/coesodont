@@ -1,6 +1,8 @@
 class PagesController < ApplicationController
   skip_before_action :authenticate_user!, only: [ :home ]
 
+  layout 'logged'
+
   def multirols
     @roles = params[:roles]
     @models = models_list

@@ -300,7 +300,7 @@ class Section < ApplicationRecord
       field :course do
         sticky true
         label 'Período'
-        filterable 'courses.name'
+        filterable false #'courses.name'
         associated_collection_cache_all false
         associated_collection_scope do
           # bindings[:object] & bindings[:controller] are available, but not in scope's block!
@@ -332,13 +332,14 @@ class Section < ApplicationRecord
         label 'Asignatura'
         column_width 240
         searchable 'subjects.code'
-        filterable 'subjects.code'
+        filterable false #'subjects.code'
         sortable 'subjects.code'
       end
 
       field :code do
         sticky true
         label 'Sec'
+        filterable false 
         column_width 30
         formatted_value do
           bindings[:view].link_to(bindings[:object].code, "/admin/section/#{bindings[:object].id}") if bindings[:object].present?
@@ -346,7 +347,9 @@ class Section < ApplicationRecord
         end
       end
 
-      field :classroom
+      field :classroom do
+        filterable false 
+      end
 
       field :teacher_desc do
         label 'Profesor'
@@ -354,6 +357,7 @@ class Section < ApplicationRecord
         # searchable ['users.ci', 'users.first_name', 'users.last_name']
         # filterable ['users.ci', 'users.first_name', 'users.last_name']
         # sortable 'users.ci'
+        filterable false 
         formatted_value do
           bindings[:view].link_to(bindings[:object].teacher.desc, "/admin/teacher/#{bindings[:object].teacher_id}") if bindings[:object].teacher.present?
         end
@@ -386,6 +390,7 @@ class Section < ApplicationRecord
         label 'Cupos'
         column_width 40
         sortable 'sections.capacity'
+        filterable false 
         pretty_value do
           ApplicationController.helpers.label_status('bg-info', value)
         end        
@@ -420,7 +425,7 @@ class Section < ApplicationRecord
         end         
       end
       field :total_retirados do
-        label 'Ret'
+        label 'RT'
         pretty_value do
           ApplicationController.helpers.label_status('bg-secondary', value)
         end         

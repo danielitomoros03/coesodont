@@ -30,7 +30,6 @@ Rails.application.routes.draw do
 
   end
 
-
   resources :enroll_academic_processes do
     member do
       put :total_retire
@@ -68,6 +67,8 @@ Rails.application.routes.draw do
     end
   end
 
+  devise_for :users, controllers: { sessions: 'sessions', passwords: 'passwords' }
+
   resources :users, only: [:edit, :update] do
     member do
       get :edit_images
@@ -102,21 +103,19 @@ Rails.application.routes.draw do
     end
   end
 
-  
   resources :grades do
     member do
       get 'kardex'
     end
   end
 
-    resources :downloader do
-      member do
-        get 'section_list'
-      end
+  resources :downloader do
+    member do
+      get 'section_list'
     end
+  end
 
-  # devise_for :users
-  devise_for :users, controllers: { sessions: 'sessions', passwords: 'passwords' }
+
   root to: "pages#home"
   get 'pages/multirols', to: 'pages#multirols'
 

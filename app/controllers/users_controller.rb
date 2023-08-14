@@ -3,9 +3,7 @@ class UsersController < ApplicationController
   before_action :set_user, only: [:edit, :update, :edit_images]
   # before_action :authenticate_student_or_teacher!
 
-  # def edit
-  # end
-
+  layout 'logged'
   def edit_images
   end
 
