@@ -5,10 +5,8 @@ class UserMailer < ApplicationMailer
   #
   #   en.user_mailer.welcome.subject
   #
-  def welcome
-    @greeting = "Hi"
-
-    mail to: "danielito.moros03@gmail.com"
+  def welcome user
+    mail(to: user.email_desc, subject: "¡Bienvenido a Coes-ODONT!")
   end
 
   def enroll_confirmation(id)

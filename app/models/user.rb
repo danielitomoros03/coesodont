@@ -33,6 +33,8 @@ class User < ApplicationRecord
   before_destroy :paper_trail_destroy
   before_update :paper_trail_update
 
+  after_create :send_welcome_email
+
   # ASSOCIATIONS:
   has_one :admin, inverse_of: :user, foreign_key: :user_id, dependent: :destroy
   accepts_nested_attributes_for :admin
@@ -393,6 +395,14 @@ class User < ApplicationRecord
 
   private
 
+    def send_welcome_email
+      begin
+        UserMailer.welcome(self).deliver_now
+      rescue Exception => e
+        
+      end
+    end
+
     def paper_trail_update
       # changed_fields = self.changes.keys - ['created_at', 'updated_at']
       object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
@@ -410,7 +420,6 @@ class User < ApplicationRecord
       self.paper_trail_event = "¡Usuario eliminado!"
     end
 
-  private
     def set_updated_password
       chagebles = self.changes.keys - ['updated_at']
       if (chagebles.count.eql? 1 and chagebles.include? "encrypted_password")
