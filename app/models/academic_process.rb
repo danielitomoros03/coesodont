@@ -47,7 +47,7 @@ class AcademicProcess < ApplicationRecord
   validates :max_credits, presence: true
   validates :max_subjects, presence: true
 
-  validates_uniqueness_of :school, scope: [:period], message: 'Proceso academico ya creado', field_name: false
+  validates_uniqueness_of :school, scope: [:period, :modality], message: 'Proceso academico ya creado', field_name: false
 
   # SCOPE:
   default_scope { order(name: :desc) }
@@ -61,6 +61,9 @@ class AcademicProcess < ApplicationRecord
     subjects.ids.include?(subject_id)
   end
 
+  def period_desc_and_modality
+    "#{period&.name}#{self.modality[0]&.upcase}"
+  end
 
   def period_name
     period.name if period
@@ -77,11 +80,11 @@ class AcademicProcess < ApplicationRecord
   end
 
   def short_desc
-    "#{self.school.short_name} #{self.period.name}" if (self.school and self.period)
+    "#{self.school.short_name} #{self.period_desc_and_modality}" if (self.school and self.period)
   end
 
   def get_name
-    "#{self.school.code} | #{self.period.name}" if (self.school and self.period)
+    "#{self.school.code} | #{self.period_desc_and_modality}" if (self.school and self.period)
   end
 
 
@@ -195,14 +198,15 @@ class AcademicProcess < ApplicationRecord
         label 'Período'
         column_width 100
         pretty_value do
-          value.name
+          # value.name
+          bindings[:object]&.period_desc_and_modality
         end
       end
 
       field :process_before do
         column_width 80
         pretty_value do
-          value.period.name if value
+          bindings[:object]&.process_before&.period_desc_and_modality
         end
       end
 
