@@ -211,6 +211,14 @@ class User < ApplicationRecord
     self.teacher.nil? ? false : true
   end
 
+  def roles
+    aux = []
+    aux << I18n.t('activerecord.models.admin.one') if admin?
+    aux << I18n.t('activerecord.models.student.one') if student?
+    aux << I18n.t('activerecord.models.teacher.one') if teacher?
+    return aux.to_sentence
+  end
+
   def reverse_name
     "#{last_name}, #{first_name}"
   end
@@ -398,6 +406,7 @@ class User < ApplicationRecord
     def send_welcome_email
       begin
         UserMailer.welcome(self).deliver_now
+        # UserMailer.welcome(self).deliver_later
       rescue Exception => e
         
       end

@@ -113,7 +113,7 @@ RailsAdmin.config do |config|
     end
 
     delete do
-      except [School, StudyPlan, Faculty, EnrollAcademicProcess, AcademicRecord, Course, Section]
+      except [School, StudyPlan, Faculty, EnrollAcademicProcess, AcademicRecord, Course]
     end
 
     import do

@@ -25,6 +25,7 @@ class EnrollAcademicProcess < ApplicationRecord
   has_many :payment_reports, as: :payable, dependent: :destroy
   has_many :academic_records, dependent: :destroy
   has_many :sections, through: :academic_records
+  has_many :schedules, through: :sections
   has_many :subjects, through: :sections
 
   # ENUMERIZE:
@@ -66,6 +67,15 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   # FUNCTIONS:
+
+  def overlapped? schedule2
+    self.schedules.where(day: schedule2.day).each do |sh|
+      if ((sh.starttime&.to_i < schedule2&.endtime&.to_i) and (schedule2&.starttime&.to_i < sh.endtime&.to_i) )
+        return true 
+      end
+    end
+    return false
+  end
 
   def self.type_label_by_enroll type
     # [:preinscrito, :reservado, :confirmado, :retirado]

@@ -62,12 +62,14 @@ class EnrollAcademicProcessesController < ApplicationController
       # LIBERAR CUPO
       academic_record = AcademicRecord.joins(:course, :grade).where('courses.id': params[:course_id],'grades.id': params[:grade_id]).first
 
-      if academic_record and academic_record.destroy
-        msg = "Cupo liberado"
-        estado = 'success'
-      else
-        msg = "Sin Inscripción"
-        estado = 'error'
+      if academic_record
+        if academic_record&.destroy
+          msg = "Cupo liberado"
+          estado = 'success'
+        else
+          msg = "Sin Inscripción"
+          estado = 'error'
+        end
       end
 
       if (params[:section_id] and !params[:section_id].blank?)
@@ -93,7 +95,18 @@ class EnrollAcademicProcessesController < ApplicationController
           credits_attemp = enroll_academic_process.total_credits+course.subject.unit_credits
           subjects_attemp = enroll_academic_process.total_subjects+1
 
-          if credits_attemp > limit_credits
+          overlapped = false
+          
+          section.schedules.each_with_index do |sh,i|
+            overlapped = enroll_academic_process.overlapped?(sh)
+            break if overlapped
+          end
+
+          if overlapped
+            # SOLAPAMIENTO DE HORARIOS
+            estado = 'error'
+            msg = "¡Solapamiento de horarios! Por favor, seleccione otra sección que no choque con el horario del resto de sus asignaturas ya reservadas."
+          elsif credits_attemp > limit_credits
             # EXCESO DE CRÉDITOS
             estado = 'error'
             msg = "Supera el límite de créditos permitidos para este proceso de inscripción. Por favor, corrija su selección de créditos e inténtelo de nuevo. (#{credits_attemp} / #{limit_credits})"

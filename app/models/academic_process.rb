@@ -34,6 +34,7 @@ class AcademicProcess < ApplicationRecord
   has_many :students, through: :grades
   has_many :courses, dependent: :destroy
   has_many :sections, through: :courses
+  has_many :schedules, through: :sections
   has_many :academic_records, through: :sections
   has_many :subjects, through: :courses
 

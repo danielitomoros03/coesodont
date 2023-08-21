@@ -80,10 +80,12 @@ class Student < ApplicationRecord
 
   # FUNCTIONS:
   def university_degree
-    [grade_title&.titleize, grade_university&.titleize, graduate_year].join(" - ")
-    
+    [grade_title&.titleize, grade_university&.titleize, graduate_year].join(" - ") 
   end
 
+  def roles
+    user.roles
+  end
 
   def complete_info?
     !(empty_info? or (user and user.empty_info?) or (address and address.empty_info?))
@@ -274,7 +276,12 @@ class Student < ApplicationRecord
         label 'Email'
       end      
 
-      :created_at
+      field :created_at
+
+      field :roles do
+        label 'Roles'
+      end
+
     end
 
     export do

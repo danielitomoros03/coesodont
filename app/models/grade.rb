@@ -139,16 +139,16 @@ class Grade < ApplicationRecord
 
   # ENROLLMENT
   def valid_to_enroll_in academic_process
-    valid = false
+    
     if self.enabled_enroll_process.eql?(academic_process)
-      valid = true
+      return true
     else
       academic_process_before = academic_process&.process_before
       if (academic_process_before and self.enroll_academic_processes.of_academic_process(academic_process_before.id).any?) and (['regular', 'reincorporado', 'articulo3'].include? self.current_permanence_status)
-        valid = true
+        return true
       end
     end
-    return valid
+    return false
   end
 
   # APPOINTMENT_TIME:

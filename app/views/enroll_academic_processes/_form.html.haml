@@ -61,12 +61,15 @@
 
   = render partial: 'enroll_academic_processes/total_credits', locals: {limitCredits: limitCredits, limitSubjects: limitSubjects, totalCreditsReserved: totalCreditsReserved, totalSubjectsReserved: totalSubjectsReserved }
 
+  =# render partial: 'schedules/index', locals: {schedules: academic_process.schedules}
+
 .modal-footer
   / %a.btn.btn-sm.btn-outline-light{data: {dismiss: 'modal'}} Cancelar
   - enableSubmit = (totalCreditsReserved > 0 and totalCreditsReserved <= limitCredits and totalSubjectsReserved > 0 and totalSubjectsReserved <= limitSubjects)
 
   - disabledClass = enableSubmit ? '' : 'disabled'
-  = submit_tag 'Completar', class: "#{disabledClass} btn btn-success btn-lg", id: 'submitBtn', 'data-disable-with': 'Enviando', disabled: !enableSubmit, onclick: 'completeEnroll(this);'
+  .d-grid.gap-2
+    = submit_tag 'Completar', class: "#{disabledClass} btn btn-success btn-lg", id: 'submitBtn', 'data-disable-with': 'Enviando', disabled: !enableSubmit, onclick: 'completeEnroll(this);'
 
 :javascript
 
@@ -98,48 +101,39 @@
 
   }
 
-  function reserve(url, ev, el) {
-
-    let opcion = el.children("option:selected");
+  function reserve(url, el) {
+    let elem = $(el);
+    let opcion = elem.children("option:selected");
     $.ajax({
-    url: url,
-    type: 'POST',
-    dataType: 'json',
-    beforeSend: function(xhr) {
-      xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
-    },
-    // beforeSend: function() {
-    //   $('#loading').modal({keyboard: false, show: true, backdrop: 'static'})
-    // },
-    complete: function(json){
-      if (json["responseJSON"].status == 'success'){
-        toastr.success(json["responseJSON"].data);
+      url: url,
+      type: 'POST',
+      dataType: 'json',
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+      },
+      // beforeSend: function() {
+      //   $('#loading').modal({keyboard: false, show: true, backdrop: 'static'})
+      // },
+      complete: function(json){
+        if (json["responseJSON"].status == 'success'){
+          toastr.success(json["responseJSON"].data);
 
-        totalizar();
-        let trParent = el.closest('tr');
-        if (opcion.val() == '')
-          trParent.removeClass('table-success');
-        else{
-          let cantidad = opcion.text()
-          trParent.addClass('table-success');
+          totalizar();
+          let trParent = elem.closest('tr');
+          if (opcion.val() == '')
+            trParent.removeClass('table-success');
+          else{
+            let cantidad = opcion.text()
+            trParent.addClass('table-success');
+          }
+
+
+        }else{
+          toastr.error(json["responseJSON"].data);
+          el.selectedIndex = 0;
         }
-
-
-      }else{
-        toastr.error(json["responseJSON"].data);
-        ev.preventDefault();
+        opcion.text(json["responseJSON"].cupo);
       }
-      opcion.text(json["responseJSON"].cupo);
-      // let msg = $("#message");
-      // msg.text(json["responseJSON"].data);
-      // msg.toggleClass('none');
-      // msg.show(500);
-      // setTimeout(function() {msg.hide(500);}, 3000);
-      
-      // msg.text('');
-
-      // $('#cargando').modal('hide');
-    }
     });
   }
 
@@ -190,7 +184,7 @@
     let pci = elem.attr('pci');
     let courseId = elem.attr('courseId');
 
-    reserve(`/enroll_academic_processes/reserve_space?section_id=${ele.value}&course_id=${courseId}&grade_id=${gradeId}&pci=${pci}`, event, elem);    
+    reserve(`/enroll_academic_processes/reserve_space?section_id=${ele.value}&course_id=${courseId}&grade_id=${gradeId}&pci=${pci}`, ele);    
   }
 
   function completeEnroll(ele){

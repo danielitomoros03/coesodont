@@ -47,7 +47,8 @@ class ApplicationController < ActionController::Base
   end
 
   def logged_as_student?
-    !current_user.nil? and !current_user.student.nil? and session[:rol].eql? 'student'
+    # !current_user.nil? and !current_user.student.nil? and session[:rol].eql? 'student'
+    (session[:rol].eql? 'student') and current_user&.student
   end
 
   def logged_as_admin?

@@ -1,0 +1,29 @@
+- min = schedules.map{|h| I18n.l(h.starttime, format: '%H').to_i}.min
+- max = schedules.map{|h| I18n.l(h.starttime, format: '%H').to_i}.max
+- days = %w(Lunes Martes Miércoles Jueves Viernes Sábado)
+
+- if max > min
+  %table.table.table-condensed.table-hover.table-bordered
+    %thead
+      %tr
+        %th Horas\Días
+        - days.each do |e|
+          = "<th> #{e} </th>".html_safe
+
+    %tbody.table-group-divider
+      - for i in min..max
+        %tr
+          %th= "#{i}:00"
+          - days.each do |e|
+            %td
+        %tr.table-group-divider
+          %th= "#{i}:30"
+          - days.each do |e|
+            %td          
+
+      - if false
+        - schedules.each do |sh|
+          %tr
+            %td.string_type= sh.day
+            %td.string_type= sh.starttime.strftime("%I:%M %P")
+            %td.string_type= sh.endtime.strftime("%I:%M %P")
