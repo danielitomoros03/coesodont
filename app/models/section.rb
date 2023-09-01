@@ -544,7 +544,7 @@ class Section < ApplicationRecord
 
       field :classroom do
         html_attributes do
-          {:onInput => "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9]/g,''))"}
+          {:onInput => "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9| ]/g,''))"}
         end
       end
 
@@ -569,24 +569,23 @@ class Section < ApplicationRecord
       end      
 
       field :total_sc do
-        label 'SC'
-        help 'Sin Clificar'
+        label 'Sin Calificar'
+
       end
       field :total_aprobados do
-        label 'A'
-        help 'Aprobado'
+        label 'Total Aprobados'
       end
       field :total_aplazados do
-        label 'AP'
+        label 'Total Aplazados'
       end
       field :total_retirados do
-        label 'Ret'
+        label 'Total Retirados'
       end 
       field :total_pi do
-        label 'PI'
+        label 'Total PI'
       end
       field :qualifications_average do
-        label 'PROM'
+        label 'Promedio de Calificaciones'
       end
 
     end

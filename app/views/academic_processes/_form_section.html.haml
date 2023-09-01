@@ -44,7 +44,7 @@
     #section_classroom_field.control-group.row.mb-3.string_type.classroom_field
       %label.col-sm-2.col-form-label.text-md-end{:for => "section_classroom"} Aula
       .col-sm-10.controls
-        %input#section_classroom.form-control{:name => "section[classroom]", :oninput => "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9]/g,''))", :type => "text"}/
+        %input#section_classroom.form-control{:name => "section[classroom]", :oninput => "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9| ]/g,''))", :type => "text"}/
         .form-text
           %span.label.label-default> Opcional
           \.

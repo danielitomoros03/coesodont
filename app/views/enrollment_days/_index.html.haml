@@ -15,9 +15,13 @@
 
 %ul#myTab.nav.nav-tabs{role: "tablist"}
   %li.nav-item{role: "presentation"}
-    %button#otherGrades-tab.nav-link{"aria-controls": "otherGrades", "aria-selected": true, "data-bs-target": "#otherGrades", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{grades_others.count} Estudiante(s) que no aplican a Nueva Jornada por Cita Horaria"}= "No Aplican"
+    %button#otherGrades-tab.nav-link{"aria-controls": "otherGrades", "aria-selected": true, "data-bs-target": "#otherGrades", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{grades_others.count} Estudiante(s) que no aplican a Nueva Jornada por Cita Horaria"}
+      .label.bg-info.text-dark= grades_others.count
+      = "No Aplican"
   %li.nav-item{role: "presentation"}
-    %button#withoutAppointment-tab.nav-link.active{"aria-controls": "withoutAppointment", "aria-selected": true, "data-bs-target": "#withoutAppointment", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{total_grades} Estudiante(s) válido(s) para aplicar en Nueva Jornada"}= "Válidos para Aplicar"
+    %button#withoutAppointment-tab.nav-link.active{"aria-controls": "withoutAppointment", "aria-selected": true, "data-bs-target": "#withoutAppointment", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{total_grades} Estudiante(s) válido(s) para aplicar en Nueva Jornada"}
+      .label.bg-info.text-dark= total_grades
+      = "Válidos para Aplicar"
 
   - enrollment_days.each do |day|
     %li.nav-item{role: "presentation"}
