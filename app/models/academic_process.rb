@@ -232,7 +232,7 @@ class AcademicProcess < ApplicationRecord
         label 'Secciones'
         pretty_value do 
           user = bindings[:view]._current_user
-          if (user and user.admin and user.admin.authorized_read? 'Section')
+          if (user&.admin&.authorized_read? 'Section')
             %{<a href='/admin/section?query=#{bindings[:object].period.name}' title='Total Secciones'><span class='badge bg-info'>#{value} en #{bindings[:object].courses.count} Cursos</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe

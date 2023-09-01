@@ -9,7 +9,7 @@ class EnrollAcademicProcessesController < ApplicationController
   # GET /enroll_academic_processes/1 or /enroll_academic_processes/1.json
 
   def show
-    if (@enroll_academic_process.school.enroll_process.eql? @enroll_academic_process.academic_process or @enroll_academic_process.school.active_process.eql? @enroll_academic_process.academic_process) and @enroll_academic_process.confirmado?
+    if @enroll_academic_process.confirmado? and (@enroll_academic_process.school.enroll_process.eql? @enroll_academic_process.academic_process or @enroll_academic_process.school.active_process.eql? @enroll_academic_process.academic_process)
 
       @school = @enroll_academic_process.school
       @faculty = @school.faculty
@@ -17,10 +17,9 @@ class EnrollAcademicProcessesController < ApplicationController
       @period = @enroll_academic_process.period
       @academic_records = @enroll_academic_process.academic_records
       event = 'Se generó Constancia de Inscripción'
-      @study_contance = params[:study] ? true : false
       file_name = "ConstanciaInscripcion#{@enroll_academic_process.short_name}"
       @title = 'CONSTANCIA DE INSCRIPCIÓN'
-      if @study_contance
+      if params[:study]
         file_name = "ConstanciaEstudio#{@enroll_academic_process.short_name}"
         event = 'Se generó Constancia de Estudio'
         @title = 'CONSTANCIA DE ESTUDIO'
@@ -42,7 +41,7 @@ class EnrollAcademicProcessesController < ApplicationController
       end
 
     else
-      flash[:warning] = 'Debe estar activado el proceso académico o la inscripción para descargar el documento solicitado.'
+      flash[:warning] = 'Debe estar confirmado la inscripción y activado el período o la inscripción para descargar el documento solicitado.'
       redirect_back fallback_location: '/admin'
     end
   end

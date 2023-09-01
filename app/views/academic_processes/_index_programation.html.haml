@@ -1,60 +1,47 @@
-- params[:scope] ||= Subject.modalities.keys.first
-%ul#scope_selector.nav.nav-tabs
-  - Subject.modalities.keys.each do |moda|
+- areas = Area.all.order(name: :asc)
+- params[:area] ||= areas.first.id
+- academic_process_id = academic_process.id
 
-    - active = (moda.eql? params[:scope]) ? 'active text-primary' : 'text-light'
-    %li.nav-item.bg-primary
-      %a.nav-link{:href => "/admin/academic_process/#{academic_process.id}/programation?scope=#{moda}", class: active}
-        = moda.titleize
+.row
+  %ul#area_selector.nav.nav-tabs.flex-column.col-3.p-0
+    - areas.each do |area|
 
-.p-3.border.border-top-0{style: 'overflow-y:scroll;max-height:360px'}
-  %table#programation.table.table-condensed.table-striped.table-hover
-    %thead{style: "position: sticky;top: 0; background-color:#F4F4F4"}
-      %tr
-        %th.col-1{scope: :col}
-          Área
-          - if false
-            = select_tag :section_code, options_for_select(Area.names), {class: "form-control filtrable", id: 'filterArea', style: 'width: 100%;', include_blank: '-- Filtrar -- '}   
-            .input-group.input-group-sm{style: 'width: 100%;'}
-              %input.form-control.filtrable{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", placeholder: 'Áreas', id: 'filterArea', name: 'filterArea'}
-        %th.col-3{scope: :col}
-          .input-group.input-group-sm{style: 'width: 100%;'}
-            %input.form-control{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", placeholder: 'Asignaturas', autofocus: true, id: 'filterSubject', name: 'filterSubject'}
+      - active_area_tab = (area.id.eql? params[:area].to_i) ? 'active' : 'text-light'
+      %li.nav-item.bg-primary
+        %a.nav-link.position-relative{:href => "/admin/academic_process/#{academic_process_id}/programation?area=#{area.id}", class: active_area_tab, style: 'font-size: small;'}
+          = ApplicationController.helpers.total_sections_stiky area.sections.where('courses.academic_process_id': academic_process_id).count
+          = area.name.titleize
 
-        %th.col-1.text-center Activa
-        - if (current_user&.admin&.authorized_read? 'Section') or (current_user&.admin&.authorized_create? 'Section')
-          %th Secciones
-    %tbody.table-group-divider
-      - subjects = academic_process.school.subjects.where(modality: params[:scope]).sort_by_code
-      - subjects.each do |subject|
-        -# course = academic_process.courses.where(subject_id: subject.id).first
-        - course = Course.where(academic_process_id: academic_process.id, subject_id: subject.id).first
-        - sections = course&.sections
-        - has_sections = sections&.any?
-        %tr.trFiltrable
-          %td= subject.area.name
-          %td{title: subject.desc}= link_to_if (current_user&.admin&.authorized_read? 'Subject'), subject.desc, "/admin/subject/#{subject.id}"
-          %td.text-center
-            - if course
-              - if (current_user&.admin&.authorized_delete? 'Course')
-                = render partial: 'academic_processes/form_active_subject', locals: {academic_process: academic_process, subject_id: subject.id, has_sections: has_sections, course: course}
-              - else
-                %i.fas.fa-check
+  .tab-content.col-9.p-0
+    - modalities = Subject.modalities
+    - params[:moda] ||= modalities.first[1]
+    - areas.each do |area|
+      - active_area = (area.id.eql? params[:area].to_i)
+      - active_area_cont = active_area ? 'active' : 'text-light'
+      - show_area_cont = active_area ? 'show' : ''
 
-            - else
-              - if (current_user&.admin&.authorized_create? 'Course')
-                = render partial: 'academic_processes/form_active_subject', locals: {academic_process: academic_process, subject_id: subject.id, has_sections: has_sections, course: course}
-              - else
-                %i.fas.fa-remove
-          %td
-            - if course
-              %table
-                %tr{}
-                  - if has_sections
-                    - if (current_user&.admin&.authorized_read? 'Section')
-                      = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: subject.academic_records.any?}
-                  - if (current_user&.admin&.authorized_create? 'Section')
-                    %td.p-0= ApplicationController.helpers.button_add_section course.id
+      - sections = area.sections.where('courses.academic_process_id': academic_process_id)
+
+      .tab-pane.fade{class: "#{active_area_cont} #{show_area_cont}", role: :tabpanel} 
+        %ul#moda_selector.nav.nav-tabs
+          - modalities.each do |moda|
+            - active_moda = (moda[1].eql? params[:moda].to_i)
+            - active_moda = active_moda ? 'active text-primary' : 'text-light'
+            - show = active_moda ? 'show' : ''
+            %li.nav-item.bg-primary
+              %a.nav-link.position-relative{:href => "/admin/academic_process/#{academic_process_id}/programation?area=#{area.id}&moda=#{moda[1]}", class: active_moda, style: 'font-size: small;'}
+
+                = ApplicationController.helpers.total_sections_stiky sections.where('subjects.modality': moda[1]).count
+                = moda[0]&.pluralize&.titleize
+
+        .tab-content.border-bottom.border-end.border-start.p-3
+          - modalities.each do |moda|
+            - if active_area and (moda[1].eql? params[:moda].to_i)
+              .tab-pane.fade.active.text-primary.show{role: :tabpanel} 
+                %h6.text-primary.text-center
+                  = "#{moda[0]&.pluralize&.titleize} de #{area&.name&.titleize}"
+                - subjects = academic_process.school.subjects.where(modality: params[:moda], area_id: params[:area]).sort_by_code
+                = render partial: '/academic_processes/table_subjects_programation', locals: {subjects: subjects, academic_process_id: academic_process_id}
 
 :javascript
 
@@ -75,7 +62,7 @@
   function updateElem(ele){
     let url;
     let type;
-    let  attrs = `{"course":{"academic_process_id": #{academic_process.id}, "subject_id": ${ele.value}}}`;
+    let  attrs = `{"course":{"academic_process_id": #{academic_process_id}, "subject_id": ${ele.value}}}`;
     if (ele.checked == true) {
       url = "/courses"
       type = 'POST'

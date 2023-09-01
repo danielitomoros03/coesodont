@@ -1,5 +1,5 @@
 %form#new_section.main{"accept-charset": "UTF-8", action: "/admin/section/new", "data-title": "Nuevo", enctype: "multipart/form-data", method: "post"}
-  %input{:autocomplete => "off", :name => "authenticity_token", :type => "hidden", :value => "5wFuSrxjJtnaES-J8FBV4AyB1wVNuF6vCBpYPzanmPgjBZawAsZS4Jcc9EkN3LnbJoYKDTAmdLv96L9OQiy3bQ"}/
+  %input{autocomplete: "off", name: "authenticity_token", type: "hidden", value: session[:_csrf_token]}
   = hidden_field_tag '[section]course_id', nil
   %span.object-infos{"data-model-label" => "Sección", "data-object-label" => "Nuevo", :style => "display:none"}
   %fieldset
@@ -71,7 +71,7 @@
       .tab-content.collapse
   .form-actions.row.justify-content-end.my-3
     .col-sm-10
-      %input{:name => "return_to", :type => "hidden", :value => "http://localhost:3000/admin/academic_process/18/programation"}/
+      %input{name: :return_to, type: :hidden, value: request.original_url}
       %button.btn.btn-primary{"data-disable-with" => "Guardar", :name => "_save", :type => "submit"}
         %i.fas.fa-check
         Guardar
@@ -79,6 +79,4 @@
 - content = render partial: '/academic_processes/section_schedules_form'
 
 #schedules_fields_blueprint{"data-blueprint" => content, :style => "display: none"}
-
-
 

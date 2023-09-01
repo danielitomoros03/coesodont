@@ -1,0 +1,41 @@
+%form{"accept-charset" => "UTF-8", :action => "/admin/course/export?academic_process_id=#{academic_process_id}&all=true&f[academic_process][#{academic_process_id}][o]=like&f[academic_process][#{academic_process_id}][v]=#{period_name}&model_name=course", "data-turbo" => "false", :method => "post"}
+
+  %input{autocomplete: "off", name: "authenticity_token", type: "hidden", value: session[:_csrf_token]}
+
+  %input{name: "send_data", type: :hidden, value: true}
+
+  %input{name: "schema[methods][]", type: :hidden, value: "total_sections"}                
+  %input{name: "schema[methods][]", type: :hidden, value: "total_academic_records"}
+  %input{name: "schema[methods][]", type: :hidden, value: "total_sc"}
+  %input{name: "schema[methods][]", type: :hidden, value: "total_aprobados"}
+  %input{name: "schema[methods][]", type: :hidden, value: "total_aplazados"}
+  %input{name: "schema[methods][]", type: :hidden, value: "total_retirados"}
+  %input{name: "schema[methods][]", type: :hidden, value: "total_pi"}
+  %input{name: "schema[methods][]", type: :hidden, value: "qualifications_average"}
+
+  %input{name: "schema[include][academic_process][only][]", type: :hidden, value: "modality"}
+  %input{name: "schema[include][academic_process][only][]", type: :hidden, value: "max_credits"}
+  %input{name: "schema[include][academic_process][only][]", type: :hidden, value: "max_subjects"}
+
+  %input{name: "schema[include][period][only][]", type: :hidden, value: "name"}
+
+  %input{name: "schema[include][subject][only][]", type: :hidden, value: "code"}
+  %input{name: "schema[include][subject][only][]", type: :hidden, value: "name"}
+  %input{name: "schema[include][subject][only][]", type: :hidden, value: "unit_credits"}
+  %input{name: "schema[include][subject][only][]", type: :hidden, value: "ordinal"}
+  %input{name: "schema[include][subject][only][]", type: :hidden, value: "qualification_type"}
+  %input{name: "schema[include][subject][only][]", type: :hidden, value: "modality"}
+                
+  %input{name: "schema[include][area][only][]", type: :hidden, value: "name"}
+
+  %input{name: "csv_options[encoding_to]", type: :hidden, value: "UTF-8"}
+
+  %input{name: "csv_options[generator][col_sep]", type: :hidden, value: ";"}
+
+  %input{name: "return_to", :type => "hidden", value: "http://localhost:3000/admin/course?f%5Bacademic_process%5D%5B52520%5D%5Bo%5D=like&f%5Bacademic_process%5D%5B52520%5D%5Bv%5D=2023-02&academic_process_id=20"}/
+
+  %button.btn.btn-info{name: "csv", type: :submit}
+    %i.fas.fa-download
+    Descarga Rápida 
+  
+  %input{name: "csv", type: :hidden}

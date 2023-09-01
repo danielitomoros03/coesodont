@@ -4,23 +4,25 @@
 - courses_offer = academic_process.courses
 - user = grade.student.user
 
-- subjects_approved = grade.subjects_approved.order('subjects.ordinal, subjects.code')
-- if current_user.student? and school.enable_dependents?
+- if current_user.student? and (session[:rol].eql? 'student') and school.enable_dependents?
   - subjects_offer_by_dependency = grade.subjects_offer_by_dependent
   - courses_offer = courses_offer.where(subject_id: subjects_offer_by_dependency.ids)
+
 - courses_offer = courses_offer.order_by_subject_code
 - limitCredits = academic_process.max_credits
 - limitSubjects = academic_process.max_subjects
 - msgDanger = "Seleccione las asignaturas que desea preinscribir. Recuerde mover el scroll para ver todas las asignaturas ofertadas. Finalmente haga clíc en 'Completar' "
 
 
-- if current_user.admin? and session[:rol].eql? 'admin'
+- if current_user&.admin? and session[:rol].eql? 'admin'
   .bg-info.text-primary.p-3.text-center
     = link_to "/admin/student/#{grade.student_id}", class: 'float-start btn btn-sm btn-primary align-middle', title: "Ir al detalle de #{user.nick_name}" do
       %i.fa-regular.fa-chevron-left
       Ir a Detalle
 
-    - if subjects_approved.any?
+    - records_from_subjects_approved = grade.academic_records_from_subjects_approved.order('subjects.ordinal, subjects.code')
+
+    - if records_from_subjects_approved.any?
       %button.btn.btn-sm.btn-primary.float-start.mx-2{"data-bs-target": "#subjectsApproved", "data-bs-toggle": :modal, type: :button}
         %i.fa-regular.fa-list-check
 
@@ -28,7 +30,7 @@
 
         - title1 = "Asignaturas Aprobadas #{user.reverse_name}"
         - title2 = "#{school.name}"
-        - content = render partial: 'grades/subjects_approved', locals: {records: grade.subjects_approved.order('subjects.ordinal, subjects.code')}
+        - content = render partial: 'grades/subjects_approved', locals: {records: records_from_subjects_approved}
 
       = render partial: '/layouts/scaffold-modal-static', locals: {content: content, title1: title1, title2: title2, id: 'subjectsApproved'}
     - else
@@ -63,13 +65,13 @@
 
   =# render partial: 'schedules/index', locals: {schedules: academic_process.schedules}
 
-.modal-footer
-  / %a.btn.btn-sm.btn-outline-light{data: {dismiss: 'modal'}} Cancelar
-  - enableSubmit = (totalCreditsReserved > 0 and totalCreditsReserved <= limitCredits and totalSubjectsReserved > 0 and totalSubjectsReserved <= limitSubjects)
+  .modal-footer
+    / %a.btn.btn-sm.btn-outline-light{data: {dismiss: 'modal'}} Cancelar
+    - enableSubmit = (totalCreditsReserved > 0 and totalCreditsReserved <= limitCredits and totalSubjectsReserved > 0 and totalSubjectsReserved <= limitSubjects)
 
-  - disabledClass = enableSubmit ? '' : 'disabled'
-  .d-grid.gap-2
-    = submit_tag 'Completar', class: "#{disabledClass} btn btn-success btn-lg", id: 'submitBtn', 'data-disable-with': 'Enviando', disabled: !enableSubmit, onclick: 'completeEnroll(this);'
+    - disabledClass = enableSubmit ? '' : 'disabled'
+    .d-grid.gap-2
+      = submit_tag 'Completar', class: "#{disabledClass} btn btn-success btn-lg", id: 'submitBtn', 'data-disable-with': 'Enviando', disabled: !enableSubmit, onclick: 'completeEnroll(this);'
 
 :javascript
 

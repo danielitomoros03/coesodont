@@ -1,9 +1,13 @@
-%h4.bg-primary.text-light.text-center.mb-4= "Programación #{@object.short_desc}"
+%h4.bg-primary.text-light.text-center.mb-4
+  .btn.bg-success.text-dark{title: 'Total Secciones'}
+    = @object.sections.count
+  = "Programación #{@object.short_desc}"
+
 
 
 - if (current_user&.admin&.authorized_manage? 'Course')
 
-  - content = render("/academic_processes/form_section")
+  - content = render("/academic_processes/form_section", return_id: @object.id)
 
   = render partial: 'layouts/scaffold-modal', locals: {id: "NewSectionModal", title: "Nueva Sección", content: content}
 

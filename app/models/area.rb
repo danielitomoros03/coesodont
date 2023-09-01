@@ -19,6 +19,8 @@ class Area < ApplicationRecord
 
   has_many :subjects, dependent: :restrict_with_error
   has_many :teachers, dependent: :restrict_with_error
+
+  has_many :sections, through: :subjects
   # accepts_nested_attributes_for :subjects
 
   # VALIDATIONS:

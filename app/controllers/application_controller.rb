@@ -18,6 +18,12 @@ class ApplicationController < ActionController::Base
   #   Course.session_academic_process_id = nil
   # end
 
+  #AUTHORIZES TO:
+
+  def autho_to action_name, clazz
+    current_user&.admin&.authorized_to action_name, clazz
+  end
+
 
   def models_list
     aux = ActiveRecord::Base.connection.tables-['schema_migrations', 'ar_internal_metadata'].map{|model| model.capitalize.singularize.camelize}

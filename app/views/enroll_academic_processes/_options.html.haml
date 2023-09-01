@@ -26,9 +26,9 @@
     = link_to "/enroll_academic_processes/#{enroll_academic_process.id}", class: 'btn btn-sm float-end btn-danger mx-1 align-middle', 'data-confirm': "Esta acción eliminará todas los registros académicos de la inscripción ¿Está completamente suguro?", method: :delete, 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: 'Eliminar inscripción en proceso académico', rel: :tooltip do
       .fa.fa-remove
 
-- if enabled_to_admin and (current_user&.admin&.authorized_manage? 'AcademicRecord')
+- if (session[:rol].eql? 'student') or (enabled_to_admin and (current_user&.admin&.authorized_manage? 'AcademicRecord'))
 
-  - if (school.active_process.eql? enroll_academic_process.academic_process or school.enroll_process.eql? enroll_academic_process.academic_process)
+  - if enroll_academic_process.confirmado? and (school.active_process.eql? enroll_academic_process.academic_process or school.enroll_process.eql? enroll_academic_process.academic_process)
 
     - if !enroll_academic_process.any_permanence_articulo?
       - msg = 'Generar Constancia de Estudio'
@@ -44,12 +44,12 @@
         .fa-solid.fa-graduation-cap
         .fa-solid.fa-e
 
-    - if enroll_academic_process.confirmado?
-      - msg = 'Generar Constancia de Inscripción'
 
-      = link_to "/enroll_academic_processes/#{enroll_academic_process.id}.pdf", class: 'btn btn-info btn-sm float-end mx-1 align-middle', target: '_blank', rel: "noopener noreferrer", 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: :tooltip do
-        .fa.fa-download
-        .fa-solid.fa-graduation-cap
+    - msg = 'Generar Constancia de Inscripción'
+
+    = link_to "/enroll_academic_processes/#{enroll_academic_process.id}.pdf", class: 'btn btn-info btn-sm float-end mx-1 align-middle', target: '_blank', rel: "noopener noreferrer", 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: :tooltip do
+      .fa.fa-download
+      .fa-solid.fa-graduation-cap
         .fa-solid.fa-i
 
   - elsif enabled_to_admin
@@ -61,8 +61,6 @@
         .fa.fa-download
         .fa-solid.fa-graduation-cap
         .fa-solid.fa-e
-
-
 
 - if (session[:rol].eql? 'student') or (enabled_to_admin and current_user&.admin&.authorized_read? 'PaymentReport')
 
@@ -79,6 +77,5 @@
     - content = render template: "/payment_reports/show"
     = render partial: '/layouts/scaffold-modal', locals: {content: content, title: titlePayment, id: id}
   - else
-    
-    = link_to 'javascript:void(0)', class: 'btn btn-secondary btn-sm float-end mx-2', title: 'Sin reporte de pago' do
+    %b.btn.btn-secondary.btn-sm.float-end.mx-2{rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-original-title': 'Sin reporte de pago'}
       .fa.fa-receipt

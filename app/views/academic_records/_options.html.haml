@@ -16,7 +16,7 @@
           .fa.fa-calendar-plus
     - else
       - section = academic_record.section
-      - sections = academic_record.course.sections.where('id != ?', section.id)
+      - sections = academic_record.course.sections.where('sections.id != ?', section.id)
       - if sections.any?
         - msg = 'Cambio de sección'
 

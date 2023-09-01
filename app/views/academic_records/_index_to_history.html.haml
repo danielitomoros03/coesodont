@@ -4,6 +4,8 @@
 %table.table.table-sm.table-striped.table-hover
   %thead
     %tr
+      - if (current_user&.admin&.yo?)
+        %th ID
       %th{style: 'width:120px;'} Código
       %th.text-center{style: 'width:10px;'} Sem
       %th Asignatura
@@ -19,6 +21,8 @@
     - academic_records.sort_by_subject_name.each do |academic_record|
       - subject = academic_record.subject
       %tr{class: academic_record.tr_class_by_status_q}
+        - if (current_user&.admin&.yo?)
+          %td= academic_record.id
         %td{title: 'Ir al detalle de la asignatura'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Subject'), subject.code, "/admin/subject/#{subject.id}"
         %td.text-center= subject.ordinal
         %td{title: subject.name}= subject.name

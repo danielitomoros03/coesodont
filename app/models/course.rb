@@ -125,6 +125,10 @@ class Course < ApplicationRecord
           value.period.name
         end
       end
+      field :area do
+        searchable :name
+        sortable :name
+      end
       field :subject do
         filterable false
       end

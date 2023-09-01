@@ -4,6 +4,8 @@
     %tr
       %th.text-center.table-primary{colspan: 5} Asignaturas Aprobadas
     %tr.table-primary
+      - if current_user&.admin&.yo?
+        %th ID
       %th.headers{style: 'width: 4%', scope: :col} #
       %th.headers{style: 'width: 5%', scope: :col} Sem
       %th.headers{style: 'width: 56%', scope: :col} Asignatura
@@ -13,6 +15,8 @@
     - records.each_with_index do |record, i|
       - subject = record.subject
       %tr
+        - if current_user&.admin&.yo?
+          %td= record.id
         %td.align-middle.text-right= i+1
         %td.align-middle.text-center= subject.ordinal
         %td.align-middle{title: subject.desc}= subject.desc

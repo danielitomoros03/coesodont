@@ -1,6 +1,7 @@
 %table.table.table-striped.table-sm
   %thead
     %tr.text-center
+      %th Período
       %th Número
       %th Capacidad
       %th.text-start Profesor
@@ -11,7 +12,8 @@
   %tbody
     - sections.each do |section|
       %tr.text-center
-        %td= section.code
+        %td= section.academic_process.period_name
+        %td= link_to_if (current_user&.admin&.authorized_read? 'Section'), section.code, "/admin/section/#{section.id}"
         %td= section.capacity
         %td.text-start= section.teacher_desc
         %td= section.label_qualified
