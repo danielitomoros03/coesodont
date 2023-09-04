@@ -60,7 +60,7 @@ class Section < ApplicationRecord
   before_save :set_code_to_02i
   
   # SCOPE:
-  # default_scope {includes(:course, :subject, :period, :area)} # No hace falta
+  default_scope {includes(:course, :subject, :period, :area)} # No hace falta
   scope :sort_by_period, -> {joins(:period).order('periods.name')}
   scope :sort_by_period_reverse, -> {joins(:period).order('periods.name DESC')}
 
@@ -559,7 +559,7 @@ class Section < ApplicationRecord
     end
 
     export do
-      fields :period, :subject, :code, :classroom, :user, :qualified, :modality, :schedules, :capacity
+      fields :period, :area, :subject, :code, :classroom, :user, :qualified, :modality, :schedules, :capacity
 
       field :total_students do 
         label 'Total inscritos'

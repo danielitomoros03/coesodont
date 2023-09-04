@@ -2,6 +2,7 @@
   %thead
     %tr
       %th.text-center= "Estado Insc #{academic_process.period.name}"
+      %th.text-center Sede
       %th.text-center Ciudad
       %th Cédula
       %th.col-4{width: '300px'} Apellidos, Nombres
@@ -17,6 +18,7 @@
       - reverse_name = student.user.reverse_name
       %tr
         %td.text-center= grade.label_status_enroll_academic_process(academic_process.id)
+        %td= student.sede 
         - address = student.address ? student.address.city_and_state : ''
         %td{title: address}= address
         %td= student.user_ci

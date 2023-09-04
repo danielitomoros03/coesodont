@@ -1,7 +1,7 @@
 - logged_as_admin = (current_user&.admin? and session[:rol].eql? 'admin') ? true : false
 - enrollment_days = academic_process.enrollment_days
 - grades_without_appointment = academic_process.readys_to_enrollment_day
-- grades_others = Grade.enrolled_in_academic_process(academic_process.process_before.id).others_permanence_invalid_to_enroll
+- grades_others = Grade.enrolled_in_academic_process(academic_process.process_before_id).others_permanence_invalid_to_enroll
 
 - if logged_as_admin and grades_without_appointment.any? and (current_user&.admin&.authorized_create? 'AcademicProcess')
   - id = 'newEnrollmentDayModal'
@@ -17,43 +17,49 @@
   %li.nav-item{role: "presentation"}
     %button#otherGrades-tab.nav-link{"aria-controls": "otherGrades", "aria-selected": true, "data-bs-target": "#otherGrades", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{grades_others.count} Estudiante(s) que no aplican a Nueva Jornada por Cita Horaria"}
       .label.bg-info.text-dark= grades_others.count
-      = "No Aplican"
+      No Aplican
   %li.nav-item{role: "presentation"}
     %button#withoutAppointment-tab.nav-link.active{"aria-controls": "withoutAppointment", "aria-selected": true, "data-bs-target": "#withoutAppointment", "data-bs-toggle": :tab, role: :tab, type: "button", title: "#{total_grades} Estudiante(s) válido(s) para aplicar en Nueva Jornada"}
       .label.bg-info.text-dark= total_grades
-      = "Válidos para Aplicar"
+      Válidos para Aplicar
 
   - enrollment_days.each do |day|
     %li.nav-item{role: "presentation"}
       %button.nav-link{"aria-controls": "day#{day.id}", "aria-selected": false, "data-bs-target": "#day#{day.id}", "data-bs-toggle": :tab, role: :tab, type: :button, id: "#day#{day.id}Tab"}
-        = I18n.l(day.start, format: "%d/%m/%Y")
         .badge.bg-dark= day.own_grades_count
+        = I18n.l(day.start, format: "%d/%m/%Y")
 
 #myTabContent.tab-content
   #otherGrades.tab-pane.fade{"aria-labelledby": "otherGrades-tab", role: "tabpanel"}
     %h6.text-center.alert.alert-warning
-      = "Estudiantes con situaciones que impide su inscripción. Puede cambiar su situación entrando al detalle de cada uno luego de correr 'Actualizar Estados Estudantes'.".html_safe  
-    = render partial: '/enrollment_days/grades', locals: {grades: grades_others, academic_process: academic_process}
+      = "Estudiantes con situaciones que impide su inscripción. Puede cambiar su situación entrando al detalle de cada uno luego de correr 'Actualizar Estados Estudantes'.".html_safe
+    = link_to "/export/xls/#{academic_process.id}.xls?grades_others=true", class: 'btn btn-info float-end m-1', format: 'xls' do
+      .fa.fa-download
+      Descargar  
+    %br
+    %br
+    .overflow-scroll  
+      = render partial: '/enrollment_days/grades', locals: {grades: grades_others, academic_process: academic_process}
 
   #withoutAppointment.tab-pane.fade.show.active{"aria-labelledby": "withoutAppointment-tab", role: "tabpanel"}
 
     - if grades_without_appointment&.any?
       %h6.text-center.alert.alert-warning
         = "Estudiantes sin Cita Horaria e Inscritos en el periodo anterior: <b>#{academic_process.process_before.period_name}</b> de <b>#{academic_process.school.short_name}</b>".html_safe
-
-      = render partial: '/enrollment_days/grades', locals: {grades: grades_without_appointment, academic_process: academic_process}
+      .overflow-scroll
+        = render partial: '/enrollment_days/grades', locals: {grades: grades_without_appointment, academic_process: academic_process}
     - else
       %h5.alert.alert-info Sin estudiantes pendientes por asignar Cita Horaria  
 
   - enrollment_days.each do |day|
     .tab-pane.fade{"aria-labelledby": "#day#{day.id}Tab", role: "tabpanel", id: "day#{day.id}"}
       - if current_user&.admin&.authorized_delete? 'AcademicProcess'
-        = link_to "/enrollment_days/#{day.id}", class: 'btn btn-danger float-end my-3', method: :delete, 'data-confirm': 'Esta acción es irreversible ¿Está completamente seguro? Se limpiarán las citas horarias respectivas' do
+        = link_to "/enrollment_days/#{day.id}", class: 'btn btn-danger float-end my-1', method: :delete, 'data-confirm': 'Esta acción es irreversible ¿Está completamente seguro? Se limpiarán las citas horarias respectivas' do
           .fa.fa-trash
           Eliminar Jornada del
           = I18n.l(day.start, format: "%d/%m/%Y")
 
-      = link_to "/enrollment_days/#{day.id}/export.xls", class: 'btn btn-info float-end m-3' do
+      = link_to "/enrollment_days/#{day.id}/export.xls", class: 'btn btn-info float-end m-1' do
         .fa.fa-download
         Descargar
       = render partial: '/enrollment_days/show', locals: {grades: day.own_grades_sort_by_appointment, academic_process: academic_process }

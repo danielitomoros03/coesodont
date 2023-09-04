@@ -651,7 +651,7 @@ es:
         bank_accounts: Cuentas Bancarias
         study_plans: Planes de Estudio
         admission_types: Tipos de Admisión
-        boss_name: Nombre del Jefe de Control Estudio
+        boss_name: Nombre del Jefe de Control Estudios
       schedule:
         day: Día
         starttime: Hora Inicio

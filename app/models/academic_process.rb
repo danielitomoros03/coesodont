@@ -58,6 +58,24 @@ class AcademicProcess < ApplicationRecord
   # CALLBACKS:
   before_save :set_name
 
+  def invalid_grades_to_csv
+
+    grades_others = Grade.enrolled_in_academic_process(self.process_before_id).others_permanence_invalid_to_enroll
+
+    CSV.generate do |csv|
+      csv << ['Est. Permanencia', 'Cédula', 'Apellido y Nombre', 'Efficiencia', 'Promedio', 'Ponderado']
+      grades_others.each do |grade|
+        user = grade.user
+    
+        # iep = grade.enroll_academic_processes.of_academic_process(self.id).first
+        # enroll_status = (iep&.enroll_status) ? iep.enroll_status&.titleize : 'Sin Inscripción'
+        csv << [grade.current_permanence_status&.titleize, user.ci, user.reverse_name, grade.efficiency, grade.simple_average, grade.weighted_average]
+      end
+    end
+  end
+
+
+  # FUNCTIONS:
   def subject_active_for_this? subject_id
     subjects.ids.include?(subject_id)
   end

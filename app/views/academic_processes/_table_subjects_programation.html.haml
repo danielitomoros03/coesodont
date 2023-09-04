@@ -36,14 +36,13 @@
                 = render partial: 'academic_processes/form_active_subject', locals: {subject_id: subject.id, course: course, has_sections: has_sections}
               - else
                 %i.fas.fa-remove
-          %td
+          %td.overflow-scroll
             - if course
-              %div{style: 'overflow:scroll;'}
-                %table
-                  %tr
-                    - if has_sections
-                      - if (current_user&.admin&.authorized_read? 'Section')
-                        = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: course.academic_records.any?}
-                    - if (current_user&.admin&.authorized_create? 'Section')
-                      %td.p-0= ApplicationController.helpers.button_add_section course.id
+              %table
+                %tr
+                  - if has_sections
+                    - if (current_user&.admin&.authorized_read? 'Section')
+                      = render partial: 'academic_processes/sections_list_inline', locals: {sections: sections, has_enrolled: course.academic_records.any?}
+                  - if (current_user&.admin&.authorized_create? 'Section')
+                    %td.p-0= ApplicationController.helpers.button_add_section course.id
 
