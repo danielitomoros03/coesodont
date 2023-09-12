@@ -1,5 +1,5 @@
 class UserMailer < ApplicationMailer
-  default from: "coes.odon@gmail.com"
+  default from: "SOPORTE COES-ODONT <soporte@coesodont.com>"
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
   #
