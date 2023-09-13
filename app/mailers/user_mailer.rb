@@ -9,6 +9,13 @@ class UserMailer < ApplicationMailer
     mail(to: user.email_desc, subject: "¡Bienvenido a Coes-ODONT!")
   end
 
+  # Bienvenida Funcionando
+  #  def welcome
+  #    @greeting = "Hi"
+  #
+  #    mail to: "moros.daniel@gmail.com"
+  #  end
+
   def enroll_confirmation(id)
     enroll_academic_process = EnrollAcademicProcess.find id
     user = enroll_academic_process.user
