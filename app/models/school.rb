@@ -144,6 +144,29 @@ class School < ApplicationRecord
 
       end
 
+      field :enable_enroll_payment_report do
+        label '¿Permitir Reportes de Pago?'
+        queryable false
+        filterable false
+        searchable false
+        sortable false
+        sortable false
+        pretty_value do
+
+          current_user = bindings[:view]._current_user
+          admin = current_user.admin
+          active = admin&.authorized_manage? 'School'
+
+          if active
+            bindings[:view].render(partial: "/schools/form_enroll_payment_reports", locals: {school: bindings[:object]})
+          else
+            value
+          end
+        end
+
+      end
+
+
       fields :enroll_process do
         label 'Período Inscripción'
         queryable false

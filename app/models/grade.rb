@@ -12,6 +12,7 @@ class Grade < ApplicationRecord
   # t.integer "duration_slot_time"
   # t.integer "current_permanence_status"
   # t.bigint "enabled_enroll_process_id"
+  # t.bigint "start_process_id"
 
   NORMATIVE_TITLE = "NORMAS SOBRE EL RENDIMIENTO MÍNIMO Y CONDICIONES DE PERMANENCIA DE LOS ALUMNOS EN LA U.C.V"
 
@@ -27,6 +28,7 @@ class Grade < ApplicationRecord
   belongs_to :study_plan
   belongs_to :admission_type
   belongs_to :enabled_enroll_process, foreign_key: 'enabled_enroll_process_id', class_name: 'AcademicProcess', optional: true
+  belongs_to :start_process, foreign_key: 'start_process_id', class_name: 'AcademicProcess', optional: true
 
   has_one :school, through: :study_plan
   has_one :user, through: :student
@@ -137,16 +139,16 @@ class Grade < ApplicationRecord
 
   # ENROLLMENT
   def valid_to_enroll_in academic_process
-    valid = false
+    
     if self.enabled_enroll_process.eql?(academic_process)
-      valid = true
+      return true
     else
       academic_process_before = academic_process&.process_before
       if (academic_process_before and self.enroll_academic_processes.of_academic_process(academic_process_before.id).any?) and (['regular', 'reincorporado', 'articulo3'].include? self.current_permanence_status)
-        valid = true
+        return true
       end
     end
-    return valid
+    return false
   end
 
   # APPOINTMENT_TIME:
@@ -229,32 +231,34 @@ class Grade < ApplicationRecord
   end
 
   def subjects_offer_by_dependent
-    # Buscamos los ids de las asignaturas aprobadas
 
     if is_new? or !any_approved?
+      # Si es nuevo o no tiene asignaturas aporvadas, le ofertamos las de 1er año
       Subject.independents.where(ordinal: 1)
     else
-      aprobadas_ids = self.subjects_approved_ids
+      # Buscamos los ids de las asignaturas aprobadas
+      asig_aprobadas_ids = self.subjects_approved_ids
 
-      # Buscamos por ids de las asignaturas que dependen de las aprobadas
-      dependent_subject_ids = SubjectLink.in_prelation(aprobadas_ids).not_in_dependency(aprobadas_ids).pluck(:depend_subject_id).uniq
+      # Buscamos por ids las asignaturas que dependen de las aprobadas
+      dependent_subject_ids = SubjectLink.in_prelation(asig_aprobadas_ids).not_in_dependency(asig_aprobadas_ids).pluck(:depend_subject_id).uniq
 
-      # ids_subjects_positives = []
+      ids_subjects_positives = []
 
       # Ahora por cada asignatura válida miramos sus respectivas dependencias a ver si todas están aprobadas
 
       # OJO: REVISAR, Creo que este paso es REDUNDANTE, si tienes las dependencias de las aprovadas, no deberías mirar si aprobó las asignaturas de esas dependencias. 
-      # dependent_subject_ids.each do |subj_id|
-      #   ids_aux = SubjectLink.where(depend_subject_id: subj_id).map{|dep| dep.prelate_subject_id}
-      #   ids_aux.reject!{|id| aprobadas_ids.include? id}
-      #   ids_subjects_positives << subj_id if (ids_aux.eql? []) #Si aprobó todas las dependencias
-      # end
+      # OJO2: ¡Revisado! y sí debe ir, porque sino oferta asignaturas que no debe
+      dependent_subject_ids.each do |subj_id|
+        ids_aux = SubjectLink.where(depend_subject_id: subj_id).map{|dep| dep.prelate_subject_id}
+        ids_aux.reject!{|id| asig_aprobadas_ids.include? id}
+        ids_subjects_positives << subj_id if (ids_aux.eql? []) #Si aprobó todas las dependencias
+      end
 
       # Buscamos las asignaturas sin prelación
       ids_subjects_independients = self.school.subjects.independents.not_inicial.ids
 
       # Sumamos todas las ids ()
-      asignaturas_disponibles_ids = dependent_subject_ids + ids_subjects_independients
+      asignaturas_disponibles_ids = ids_subjects_positives + ids_subjects_independients
 
       Subject.where(id: asignaturas_disponibles_ids)
     end
@@ -288,7 +292,7 @@ class Grade < ApplicationRecord
     # redear una tabla descripción. OJO Sí es posible estandarizar
   end
 
-  def subjects_approved
+  def academic_records_from_subjects_approved
     self.academic_records.aprobado.joins(:subject)
   end
 
@@ -450,8 +454,20 @@ class Grade < ApplicationRecord
     end
 
     edit do
-      fields :study_plan, :admission_type, :registration_status
+      field :study_plan do
+        inline_add false
+        inline_edit false
+      end
+      fields :admission_type do
+        inline_add false        
+        inline_edit false        
+      end
+      fields :registration_status
       field :enrollment_status
+      field :start_process do
+        inline_edit false
+        inline_add false
+      end
       field :appointment_time do
         label 'Fecha y Hora Cita Horaria'
       end

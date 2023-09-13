@@ -6,6 +6,7 @@
       %td{style: 'width:30%'} Cátedra
       %td Orden
       %td Tipo
+      %td Tipo Cal.
       %td Créd
 
   %tbody
@@ -16,4 +17,5 @@
       %td= link_to_if active_link, subject.area.name, "/admin/area/#{subject.area_id}"
       %td= ApplicationController.helpers.label_status("bg-info", subject.ordinal)
       %td= subject.label_modality
+      %td= subject.label_qualification_type
       %td.text-center= subject.label_credits

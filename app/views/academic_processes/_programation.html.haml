@@ -1,4 +1,6 @@
 - has_enrolled = academic_process.enroll_academic_processes.any?
+- period_name = academic_process.period_name
+- academic_process_id = academic_process.id
 .float-end
 
   - if (current_user&.admin&.authorized_manage? 'Course')
@@ -20,18 +22,21 @@
       = render partial: '/layouts/scaffold-modal', locals: {content: content, title: title, id: id}
 
     - if academic_process.sections.any? and !has_enrolled and (current_user&.admin&.authorized_delete? 'Course')
-      - period_name = academic_process.period.name
+
       - total = academic_process.sections.count
 
-      = link_to "/academic_processes/#{academic_process.id}/clean_courses", class: 'btn btn-danger mx-1', 'data-confirm': "Esta acción es irreversible y eliminará un total de #{total} secciones asociadas al proceso y limpiará las asignaturas activadas. ¿ Está completamente seguro?", title: 'Eliminar las secciones y desactivar todas las asignaturas' do
+      = link_to "/academic_processes/#{academic_process_id}/clean_courses", class: 'btn btn-danger mx-1', 'data-confirm': "Esta acción es irreversible y eliminará un total de #{total} secciones asociadas al proceso y limpiará las asignaturas activadas. ¿ Está completamente seguro?", title: 'Eliminar las secciones y desactivar todas las asignaturas' do
         .fa.fa-remove
         = "Eliminar Toda la Programación"
 
   - # ENLACE A PROGRAMACIONES
   - if (current_user&.admin&.authorized_read? 'Course')
-    - period_name = academic_process.period_name
-    = link_to "/admin/course?f%5Bacademic_process%5D%5B52520%5D%5Bo%5D=like&f%5Bacademic_process%5D%5B52520%5D%5Bv%5D=#{period_name}&academic_process_id=#{academic_process.id}", class: 'btn btn-primary mx-1', title: "Ver listado de cursos #{period_name}" do
+    .float-end= render partial: '/courses/quick_export', locals: {period_name: period_name, academic_process_id: academic_process_id}
+
+    = link_to "/admin/course?f%5Bacademic_process%5D%5B52520%5D%5Bo%5D=like&f%5Bacademic_process%5D%5B52520%5D%5Bv%5D=#{period_name}&academic_process_id=#{academic_process_id}", class: 'btn btn-primary mx-1', title: "Ver listado de cursos #{period_name}" do
       .fa-solid.fa-shapes
       ="Ver en Cursos"
 
+%br
+%br
 = render partial: '/academic_processes/index_programation', locals: {academic_process: academic_process, has_enrolled: has_enrolled}

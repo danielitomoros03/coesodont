@@ -4,6 +4,8 @@ class StudentsController < ApplicationController
 
   # def edit
   # end
+  layout 'logged'
+
 
   def update
     if @student.update(student_params)

@@ -23,6 +23,7 @@ class Section < ApplicationRecord
 
   # has_one
   has_one :subject, through: :course
+  has_one :area, through: :subject
   # accepts_nested_attributes_for :subject
 
   has_one :academic_process, through: :course
@@ -59,7 +60,7 @@ class Section < ApplicationRecord
   before_save :set_code_to_02i
   
   # SCOPE:
-  # default_scope {joins(:course).order('courses.name')}
+  default_scope {includes(:course, :subject, :period, :area)} # No hace falta
   scope :sort_by_period, -> {joins(:period).order('periods.name')}
   scope :sort_by_period_reverse, -> {joins(:period).order('periods.name DESC')}
 
@@ -285,9 +286,10 @@ class Section < ApplicationRecord
     weight -1
 
     list do
+      sort_by ['periods.name', 'areas.name', 'courses.name', 'subjects.code']
       search_by :custom_search
       
-      # filters [:period_name, :code, :subject_code]
+      # filters [:period, :code, :subject_code]
       # sort_by 'courses.name'
       # field :academic_process do
       #   label 'Período'
@@ -297,23 +299,30 @@ class Section < ApplicationRecord
       #   end
       # end
 
-      field :course do
+      field :period do
         sticky true
         label 'Período'
-        filterable 'courses.name'
-        associated_collection_cache_all false
-        associated_collection_scope do
-          # bindings[:object] & bindings[:controller] are available, but not in scope's block!
-          Proc.new { |scope|
-            # scoping all Players currently, let's limit them to the team's league
-            # Be sure to limit if there are a lot of Players and order them by position
-            scope = scope.joins(:course)
-            scope = scope.limit(30) # 'order' does not work here
-          }
-        end
+        searchable :name
+        sortable :name
+        # associated_collection_cache_all false
+        # associated_collection_scope do
+        #   # bindings[:object] & bindings[:controller] are available, but not in scope's block!
+        #   Proc.new { |scope|
+        #     # scoping all Players currently, let's limit them to the team's league
+        #     # Be sure to limit if there are a lot of Players and order them by position
+        #     scope = scope.joins(:period)
+        #     scope = scope.limit(30) # 'order' does not work here
+        #   }
+        # end
         pretty_value do
-          value.period.name
+          value.name
         end
+      end
+
+      field :area do
+        sticky true
+        sortable :name
+        searchable :name
       end
 
       # field :period_name do
@@ -331,14 +340,15 @@ class Section < ApplicationRecord
         sticky true
         label 'Asignatura'
         column_width 240
-        searchable 'subjects.code'
-        filterable 'subjects.code'
-        sortable 'subjects.code'
+
+        filterable false #'subjects.code'
+        sortable :code
       end
 
       field :code do
         sticky true
         label 'Sec'
+        filterable false 
         column_width 30
         formatted_value do
           bindings[:view].link_to(bindings[:object].code, "/admin/section/#{bindings[:object].id}") if bindings[:object].present?
@@ -346,7 +356,10 @@ class Section < ApplicationRecord
         end
       end
 
-      field :classroom
+      field :classroom do
+        filterable false 
+        sortable false
+      end
 
       field :teacher_desc do
         label 'Profesor'
@@ -354,6 +367,7 @@ class Section < ApplicationRecord
         # searchable ['users.ci', 'users.first_name', 'users.last_name']
         # filterable ['users.ci', 'users.first_name', 'users.last_name']
         # sortable 'users.ci'
+        filterable false 
         formatted_value do
           bindings[:view].link_to(bindings[:object].teacher.desc, "/admin/teacher/#{bindings[:object].teacher_id}") if bindings[:object].teacher.present?
         end
@@ -386,6 +400,7 @@ class Section < ApplicationRecord
         label 'Cupos'
         column_width 40
         sortable 'sections.capacity'
+        filterable false 
         pretty_value do
           ApplicationController.helpers.label_status('bg-info', value)
         end        
@@ -420,7 +435,7 @@ class Section < ApplicationRecord
         end         
       end
       field :total_retirados do
-        label 'Ret'
+        label 'RT'
         pretty_value do
           ApplicationController.helpers.label_status('bg-secondary', value)
         end         
@@ -529,7 +544,7 @@ class Section < ApplicationRecord
 
       field :classroom do
         html_attributes do
-          {:onInput => "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9]/g,''))"}
+          {:onInput => "$(this).val($(this).val().toUpperCase().replace(/[^A-Za-z0-9| ]/g,''))"}
         end
       end
 
@@ -544,7 +559,7 @@ class Section < ApplicationRecord
     end
 
     export do
-      fields :period, :subject, :code, :classroom, :user, :qualified, :modality, :schedules, :capacity
+      fields :period, :area, :subject, :code, :classroom, :user, :qualified, :modality, :schedules, :capacity
 
       field :total_students do 
         label 'Total inscritos'
@@ -554,24 +569,23 @@ class Section < ApplicationRecord
       end      
 
       field :total_sc do
-        label 'SC'
-        help 'Sin Clificar'
+        label 'Sin Calificar'
+
       end
       field :total_aprobados do
-        label 'A'
-        help 'Aprobado'
+        label 'Total Aprobados'
       end
       field :total_aplazados do
-        label 'AP'
+        label 'Total Aplazados'
       end
       field :total_retirados do
-        label 'Ret'
+        label 'Total Retirados'
       end 
       field :total_pi do
-        label 'PI'
+        label 'Total PI'
       end
       field :qualifications_average do
-        label 'PROM'
+        label 'Promedio de Calificaciones'
       end
 
     end

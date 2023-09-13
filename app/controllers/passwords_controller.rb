@@ -2,7 +2,6 @@
 class PasswordsController < Devise::PasswordsController
   skip_before_action :authenticate_user!#, only: [ :edit, :update ]
 
-  layout 'visitor'
   # GET /resource/password/new
   def new
    super
@@ -19,7 +18,7 @@ class PasswordsController < Devise::PasswordsController
       
       flash[:danger] = resource.errors.full_messages.to_sentence unless resource.errors.empty?
 
-      flash[:warning] = "Si no se encuentra su correo o no recuerda su contraseña, por favor contacte a la administración para que le brinde el apoyo respectivo."
+      flash[:warning] = "Si no está seguro del correo registrado en COES, contacte a la administración para que le brinde el apoyo respectivo."
       redirect_back fallback_location: root_path
     end
   end

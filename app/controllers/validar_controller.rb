@@ -1,10 +1,8 @@
 class ValidarController < ApplicationController
   before_action :set_version, only: %i[ constancias ]
   skip_before_action :authenticate_user!, only: [ :constancias ]
-  layout 'visitor'
 
   def constancias
-
 
     if (@version and @version.item.is_a? EnrollAcademicProcess and (params[:study] and @version.event.eql? 'Se generó Constancia de Estudio') or (@version.event.eql? 'Se generó Constancia de Inscripción'))
 

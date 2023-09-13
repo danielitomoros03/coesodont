@@ -8,7 +8,7 @@
         %tbody
             - study_plan.subject_types.each do |tipo|
                 %tr
-                    %th.text-start= "#{tipo.name.titleize} (#{tipo.code})"
+                    %th.text-start= tipo.desc_pluralize
                     %td= tipo.required_credits
                     %td= grade.credits_completed_by_type tipo.name
 

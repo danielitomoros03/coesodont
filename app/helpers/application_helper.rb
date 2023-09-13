@@ -3,6 +3,10 @@ module ApplicationHelper
 		Haml::Engine.new(haml.strip_heredoc, format: :html5).render(locals)
 	end
 
+	def to_bs value
+		ActionController::Base.helpers.number_to_currency(value, unit: 'Bs.', separator: ",", delimiter: ".")
+	end
+
 	def btn_toggle type, icon, href, title_tooltip, value, onclick_action=nil
 
 		target = ''
@@ -35,12 +39,23 @@ module ApplicationHelper
 		
 	end
 
+	def total_sections_stiky total
+		sticky_label 0, 0, 'bg-success', 'text-dark', 'Total Secciones', total
+	end
+
+	def sticky_label top, right, bg_color, text_color, title, content
+		content_tag :div, title: title, class: "btn btn-sm #{bg_color} #{ text_color}", style: "top: #{top}px; right: #{right};font-size: xx-small;" do
+			capture_haml{"#{content}".html_safe }
+		end	
+	end
+
 	def label_link_with_tooptip(href, klazz, content, title, placement='top')
 
 		content_tag :a, href: href, rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-placement': placement, 'data-bs-original-title': title do
 			capture_haml{"<span class='text-center badge #{klazz}'>#{content}</span>".html_safe }
 		end	
 	end	
+
 	def btn_link_with_tooptip(href, klazz, content, title, placement='top')
 
 		content_tag :a, href: href, rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-placement': placement, 'data-bs-original-title': title, class: "btn btn-sm #{klazz}" do

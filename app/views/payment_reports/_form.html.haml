@@ -1,15 +1,31 @@
 -# frozen_string_literal: true
-= simple_form_for(@payment_report) do |f|
-  = f.error_notification
-  = f.error_notification message: f.object.errors[:base].to_sentence if f.object.errors[:base].present?
+= simple_form_for @payment_report_new, html: { class: 'form-horizontal', novalidate: false } do |f|
 
-  .form-inputs
-    = f.input :amount
-    = f.input :transaction_id
-    = f.input :transaction_type
-    = f.input :transaction_date
-    = f.association :origin_bank
-    = f.association :payable
+  =# f.input :payable, as: :hidden
+  = f.input :payable_id, as: :hidden
+  = f.input :payable_type, as: :hidden
+
+  = f.input :amount, disabled: true, input_html: { class: 'disabled' }, as: :currency
+  = f.input :amount, as: :hidden
+  = f.input :transaction_id, input_html: {aria: {required: true}, oninput: "onlyNumbers($(this))"}, required: true
+  =# f.input :transaction_type, collection: PaymentReport.transaction_types.map{|e| e}#,  as: :radio
+  =# f.collection_radio_buttons :transaction_type, PaymentReport.transaction_types.keys, nil, nil
+  = f.input :transaction_type, collection: PaymentReport.transaction_types.keys, as: :radio_buttons, required: true
+
+  = f.input :transaction_date, as: :date, start_year: Date.today.year,
+                            end_year: Date.today.year,
+                            order: [:day, :month, :year]
+  = f.association :origin_bank, required: true
+  =# f.association :payable
+
+  = f.association :receiving_bank_account, required: true
+  = f.input :voucher, required: true, input_html: {accept: "image/jpeg,image/jpg,image/png"}
 
   .form-actions
     = f.button :submit
+
+:javascript
+
+  function onlyNumbers(e){
+    e.val(e.val().replace(/[^0-9]/g, ''));
+  }

@@ -9,6 +9,8 @@ Rails.application.routes.draw do
   match "/importer/subjects" => "importer#subjects" , :as => "importer_subjects", :via => [:get, :post]
   match "/importer/academic_records" => "importer#academic_records" , :as => "importer_academic_records", :via => [:get, :post]
 
+  match "/export/xls/:id" => "export#xls", via: :get
+
   resources :validar, only: :index do
     member do
       get 'constancias'
@@ -29,7 +31,6 @@ Rails.application.routes.draw do
     end
 
   end
-
 
   resources :enroll_academic_processes do
     member do
@@ -68,6 +69,8 @@ Rails.application.routes.draw do
     end
   end
 
+  devise_for :users, controllers: { sessions: 'sessions', passwords: 'passwords' }
+
   resources :users, only: [:edit, :update] do
     member do
       get :edit_images
@@ -90,6 +93,7 @@ Rails.application.routes.draw do
   resources :banks do
     resources :payment_reports
   end
+  resources :payment_reports
   resources :schools, only: [:update]
   resources :subjects, only: [:show]
   resources :faculties do
@@ -101,21 +105,19 @@ Rails.application.routes.draw do
     end
   end
 
-  
   resources :grades do
     member do
       get 'kardex'
     end
   end
 
-    resources :downloader do
-      member do
-        get 'section_list'
-      end
+  resources :downloader do
+    member do
+      get 'section_list'
     end
+  end
 
-  # devise_for :users
-  devise_for :users, controllers: { sessions: 'sessions', passwords: 'passwords' }
+
   root to: "pages#home"
   get 'pages/multirols', to: 'pages#multirols'
 

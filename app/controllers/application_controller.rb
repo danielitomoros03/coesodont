@@ -18,6 +18,12 @@ class ApplicationController < ActionController::Base
   #   Course.session_academic_process_id = nil
   # end
 
+  #AUTHORIZES TO:
+
+  def autho_to action_name, clazz
+    current_user&.admin&.authorized_to action_name, clazz
+  end
+
 
   def models_list
     aux = ActiveRecord::Base.connection.tables-['schema_migrations', 'ar_internal_metadata'].map{|model| model.capitalize.singularize.camelize}
@@ -47,7 +53,8 @@ class ApplicationController < ActionController::Base
   end
 
   def logged_as_student?
-    !current_user.nil? and !current_user.student.nil? and session[:rol].eql? 'student'
+    # !current_user.nil? and !current_user.student.nil? and session[:rol].eql? 'student'
+    (session[:rol].eql? 'student') and current_user&.student
   end
 
   def logged_as_admin?

@@ -86,7 +86,13 @@ class Teacher < ApplicationRecord
     end
 
     show do
-      fields :user, :area, :sections
+      fields :user, :area
+
+      field :sections do
+        pretty_value do
+          bindings[:view].render(partial: '/sections/index', locals: {sections: bindings[:object].sections.joins(:period).order('periods.name': :desc)})
+        end
+      end
     end
 
     edit do
@@ -98,7 +104,7 @@ class Teacher < ApplicationRecord
     end
 
     export do
-      fields :user, :area, :created_at
+      fields :user, :area, :sections, :created_at
     end
 
     import do

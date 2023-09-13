@@ -42,11 +42,11 @@ class EnrollmentDay < ApplicationRecord
   def own_grades_to_csv
 
     CSV.generate do |csv|
-      csv << ['Cédula', 'Apellido y Nombre', 'Ubicación', 'desde', 'hasta', 'Efficiencia', 'Promedio', 'Ponderado']
+      csv << ['Cédula', 'Apellido y Nombre', 'Sede', 'Ubicación', 'Desde', 'Hasta', 'Eficiencia', 'Promedio', 'Ponderado']
       own_grades_sort_by_appointment.each do |grade|
         user = grade.user
         address = grade.student.address ? grade.student.address.city_and_state : '' 
-        csv << [user.ci, user.reverse_name, address, grade.appointment_from, grade.appointment_to, grade.efficiency, grade.simple_average, grade.weighted_average]
+        csv << [user.ci, user.reverse_name, student.sede, address, grade.appointment_from, grade.appointment_to, grade.efficiency, grade.simple_average, grade.weighted_average]
       end
     end
   end

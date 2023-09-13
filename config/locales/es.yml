@@ -315,13 +315,17 @@ es:
           attributes:
             base:
               restrict_dependent_destroy:
-                has_many: 'Tiene asignaturas asociadas'
+                has_many: 'Tiene asignaturas o profesores asociadas'
         grade:
           attributes:
             admission_type:
               required: requerido
         payment_report:
           attributes:
+            origin_bank:
+              required: requerido
+            receiving_bank_account:
+              required: requerido
             payable:
               required: 'requerido'
         parent_area:
@@ -479,6 +483,7 @@ es:
         process_before: Período Anterior
         enrollment_days: Jornadas de Inscripción por Cita Horaria
         enroll_instructions: Instrucciones Para la Inscripción
+        registration_amount: 'Arancel de Inscripción (Bs.)'
       academic_record:
         section: 'Sección'
         enroll_academic_process: 'Inscripción en Período'
@@ -597,6 +602,7 @@ es:
         duration_slot_time: Duración Franja Horaria
         enabled_enroll_process: 'Permiso especial para inscribir en'
         enrollment_status: 'Estado de Inscripción en la Facultad'
+        start_process: 'Periodo de Inicio'
       address:
         state: 'Estado'
         municipality: 'Municipio'
@@ -613,6 +619,8 @@ es:
         transaction_date: 'Fecha de la Transacción'
         origin_bank: 'Banco Origen'
         payable: 'Pagable'
+        receiving_bank_account: 'Cuenta Receptora'
+        voucher: 'Imagen de Comprobante'
         created_at: 'Fecha Registro'
       period:
         year: 'Año'
@@ -643,7 +651,7 @@ es:
         bank_accounts: Cuentas Bancarias
         study_plans: Planes de Estudio
         admission_types: Tipos de Admisión
-        boss_name: Nombre del Jefe de Control Estudio
+        boss_name: Nombre del Jefe de Control Estudios
       schedule:
         day: Día
         starttime: Hora Inicio
@@ -717,7 +725,7 @@ es:
         created_at: Creado en
         updated_at: Actualizado en
       teacher:
-        area: 'Departamento'
+        area: 'Cátedra'
         user: 'Usuario'
         created_at: 'Fecha de Registro'
         sections: 'Secciones'

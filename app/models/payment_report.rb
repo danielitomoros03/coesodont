@@ -7,6 +7,7 @@ class PaymentReport < ApplicationRecord
   # t.bigint "origin_bank_id", null: false
   # t.string "payable_type"
   # t.bigint "payable_id"  
+  # t.bigint "receiving_bank_account_id"  
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -15,9 +16,24 @@ class PaymentReport < ApplicationRecord
   before_destroy :paper_trail_destroy
   before_update :paper_trail_update
 
+
   # ASSOCIATIONS:
   belongs_to :origin_bank, class_name: 'Bank', foreign_key: 'origin_bank_id'
   belongs_to :payable, polymorphic: true
+  belongs_to :receiving_bank_account, class_name: 'BankAccount'
+
+  has_one_attached :voucher do |attachable|
+    attachable.variant :thumb, resize_to_limit: [100,100]
+  end
+
+  scope :grades, -> {where(payable_type: 'Grade')}  
+  scope :enroll_academic_processes, -> {where(payable_type: 'EnrollAcademicProcess')}  
+
+  # scope :custom_search, -> (keyword) {joins(:user).where("users.ci ILIKE '%#{keyword}%' OR users.first_name ILIKE '%#{keyword}%' OR users.last_name ILIKE '%#{keyword}%' OR users.email ILIKE '%#{keyword}%'") }
+
+
+  attr_accessor :remove_voucher
+  after_save { voucher.purge if remove_voucher.eql? '1' }   
 
   # VALIDATIONS:
   # validates :payable_id, presence: true
@@ -28,6 +44,8 @@ class PaymentReport < ApplicationRecord
   validates :transaction_type, presence: true
   validates :transaction_date, presence: true
   validates :origin_bank, presence: true
+  validates :receiving_bank_account, presence: true
+  validates :voucher, presence: true
 
   enum transaction_type: [:transferencia, :efectivo, :punto_venta]
 
@@ -35,8 +53,50 @@ class PaymentReport < ApplicationRecord
     navigation_label 'Administrativa'
     navigation_icon 'fa-solid fa-cash-register'
 
+    list do
+      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account
+
+      field :voucher do
+        filterable false
+
+        formatted_value do
+          if (bindings[:object].voucher&.attached? and bindings[:object].voucher&.representable?)
+            bindings[:view].render(partial: "layouts/set_image", locals: {image: bindings[:object].voucher, size: '30x30'})
+          else
+            false
+          end
+        end
+      end
+    end
+
+    show do
+      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account, :voucher
+    end
+
+    edit do
+      field :amount
+      field :transaction_id do
+        html_attributes do
+          {:length => 20, :size => 20, :onInput => "$(this).val($(this).val().toUpperCase().replace(/[^0-9]/g,''))"}
+        end
+      end
+      field :payable do
+        label 'Entidad a Pagar'
+      end
+      fields :transaction_type, :transaction_date
+      field :origin_bank do
+        inline_edit false
+        inline_add false
+      end
+      field :receiving_bank_account do
+        inline_edit false
+        inline_add false
+      end
+      field :voucher
+    end
+
     export do
-      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank_id, :origin_bank
+      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :origin_bank
       field :payable_type do
         label 'Tipo'
       end

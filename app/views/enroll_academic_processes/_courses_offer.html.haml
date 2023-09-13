@@ -22,13 +22,20 @@
       - section_id = ac ? ac.section_id : nil
       - approved = false
       - desc_qualification = nil
-      - if ac and ac.aprobado?
+      - if ac&.aprobado?
         - approved = true
         - desc_qualification = ac.q_value_to_02i
       - reservada = !section_id.nil? ? 'table-success' : ''
       - asigApproved = approved ? 'text-muted border table-success' : ''
-      - sections = course.sections#.con_cupos
-      - # ATENCIÓN: El scope "con_cupos" no va, ya que es importante seleccionar secciones que haya inscrito o con cupos jutas. Esto con el objetivo de que luego pueda cambiar secciones
+      - if grade.school.code&.eql? 'EACRV'
+        - # OJO: CONDICIÓN PARTICULAR DE ARQUITACTURA!!!!
+        - if grade.student.Caracas?
+          - sections = course.sections.where.not("code ILIKE '%E%'")#.con_cupos
+        - else
+          - sections = course.sections.where("code ILIKE '%E%'")#.con_cupos
+      - else
+        - sections = course.sections#.con_cupos
+      - # ATENCIÓN: El scope "con_cupos" no va, ya que es importante seleccionar secciones que haya inscrito o con cupos juntas. Esto con el objetivo de que luego pueda cambiar secciones
       - if sections.any?
         - subject = course.subject
         %tr{class: "#{asigApproved} #{reservada}"}

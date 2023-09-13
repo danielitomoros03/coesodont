@@ -19,7 +19,7 @@ class BankAccount < ApplicationRecord
 
   # FUNCTIONS:
   def name
-    "#{holder} - #{account_type} : #{bank.name}" if bank
+    "#{code} #{holder} - #{account_type} : #{bank.name}" if bank
   end
 
   rails_admin do

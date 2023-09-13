@@ -53,6 +53,21 @@ class Admin < ApplicationRecord
     user_aux.delete if user_aux.without_rol?
   end 
 
+  def authorized_to action_name, clazz
+    case action_name
+    when 'create'
+      authorized_create? clazz
+    when 'manage'
+      authorized_manage? clazz
+    when 'delete'
+      authorized_delete? clazz
+    when 'update'  
+      authorized_update? clazz
+    else
+      false
+    end
+  end
+
   def authorized_create? clazz
     if yo? or desarrollador? or jefe_control_estudio?
       return true

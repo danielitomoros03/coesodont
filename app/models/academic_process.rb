@@ -34,6 +34,7 @@ class AcademicProcess < ApplicationRecord
   has_many :students, through: :grades
   has_many :courses, dependent: :destroy
   has_many :sections, through: :courses
+  has_many :schedules, through: :sections
   has_many :academic_records, through: :sections
   has_many :subjects, through: :courses
 
@@ -47,7 +48,7 @@ class AcademicProcess < ApplicationRecord
   validates :max_credits, presence: true
   validates :max_subjects, presence: true
 
-  validates_uniqueness_of :school, scope: [:period], message: 'Proceso academico ya creado', field_name: false
+  validates_uniqueness_of :school, scope: [:period, :modality], message: 'Proceso academico ya creado', field_name: false
 
   # SCOPE:
   default_scope { order(name: :desc) }
@@ -57,10 +58,31 @@ class AcademicProcess < ApplicationRecord
   # CALLBACKS:
   before_save :set_name
 
+  def invalid_grades_to_csv
+
+    grades_others = Grade.enrolled_in_academic_process(self.process_before_id).others_permanence_invalid_to_enroll
+
+    CSV.generate do |csv|
+      csv << ['Est. Permanencia', 'Cédula', 'Apellido y Nombre', 'Efficiencia', 'Promedio', 'Ponderado']
+      grades_others.each do |grade|
+        user = grade.user
+    
+        # iep = grade.enroll_academic_processes.of_academic_process(self.id).first
+        # enroll_status = (iep&.enroll_status) ? iep.enroll_status&.titleize : 'Sin Inscripción'
+        csv << [grade.current_permanence_status&.titleize, user.ci, user.reverse_name, grade.efficiency, grade.simple_average, grade.weighted_average]
+      end
+    end
+  end
+
+
+  # FUNCTIONS:
   def subject_active_for_this? subject_id
     subjects.ids.include?(subject_id)
   end
 
+  def period_desc_and_modality
+    "#{period&.name}#{self.modality[0]&.upcase}"
+  end
 
   def period_name
     period.name if period
@@ -77,11 +99,11 @@ class AcademicProcess < ApplicationRecord
   end
 
   def short_desc
-    "#{self.school.short_name} #{self.period.name}" if (self.school and self.period)
+    "#{self.school.short_name} #{self.period_desc_and_modality}" if (self.school and self.period)
   end
 
   def get_name
-    "#{self.school.code} | #{self.period.name}" if (self.school and self.period)
+    "#{self.school.code} | #{self.period_desc_and_modality}" if (self.school and self.period)
   end
 
 
@@ -195,14 +217,15 @@ class AcademicProcess < ApplicationRecord
         label 'Período'
         column_width 100
         pretty_value do
-          value.name
+          # value.name
+          bindings[:object]&.period_desc_and_modality
         end
       end
 
       field :process_before do
         column_width 80
         pretty_value do
-          value.period.name if value
+          bindings[:object]&.process_before&.period_desc_and_modality
         end
       end
 
@@ -227,7 +250,7 @@ class AcademicProcess < ApplicationRecord
         label 'Secciones'
         pretty_value do 
           user = bindings[:view]._current_user
-          if (user and user.admin and user.admin.authorized_read? 'Section')
+          if (user&.admin&.authorized_read? 'Section')
             %{<a href='/admin/section?query=#{bindings[:object].period.name}' title='Total Secciones'><span class='badge bg-info'>#{value} en #{bindings[:object].courses.count} Cursos</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
@@ -297,6 +320,12 @@ class AcademicProcess < ApplicationRecord
 
       field :enroll_instructions do
         help 'Si desea agregar imágenes tome en cuenta el tamaño de misma y su ajuste a la pantalla dónde se desplegará'
+      end
+
+      field :registration_amount do
+        # pretty_value do
+        #   bindings[:view].content_tag()
+        # end
       end
     end
 

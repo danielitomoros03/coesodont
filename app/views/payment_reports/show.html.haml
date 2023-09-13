@@ -1,24 +1,25 @@
-%p#notice= notice
-
 %p
-  %b Amount:
-  = @payment_report.amount
+  %b Monto:
+  - if @payment_report.amount
+    = ActionController::Base.helpers.number_to_currency(@payment_report.amount, unit: 'Bs.', separator: ",", delimiter: ".")
+  
 %p
-  %b Transaction:
+  %b Transaccion:
   = @payment_report.transaction_id
 %p
-  %b Transaction type:
+  %b Tipo:
   = @payment_report.transaction_type
 %p
-  %b Transaction date:
+  %b Fecha:
   = @payment_report.transaction_date
 %p
-  %b Origin bank:
-  = @payment_report.origin_bank
-%p
-  %b Payable:
-  = @payment_report.payable
+  %b Banco Origen:
+  = @payment_report.origin_bank.name
 
-= link_to 'Edit', edit_payment_report_path(@payment_report)
-\|
-= link_to 'Back', payment_reports_path
+%p
+  %b Cuenta:
+  = @payment_report.receiving_bank_account.name
+
+%p
+  %b Comprobante de Pago:
+= render partial: "layouts/set_image", locals: {image: @payment_report.voucher, size: '', alt: 'Comprobante'}

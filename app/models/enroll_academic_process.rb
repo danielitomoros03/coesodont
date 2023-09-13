@@ -22,9 +22,10 @@ class EnrollAcademicProcess < ApplicationRecord
   
   belongs_to :academic_process
   has_one :period, through: :academic_process
-  has_many :payment_reports, as: :payable
+  has_many :payment_reports, as: :payable, dependent: :destroy
   has_many :academic_records, dependent: :destroy
   has_many :sections, through: :academic_records
+  has_many :schedules, through: :sections
   has_many :subjects, through: :sections
 
   # ENUMERIZE:
@@ -66,6 +67,15 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   # FUNCTIONS:
+
+  def overlapped? schedule2
+    self.schedules.where(day: schedule2.day).each do |sh|
+      if ((sh.starttime&.to_i < schedule2&.endtime&.to_i) and (schedule2&.starttime&.to_i < sh.endtime&.to_i) )
+        return true 
+      end
+    end
+    return false
+  end
 
   def self.type_label_by_enroll type
     # [:preinscrito, :reservado, :confirmado, :retirado]
@@ -186,7 +196,7 @@ class EnrollAcademicProcess < ApplicationRecord
     when 'articulo3'
       label_color = 'warning'
     when 'articulo6'
-      label_color = 'darger'
+      label_color = 'danger'
     when 'articulo7'
       label_color = 'dark'
     end
@@ -234,23 +244,20 @@ class EnrollAcademicProcess < ApplicationRecord
       field :enroll_status_label do
         label 'Estado'
         column_width 100
-        searchable 'enroll_status'
-        filterable 'enroll_status'
-        sortable 'enroll_status'
+        searchable :enroll_status
+        filterable false
+        sortable false
         formatted_value do
           bindings[:object].label_status
-        end        
+        end
       end
 
-      field :period_name do
+      field :period do
         label 'Período'
         column_width 100
-        # searchable 'periods.name'
+        searchable :name
         # filterable 'periods.name'
-        # sortable 'periods.name'
-        formatted_value do
-          bindings[:object].period.name if bindings[:object].period
-        end        
+        sortable :name
       end
 
       field :student do
@@ -271,6 +278,13 @@ class EnrollAcademicProcess < ApplicationRecord
 
       field :created_at do
         label 'Fecha de Inscripción'
+        searchable false
+      end
+
+      field :permanence_status do
+        pretty_value do
+          bindings[:object].label_permanence_status
+        end        
       end
     end
 
