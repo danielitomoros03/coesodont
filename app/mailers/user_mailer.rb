@@ -6,7 +6,7 @@ class UserMailer < ApplicationMailer
   #   en.user_mailer.welcome.subject
   #
   def welcome user
-    mail(to: user.email_desc, subject: "¡Bienvenido a Coes-ODONT!")
+    mail(to: user.email_desc, subject: "¡Bienvenido a COES-ODONT!")
   end
 
   # Bienvenida Funcionando
@@ -26,7 +26,7 @@ class UserMailer < ApplicationMailer
     @periodo_name = enroll_academic_process.period.name
     @nombre = user.nick_name
     @genero = user.genero
-    mail(to: user.email_desc, subject: "¡Confirmación de inscripción en #{@escuela_name} para el Período #{@periodo_name} COES-FAU!")
+    mail(to: user.email_desc, subject: "¡Confirmación de inscripción en #{@escuela_name} para el Período #{@periodo_name} COES-ODONT!")
     
   end
 
