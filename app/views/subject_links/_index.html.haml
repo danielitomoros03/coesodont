@@ -1,4 +1,9 @@
 - links = adelante ? subject.depend_links.joins(:depend_subject).order('subjects.ordinal': :asc) : subject.prelate_links.joins(:prelate_subject).order('subjects.ordinal': :asc)
+.alert.alert-warning.p-1.m-2
+  - if adelante
+    = "Luego de aprobar #{subject.name}, el estudiante podrá cursar #{'la'.pluralize(links&.count)} #{'siguiente'.pluralize(links&.count)} #{'asignatura'.pluralize(links&.count)}:"
+  - else
+    = "El estudiante debe aprobar #{'la'.pluralize(links&.count)} #{'siguiente'.pluralize(links&.count)} #{'asignatura'.pluralize(links&.count)} para poder cursar #{subject.name}:"
 
 - if links.any?
   = render partial: '/subject_links/tree', locals: {subject_links: links, adelante: adelante}

@@ -10,7 +10,7 @@
   = f.input :transaction_id, input_html: {aria: {required: true}, oninput: "onlyNumbers($(this))"}, required: true
   =# f.input :transaction_type, collection: PaymentReport.transaction_types.map{|e| e}#,  as: :radio
   =# f.collection_radio_buttons :transaction_type, PaymentReport.transaction_types.keys, nil, nil
-  = f.input :transaction_type, collection: PaymentReport.transaction_types.keys, as: :radio_buttons, required: true
+  = f.input :transaction_type, collection: PaymentReport.transaction_types.keys.map{|a| [a.titleize, a]}, as: :radio_buttons, required: true
 
   = f.input :transaction_date, as: :date, start_year: Date.today.year,
                             end_year: Date.today.year,
@@ -18,7 +18,8 @@
   = f.association :origin_bank, required: true
   =# f.association :payable
 
-  = f.association :receiving_bank_account, required: true
+  = f.association :receiving_bank_account, include_blank: false
+
   = f.input :voucher, required: true, input_html: {accept: "image/jpeg,image/jpg,image/png"}
 
   .form-actions

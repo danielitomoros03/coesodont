@@ -1,0 +1,17 @@
+%h4.bg-primary.text-light.text-center.mb-4
+  .btn.bg-success.text-dark
+    - total = @object.subjects.count
+    = "#{total} Asignatura".pluralize(total)
+  = "Organigrama #{@object.short_name}"
+
+- if (current_user&.admin&.authorized_read? 'School')
+
+  - if @object.subjects.any?
+    - subjects = @object.subjects.order(:ordinal)
+    = render(partial: "/schools/subjects_organization", locals: {subjects: subjects, orders: subjects.group(:ordinal).count})
+  - else
+    %h3.alert.alert-warning Sin prelaciones
+- else
+  .text-center.alert.alert-warning Acceso Restringido
+
+

@@ -39,6 +39,9 @@ class Ability
                 can :programation, [AcademicProcess]
                 can :enrollment_day, [AcademicProcess]
             end
+            if authd.authorizable.klazz.eql? 'School' and authd.can_read?
+               can :organization_chart, [School] 
+            end
             if authd.authorizable.klazz.eql? 'AcademicProcess' and authd.can_manage?
                 can :manage, [Period, PeriodType]
             end

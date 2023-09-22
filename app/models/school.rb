@@ -233,57 +233,57 @@ class School < ApplicationRecord
     show do
       field :description
 
-      field :enable_dependents do
-        label 'Activar Prelaciones'
+      # field :enable_dependents do
+      #   label 'Activar Prelaciones'
 
-        pretty_value do
+      #   pretty_value do
 
-          current_user = bindings[:view]._current_user
-          admin = current_user.admin
-          active = admin and admin.authorized_manage? 'School'
+      #     current_user = bindings[:view]._current_user
+      #     admin = current_user.admin
+      #     active = admin and admin.authorized_manage? 'School'
 
-          if active
-            bindings[:view].render(partial: "/schools/form_dependents", locals: {school: bindings[:object]})
-          else
-            value
-          end
-        end
+      #     if active
+      #       bindings[:view].render(partial: "/schools/form_dependents", locals: {school: bindings[:object]})
+      #     else
+      #       value
+      #     end
+      #   end
 
-      end
+      # end
 
-      field :enroll_process do
+      # field :enroll_process do
 
-        # pretty_value do
+      #   # pretty_value do
 
-        #   current_user = bindings[:view]._current_user
-        #   admin = current_user.admin
-        #   active = admin and admin.authorized_manage? 'School'
+      #   #   current_user = bindings[:view]._current_user
+      #   #   admin = current_user.admin
+      #   #   active = admin and admin.authorized_manage? 'School'
 
-        #   if active
-        #     bindings[:view].render(partial: "/schools/form_enabled_enroll", locals: {school: bindings[:object]})
-        #   else
-        #     value
-        #   end
-        # end
+      #   #   if active
+      #   #     bindings[:view].render(partial: "/schools/form_enabled_enroll", locals: {school: bindings[:object]})
+      #   #   else
+      #   #     value
+      #   #   end
+      #   # end
 
-      end
+      # end
 
-      field :active_process do
+      # field :active_process do
 
-        # pretty_value do
+      #   # pretty_value do
 
-        #   current_user = bindings[:view]._current_user
-        #   admin = current_user.admin
-        #   active = admin and admin.authorized_manage? 'School'
+      #   #   current_user = bindings[:view]._current_user
+      #   #   admin = current_user.admin
+      #   #   active = admin and admin.authorized_manage? 'School'
 
-        #   if true #active
-        #     bindings[:view].render(partial: "/schools/form_enabled_active", locals: {school: bindings[:object]})
-        #   else
-        #     value
-        #   end
-        # end
+      #   #   if true #active
+      #   #     bindings[:view].render(partial: "/schools/form_enabled_active", locals: {school: bindings[:object]})
+      #   #   else
+      #   #     value
+      #   #   end
+      #   # end
 
-      end      
+      # end      
 
       # fields :study_plans, :periods, :areas, :bank_accounts, :contact_email
     end

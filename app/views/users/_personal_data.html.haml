@@ -1,5 +1,5 @@
 
-%table.table.table-sm.border.text-center
+%table.table.table-sm.border.text-center.responsive-table
   %tbody
     %tr
       - if (session[:rol] and session[:rol].eql? 'admin') and user.profile_picture and user.profile_picture.attached? and user.profile_picture.representable?

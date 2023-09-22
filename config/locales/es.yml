@@ -55,12 +55,17 @@ es:
         title: "Período"
         menu: "Cita Horaria"
         breadcrumb: "Cita Horaria"
-        link: "Cita Horaria"      
+        link: "Cita Horaria"
       programation: 
         title: "Período"
         menu: "Programación"
         breadcrumb: "Programación"
         link: "Programación"
+      organization_chart: 
+        title: "Escuela"
+        menu: "Organigrama"
+        breadcrumb: "Organigrama"
+        link: "Organigrama"
       personal_data: 
         title: "Datos Personales"
         menu: "Datos Personales"
@@ -316,6 +321,18 @@ es:
             base:
               restrict_dependent_destroy:
                 has_many: 'Tiene asignaturas o profesores asociadas'
+        bank_account:
+          attributes:
+            bank_id:
+              required: requerido
+            code:
+              required: requerido
+            holder:
+              required: requerido
+            school_id:
+              required: requerido
+            account_type:
+              required: requerido
         grade:
           attributes:
             admission_type:
@@ -713,7 +730,7 @@ es:
         qualification_type: 'Tipo de calificación'
         modality: 'Modalidad'
         area: 'Cátedra'
-        prelate_subjects: Prelada por
+        prelate_subjects: Prelaciones
         depend_subjects: Asignaturas que prela
         created_at: 'Fecha de Registro'
         updated_at: 'Fecha de Actualización'

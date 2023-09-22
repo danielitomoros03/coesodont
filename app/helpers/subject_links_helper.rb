@@ -20,7 +20,7 @@ module SubjectLinksHelper
 
 		capture_haml do
 			
-			aux = btn_delete_depend(dep).html_safe if (admin and admin.authorized_delete? 'Subject')
+			aux = btn_delete_depend(dep).html_safe if (admin&.authorized_delete? 'Subject')
 			asig = adelante ? dep.depend_subject : dep.prelate_subject
 
 			aux2 = simple_toggle "/admin/subject/#{asig.id}", "| #{asig.desc}", "Ir al detalle de " + asig.desc, 'primary', nil

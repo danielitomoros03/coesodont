@@ -3,7 +3,7 @@ class BankAccount < ApplicationRecord
   # t.string "holder", null: false
   # t.bigint "bank_id", null: false
   # t.bigint "school_id", null: false
-  # t.integer "acount_type"
+  # t.integer "account_type"
 
   # ENUMERIZE:
   enum account_type: [:ahorro, :corriente]
@@ -19,7 +19,7 @@ class BankAccount < ApplicationRecord
 
   # FUNCTIONS:
   def name
-    "#{code} #{holder} - #{account_type} : #{bank.name}" if bank
+    "#{code} #{holder} - #{account_type} : #{bank&.name}"
   end
 
   rails_admin do
@@ -39,6 +39,9 @@ class BankAccount < ApplicationRecord
         inline_edit false
       end
       field :account_type
+      # field :short_desc do
+      #   help 'A quíen va dirigida la cuenta'
+      # end
     end
 
     export do

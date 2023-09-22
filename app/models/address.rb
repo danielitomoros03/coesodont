@@ -86,6 +86,9 @@ class Address < ApplicationRecord
   end
 
   rails_admin do
+    edit do
+      fields :state, :municipality, :city, :sector, :street, :house_type, :house_name      
+    end
     export do
       exclude_fields :id, :created_at, :updated_at
     end

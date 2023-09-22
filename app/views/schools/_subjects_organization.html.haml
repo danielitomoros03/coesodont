@@ -1,0 +1,68 @@
+
+
+.input-group.input-group-sm    
+  = link_to 'javascript:void(0)', onclick: "$('.arbol').toggleClass('d-none'); $('.fa-chevron-right').toggleClass('fa-rotate-90');", class: 'btn btn-sm btn-success', style: 'margin-right: 15px' do
+    Desplegar todos
+    %i.fa.fa-chevron-right
+  %input.form-control{"aria-label": "", type: "text", placeholder: 'Buscar asignaturas por código', id: 'filterTable', name: 'filterSubject'}
+
+%div{style: 'height:540px;overflow-x:scroll'}
+  %table.table.table-bordered.table-sm.table-responsive.mt-3
+    %thead
+      %tr.text-center
+        - orders.each do |k,v|
+          - if k.nil?
+            - title = "Sin Orden"
+            - bg = 'bg-danger'
+          - elsif k.eql? 0
+            - title = "Optativas"
+            - bg = 'bg-info'
+          - else
+            - title = "#{Subject.ordinal_to_cardinal(k,'Sem')}"
+            - bg = 'bg-success'
+          %th{class: bg}
+            = title
+            %span.badge.bg-dark{title: 'Total de Asignaturas'}= "#{v}"
+
+
+    %tbody
+      %tr
+        - orders.each do |k,v|
+          %td.p-1
+            %div{style: 'max-height:480px;overflow-y:scroll'}
+              - if k.nil?
+                - table = 'table-danger'
+              - elsif k.eql? 0
+                - table = 'table-info'
+              - else
+                - table = ''
+
+              %table.table.table-bordered.table-sm.table.table-striped
+                %thead
+                %tbody
+                  - subjects.where(ordinal: k).order(:code).each do |asig|
+                    %tr.trFiltrable{class: table}
+                      = render partial: '/subject_links/tree_by_school', locals: {subject: asig}
+
+
+:javascript
+
+  document.addEventListener("rails_admin.dom_ready", function() {
+
+    $('#filterTable').on('keyup', function(e){
+      $('.trFiltrable').hide().filter(":contains('" + this.value.toUpperCase() + "')").show();
+
+      // Avancing in search by title:
+      // $('.trFiltrable').hide().filter("a[aria-label*='" + this.value.toUpperCase() + "']").show();
+
+
+    });
+
+    $('.mouseover').hover( function(e){
+      let clase = $(this).attr( "mouseover");
+      $('.'+clase).toggleClass('table-warning');
+    });
+  });
+
+
+

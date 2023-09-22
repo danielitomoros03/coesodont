@@ -76,6 +76,14 @@ RailsAdmin.config do |config|
       end
     end
 
+    member :organization_chart do 
+
+      only [School]
+      link_icon do
+          'fa-solid fa-shapes'
+      end
+    end
+
     member :enrollment_day do 
 
       only [AcademicProcess]
@@ -105,7 +113,7 @@ RailsAdmin.config do |config|
     end
 
     show do
-      except [School, StudyPlan, AcademicRecord]
+      except [StudyPlan, AcademicRecord]
     end
 
     edit do
