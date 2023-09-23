@@ -6,8 +6,8 @@
     %i.fa.fa-chevron-right
   %input.form-control{"aria-label": "", type: "text", placeholder: 'Buscar asignaturas por código', id: 'filterTable', name: 'filterSubject'}
 
-%div{style: 'height:540px;overflow-x:scroll'}
-  %table.table.table-bordered.table-sm.table-responsive.mt-3
+.table-responsive
+  %table.table.table-bordered.table-sm.mt-3
     %thead
       %tr.text-center
         - orders.each do |k,v|
@@ -29,7 +29,8 @@
       %tr
         - orders.each do |k,v|
           %td.p-1
-            %div{style: 'max-height:480px;overflow-y:scroll'}
+            .table-responsive{style: 'max-height:480px'}
+
               - if k.nil?
                 - table = 'table-danger'
               - elsif k.eql? 0

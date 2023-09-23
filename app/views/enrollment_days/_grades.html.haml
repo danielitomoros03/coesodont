@@ -1,26 +1,27 @@
-%table.table.table-striped.table-sm.table-hover.table-bordered.responsive-table.tableDataMia
-  %thead
-    %tr
-      %th #
-      %th.text-center.align-middle= "Estado Insc #{academic_process.period.name}"
-      %th.text-center.align-middle Est. Permanencia
-      %th.w-25 Sede
-      %th Cédula
-      %th.w-25 Apellidos, Nombres
-      %th Eficiencia
-      %th Promedio
-      %th Ponderado
-  %tbody
-    -# anterior_cita = nil
-    - grades.each_with_index do |grade, i|
+.overflow-scroll
+  %table.table.table-striped.table-sm.table-hover.table-bordered.table-responsive.tableDataMia
+    %thead
       %tr
-        %td= i+1
-        %td.text-center.align-middle= grade.label_status_enroll_academic_process(academic_process.id)
-        %td.text-center.align-middle= grade.label_current_permanence_status
-        %td= grade.student.sede
-        %td= grade.student.user_ci
-        %td= link_to grade.user.reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
-        %td= grade.efficiency
-        %td= grade.simple_average
-        %td= grade.weighted_average
-      -# anterior_cita = @cita_horaria
+        %th #
+        %th.text-center.align-middle= "Estado Insc #{academic_process.period.name}"
+        %th.text-center.align-middle Est. Permanencia
+        %th.w-25 Sede
+        %th Cédula
+        %th.w-25 Apellidos, Nombres
+        %th Eficiencia
+        %th Promedio
+        %th Ponderado
+    %tbody
+      -# anterior_cita = nil
+      - grades.each_with_index do |grade, i|
+        %tr
+          %td= i+1
+          %td.text-center.align-middle= grade.label_status_enroll_academic_process(academic_process.id)
+          %td.text-center.align-middle= grade.label_current_permanence_status
+          %td= grade.student.sede
+          %td= grade.student.user_ci
+          %td= link_to grade.user.reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
+          %td= grade.efficiency
+          %td= grade.simple_average
+          %td= grade.weighted_average
+        -# anterior_cita = @cita_horaria

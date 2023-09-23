@@ -1,32 +1,35 @@
-%table.table.table-striped.table-sm.table-hover.table-bordered.responsive-table.tableDataMia
-  %thead
-    %tr
-      %th.text-center= "Estado Insc #{academic_process.period.name}"
-      %th.text-center Sede
-      %th.text-center Ciudad
-      %th Cédula
-      %th.col-4{width: '300px'} Apellidos, Nombres
-      %th.col-4.text-center Desde
-      %th.col-4.text-center Hasta
-      %th.text-center.align-middle Est. Permanencia
-      %th.col-1 Eficiencia
-      %th.col-1 Promedio
-      %th.col-1 Ponderado
-  %tbody
-    - grades.each do |grade, i|
-      - student = grade.student
-      - reverse_name = student.user.reverse_name
+%br
+%br
+.overflow-scroll
+  %table.table.table-striped.table-sm.table-hover.table-bordered.table-responsive.tableDataMia
+    %thead
       %tr
-        %td.text-center= grade.label_status_enroll_academic_process(academic_process.id)
-        %td= student.sede 
-        - address = student.address ? student.address.city_and_state : ''
-        %td{title: address}= address
-        %td= student.user_ci
-        %td{title: reverse_name}= link_to reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
-        %td.text-center= grade.appointment_from 
-        %td.text-center= grade.appointment_to
-        %td.text-center.align-middle= grade.label_current_permanence_status
-        %td= grade.efficiency
-        %td= grade.simple_average
-        %td= grade.weighted_average
+        %th.text-center= "Estado Insc #{academic_process.period.name}"
+        %th.text-center Sede
+        %th.text-center Ciudad
+        %th Cédula
+        %th.col-4{width: '300px'} Apellidos, Nombres
+        %th.col-4.text-center Desde
+        %th.col-4.text-center Hasta
+        %th.text-center.align-middle Est. Permanencia
+        %th.col-1 Eficiencia
+        %th.col-1 Promedio
+        %th.col-1 Ponderado
+    %tbody
+      - grades.each do |grade, i|
+        - student = grade.student
+        - reverse_name = student.user.reverse_name
+        %tr
+          %td.text-center= grade.label_status_enroll_academic_process(academic_process.id)
+          %td= student.sede 
+          - address = student.address ? student.address.city_and_state : ''
+          %td{title: address}= address
+          %td= student.user_ci
+          %td{title: reverse_name}= link_to reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
+          %td.text-center= grade.appointment_from 
+          %td.text-center= grade.appointment_to
+          %td.text-center.align-middle= grade.label_current_permanence_status
+          %td= grade.efficiency
+          %td= grade.simple_average
+          %td= grade.weighted_average
 

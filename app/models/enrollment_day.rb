@@ -46,7 +46,7 @@ class EnrollmentDay < ApplicationRecord
       own_grades_sort_by_appointment.each do |grade|
         user = grade.user
         address = grade.student.address ? grade.student.address.city_and_state : '' 
-        csv << [user.ci, user.reverse_name, student.sede, address, grade.appointment_from, grade.appointment_to, grade.efficiency, grade.simple_average, grade.weighted_average]
+        csv << [user.ci, user.reverse_name, grade.student.sede, address, grade.appointment_from, grade.appointment_to, grade.efficiency, grade.simple_average, grade.weighted_average]
       end
     end
   end

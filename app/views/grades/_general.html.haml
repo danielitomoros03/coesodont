@@ -1,22 +1,26 @@
-%table.table.table-sm.border.text-center.table-info.responsive-table
-	%tr
-		%td.text-center Plan de Estudio
-		%td.text-center Periodo Ingreso
-		%td.text-center Admisión
-		- if grade.registration_status
-			%td.text-center Estado de Registro
-		- if grade.graduate_status
-			%td.text-center Estado de la Carrera
-		%td.text-center Estado Permanencia Actual
+%br
+%br
+%br
+.table-responsive
+	%table.table.table-sm.border.text-center.table-info
+		%tr
+			%td.text-center Plan de Estudio
+			%td.text-center Periodo Ingreso
+			%td.text-center Admisión
+			- if grade.registration_status
+				%td.text-center Estado de Registro
+			- if grade.graduate_status
+				%td.text-center Estado de la Carrera
+			%td.text-center Estado Permanencia Actual
 
-	%tr
-		%td.text-center.fw-bold= grade.study_plan.desc
-		%td.text-center.fw-bold= grade.start_process&.period_name
-		%td.text-center.fw-bold= grade.admission_type.name
-		- if grade.registration_status
-			%td.text-center
-				%strong.badge.bg-info= grade.registration_status.titleize
-		- if grade.graduate_status
-			%td.text-center
-				%strong.badge.bg-info= grade.graduate_status.titleize
-		%td.text-center.fw-bold= grade.label_current_permanence_status
+		%tr
+			%td.text-center.fw-bold= grade.study_plan.desc
+			%td.text-center.fw-bold= grade.start_process&.period_name
+			%td.text-center.fw-bold= grade.admission_type.name
+			- if grade.registration_status
+				%td.text-center
+					%strong.badge.bg-info= grade.registration_status.titleize
+			- if grade.graduate_status
+				%td.text-center
+					%strong.badge.bg-info= grade.graduate_status.titleize
+			%td.text-center.fw-bold= grade.label_current_permanence_status
