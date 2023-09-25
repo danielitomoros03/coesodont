@@ -88,9 +88,12 @@ class Qualification < ApplicationRecord
 
   def update_status
 
-    self.enroll_academic_process.update(permanence_status: self.enroll_academic_process.get_regulation) if enroll_academic_process&.finished?
-        
+    eap = self.enroll_academic_process
+    eap.update(permanence_status: eap.get_regulation) if enroll_academic_process&.finished?
+    
+    eap.update(efficiency: eap.calculate_efficiency, simple_average: eap.calculate_average, weighted_average: eap.calculate_weighted_average)    
 
-    self.grade.update(efficiency: self.grade.calculate_efficiency, simple_average: self.grade.calculate_average, weighted_average: self.grade.calculate_weighted_average)
+    grado = self.grade
+    grado.update(efficiency: grado.calculate_efficiency, simple_average: grado.calculate_average, weighted_average: grado.calculate_weighted_average)
   end
 end

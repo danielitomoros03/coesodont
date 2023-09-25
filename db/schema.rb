@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_09_222114) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_25_143346) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -201,6 +201,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_09_222114) do
     t.integer "permanence_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.float "efficiency", default: 1.0
+    t.float "simple_average", default: 0.0
+    t.float "weighted_average", default: 0.0
     t.index ["academic_process_id"], name: "index_enroll_academic_processes_on_academic_process_id"
     t.index ["grade_id"], name: "index_enroll_academic_processes_on_grade_id"
   end

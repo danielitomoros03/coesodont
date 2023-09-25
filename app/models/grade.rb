@@ -56,7 +56,7 @@ class Grade < ApplicationRecord
   scope :with_day_enroll_eql_to, -> (day){ where(appointment_time: day.all_day)}
   scope :with_appointment_time, -> { where("appointment_time IS NOT NULL")}
   scope :with_appointment_time_eql_to, -> (dia){ where("date(appointment_time) = '#{dia}'")}
-  scope :without_appointment_time, -> { where(appointment_time: nil)}
+  scope :without_appointment_time, -> { where('grades.appointment_time': nil)}
 
   # scope :with_enrollments_in_period, -> (period_id) { joins(academic_records: {section: {course: :academic_process}}).where('(SELECT COUNT(*) FROM academic_records WHERE academic_records.estudiante_id = grades.student_id) > 0 and secciones.periodo_id = ?', periodo_id) }
 
@@ -83,7 +83,7 @@ class Grade < ApplicationRecord
 
   scope :valid_to_enrolls_pre, -> (process_before_id) {without_appointment_time.current_permanence_valid_to_enroll.enrolled_in_academic_process(process_before_id)}
 
-  scope :current_permanence_valid_to_enroll, -> {where(current_permanence_status: [:regular, :reincorporado, :articulo3])}
+  scope :current_permanence_valid_to_enroll, -> {where('grades.current_permanence_status': [:regular, :reincorporado, :articulo3])}
 
   scope :others_permanence_invalid_to_enroll, -> {where(current_permanence_status: [:nuevo, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar])}
 
@@ -416,7 +416,7 @@ class Grade < ApplicationRecord
 
     aprobados = self.academic_records.total_credits_approved
     aux = self.academic_records.weighted_average_approved
-    (aprobados > 0 and aux and aux.is_a? BigDecimal) ? (aux.to_f/aprobados.to_f).round(4) : 0.0
+    ((aprobados > 0) and aux&.is_a? Integer) ? (aux.to_f/aprobados.to_f).round(4) : 0.0
     
   end
 

@@ -175,16 +175,29 @@ class AcademicProcess < ApplicationRecord
     self.id.eql? self.school.enroll_process_id
   end
 
-  def readys_to_enrollment_day
-    # if process_before
-    #   grades_before_ids = self.process_before.grades.ids
-    #   grades_ids = self.grades.ids
-    #   self.school.grades.without_appointment_time.joins(:academic_processes).where("academic_processes.id IN (?)", grades_before_ids).sort_by_numbers.uniq if process_before
-    # end
-    self.school.grades.valid_to_enrolls(self.id,self.process_before.id).sort_by_numbers.uniq if process_before
-    
+  def update_grades_enrollment_day (to_enroll_academic_processes, final_lap, appointment_time, duration_slot_time)
+
+    total_updated = 0
+    entities = self.ready_to_enrollment_day to_enroll_academic_processes
+
+    entities[0..final_lap].each do |ent| 
+      grade = to_enroll_academic_processes ? ent.grade : ent
+      total_updated += 1 if grade.update(appointment_time: appointment_time, duration_slot_time: duration_slot_time)
+    end
+    return total_updated
   end
 
+  def ready_to_enrollment_day to_enroll_academic_processes
+    to_enroll_academic_processes ? enrolleds_ready_to_enrollment_day : grades_ready_to_enrollment_day
+  end
+
+  def grades_ready_to_enrollment_day
+    self.school.grades.valid_to_enrolls(self.id,self.process_before.id).sort_by_numbers.uniq if process_before
+  end
+
+  def enrolleds_ready_to_enrollment_day
+    self.process_before&.enroll_academic_processes.valid_to_enroll_in.sort_by_numbers_of_this_process
+  end
 
   def update_enroll_academic_processes_permanence_status
       self.enroll_academic_processes.each{|eap| eap.update(permanence_status: eap.get_regulation) if eap.finished?}

@@ -38,30 +38,32 @@ class EnrollmentDaysController < ApplicationController
     # @enrollment_day.start = selected_date
 
     if @enrollment_day.save
-      total_update = 0
+      flash[:success] = 'Jornada de inscripción por cita horaria creada con éxito.'
 
-      flash[:success] = 'Jornada de Inscripción por Cita Horaria Creada con Éxito'
+      total_updated = 0
       academic_process = @enrollment_day.academic_process
-
       total_timeslots = @enrollment_day.total_timeslots
-      grades_by_timeslot = @enrollment_day.grades_by_timeslot
+      grades_by_timeslot = @enrollment_day.grades_by_timeslot-1
+      duration_slot_time = @enrollment_day.slot_duration_minutes
+
       for a in 0..(total_timeslots-1) do
-        limitado = academic_process.readys_to_enrollment_day
 
-        limitado[0..grades_by_timeslot-1].each do |gr| 
-          # if !(gr.enroll_academic_processes.of_academic_process(academic_process.id).any?)
-            total_update += 1 if gr.update(appointment_time: @enrollment_day.start+(a*@enrollment_day.slot_duration_minutes).minutes, duration_slot_time: @enrollment_day.slot_duration_minutes)
-          # end
-        end
+        appointment_time = @enrollment_day.start+(a*@enrollment_day.slot_duration_minutes).minutes
+
+        total_updated += academic_process.update_grades_enrollment_day params[:by_before_process], grades_by_timeslot, appointment_time, duration_slot_time
 
       end
-      resto = @enrollment_day.mod_to_grades
-      if resto > 0
-        limitado = academic_process.readys_to_enrollment_day
-        limitado[0..resto-1].each{|gr| total_update += 1 if gr.update(appointment_time: @enrollment_day.start+(total_timeslots*@enrollment_day.slot_duration_minutes).minutes, duration_slot_time: @enrollment_day.slot_duration_minutes)}
+
+      rest = @enrollment_day.mod_to_grades
+
+      if rest > 0
+        appointment_time = @enrollment_day.start+(total_timeslots*@enrollment_day.slot_duration_minutes).minutes
+
+        total_updated += academic_process.update_grades_enrollment_day params[:by_before_process], rest-1, appointment_time, duration_slot_time
+
       end
 
-      flash[:success] += ". Se generaron #{total_update} citas"
+      flash[:success] += ". Se generaron #{total_updated} citas"
     else
       flash[:danger] = @enrollment_day.errors.full_messages.to_sentence
     end

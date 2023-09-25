@@ -52,6 +52,12 @@ class EnrollAcademicProcess < ApplicationRecord
 
   scope :sort_by_period_reverse, -> {joins(period: :period_type).order('periods.year': :asc, 'period_types.name': :asc)}
 
+
+  scope :valid_to_enroll_in, -> () {joins(:grade).where("grades.current_permanence_status": [:regular, :reincorporado, :articulo3], "grades.appointment_time": nil)}
+
+
+  scope :sort_by_numbers_of_this_process, -> () {order(['enroll_academic_processes.efficiency': :desc, 'enroll_academic_processes.simple_average': :desc, 'enroll_academic_processes.weighted_average': :desc])}
+
   scope :without_academic_records, -> {joins(:academic_records).group(:"enroll_academic_processes.id").having('COUNT(*) = 0').count}
 
   scope :with_any_academic_records, -> {joins(:academic_records).group(:"enroll_academic_processes.id").having('COUNT(*) > 0').count}
@@ -307,7 +313,35 @@ class EnrollAcademicProcess < ApplicationRecord
     self.grade.last_enrolled.eql? self
   end
 
+
+  def total_credits_coursed
+    academic_records.total_credits_coursed
+  end
+
+  def total_credits_approved
+    academic_records.total_credits_approved
+  end
+
+  def calculate_efficiency
+    cursados = self.total_credits_coursed
+    aprobados = self.total_credits_approved
+    (cursados > 0 and aprobados != cursados) ? (aprobados.to_f/cursados.to_f).round(4) : self.efficiency
+  end
+
+  def calculate_average
+    aux = academic_records.promedio
+    (aux&.is_a? BigDecimal) ? aux.to_f.round(4) : self.simple_average
+  end
+
+  def calculate_weighted_average 
+    aux = academic_records.weighted_average
+    cursados = self.total_credits_coursed
+    (cursados > 0 and aux) ? (aux.to_f/cursados.to_f).round(4) : self.weighted_average
+  end
+
+
   private
+
 
     def update_current_permanence_status_on_grade
       grade.update(current_permanence_status: self.permanence_status) if is_the_last_enroll_of_grade?
