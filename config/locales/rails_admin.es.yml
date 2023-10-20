@@ -11,6 +11,9 @@ es:
     toggle_navigation: 'Navegación'
     loading: 'cargando'
     misc:
+      operators:
+        like: Contiene      
+      discard: 'Seleccione'
       chose_all: 'Agregar Todos'
       clear_all: 'Quitar Todos'
       add_new: 'Agregar'
@@ -65,6 +68,7 @@ es:
       updated: "actualizado"
       deleted: "borrado"
       export: "generar reporte"
+      custom_export: "generar reporte personalizado"
       exported: "exportado"       
       delete: "borrar"
       delete:

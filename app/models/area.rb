@@ -72,7 +72,13 @@ class Area < ApplicationRecord
     show do
       field :name
       field :parent_area
-      field :subjects
+
+
+      field :subjects do
+        pretty_value do
+          bindings[:view].render(template: '/subjects/index', locals: {subjects: bindings[:object].subjects.order(code: :asc)})
+        end
+      end
       field :teachers do
         label 'Profesores'
       end      

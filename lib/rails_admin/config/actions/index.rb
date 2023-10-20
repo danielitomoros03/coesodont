@@ -74,17 +74,18 @@ module RailsAdmin
                 end
               end
 
-              format.csv do
-                header, encoding, output = CSVConverter.new(@objects, @schema).to_csv(params[:csv_options].permit!.to_h)
-                if params[:send_data]
-                  send_data output,
-                            type: "text/csv; charset=#{encoding}; #{'header=present' if header}",
-                            disposition: :attachment,
-                            filename: "Reporte Coes #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.csv"
-                else
-                  render plain: output
-                end
-              end
+              # format.csv do
+              #   header, encoding, output = CSVConverter.new(@objects, @schema).to_csv(params[:csv_options].permit!.to_h)
+              #   if params[:send_data]
+              #     send_data output,
+              #               type: "text/csv; charset=#{encoding}; #{'header=present' if header}",
+              #               disposition: :attachment,
+              #               filename: "Reporte Coes #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.csv"
+              #   else
+              #     render plain: output
+              #   end
+              # end
+              
             end
           end
         end

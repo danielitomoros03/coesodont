@@ -6,30 +6,27 @@
       %tr
         %th.text-center= "Estado Insc #{academic_process.period.name}"
         %th.text-center Sede
-        %th.text-center Ciudad
         %th Cédula
-        %th.col-4{width: '300px'} Apellidos, Nombres
+        %th.col-4{width: '350px'} Apellidos, Nombres
         %th.col-4.text-center Desde
         %th.col-4.text-center Hasta
         %th.text-center.align-middle Est. Permanencia
-        %th.col-1 Eficiencia
-        %th.col-1 Promedio
-        %th.col-1 Ponderado
+        %th.text-center{width: '50px'}= "Eficiencia #{academic_process.process_before.period.name}"
+        %th.col-1.text-center= "Promedio #{academic_process.process_before.period.name}" 
+        %th.col-1.text-center= "Ponderado #{academic_process.process_before.period.name}" 
     %tbody
       - grades.each do |grade, i|
         - student = grade.student
         - reverse_name = student.user.reverse_name
+        - eap = grade.enroll_academic_processes.joins(:period).order(['periods.year': :desc, 'periods.period_type_id': :desc]).first
         %tr
           %td.text-center= grade.label_status_enroll_academic_process(academic_process.id)
           %td= student.sede 
-          - address = student.address ? student.address.city_and_state : ''
-          %td{title: address}= address
           %td= student.user_ci
           %td{title: reverse_name}= link_to reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
           %td.text-center= grade.appointment_from 
           %td.text-center= grade.appointment_to
           %td.text-center.align-middle= grade.label_current_permanence_status
-          %td= grade.efficiency
-          %td= grade.simple_average
-          %td= grade.weighted_average
-
+          %td= eap.efficiency
+          %td= eap.simple_average
+          %td= eap.weighted_average

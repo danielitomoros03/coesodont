@@ -3,7 +3,7 @@
     = link_to main_app.url_for(image), target: '_blank', rel: 'noopener noreferrer' do
       = image_tag main_app.url_for(image), size: size, alt: alt  
   - else
-    %h4.alert.alert-warning Sin Imagen
+    .alert.alert-warning Sin Imagen
 - rescue Exception => e
   
 

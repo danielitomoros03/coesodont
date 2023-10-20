@@ -55,6 +55,7 @@ class Section < ApplicationRecord
   validates :capacity, presence: true
   validates :course, presence: true
   validates :modality, presence: true
+  validates :qualified, inclusion: { in: [ true, false ] }
 
   #CALLBACKS
   before_save :set_code_to_02i
@@ -524,6 +525,8 @@ class Section < ApplicationRecord
         inline_edit false
         inline_add false
       end
+
+      field :qualified
 
       # field :course_id do
       #   formatted_value do

@@ -158,6 +158,13 @@ class AcademicRecord < ApplicationRecord
     return data
   end
 
+  def get_value_by_status
+    if absolute? or pi? or rt? or sin_calificar? or equivalencia?
+      desc_conv_absolute
+    else
+      "#{self.q_value_to_02i}"
+    end
+  end
 
   def set_status valor
     valor.strip!
@@ -565,19 +572,15 @@ class AcademicRecord < ApplicationRecord
     end
 
     edit do
-      field :course do
-        inline_edit false
-        label 'Curso'
-      end
       field :section do
         inline_edit false
-        help 'Ingrese el código de la asignatura y SELECCIONE la correspondiente al período y código de la sección'
+        help 'Ingrese el código de la asignatura y SELECCIONE la sección correspondiente al período requerido'
       end
 
       field :enroll_academic_process do 
         # inline_add false
         inline_edit false
-        help 'Ingrese la cédula de identidad del estudiante y SELECCIONE la correspondiente inscripción en el período'
+        help 'Ingrese la cédula de identidad del estudiante y SELECCIONE la inscripción correspondiente al período'
       end
       field :status do
         visible do
@@ -598,7 +601,40 @@ class AcademicRecord < ApplicationRecord
     end
 
     export do
-      fields :section, :enroll_academic_process, :status, :qualifications, :period, :period_type, :student, :user, :address, :subject
+      fields :section, :enroll_academic_process
+
+      field :period do
+        label 'Período'
+        searchable :name
+        sortable :name
+      end
+
+      field :area do
+        label 'Área'
+        searchable :name
+        sortable :name
+      end
+
+      # field :period do
+      #   label 'Periodo'
+      #   column_width 120
+
+      #   associated_collection_cache_all false
+      #   associated_collection_scope do
+      #     # bindings[:object] & bindings[:controller] are available, but not in scope's block!
+      #     Proc.new { |scope|
+      #       # scoping all Players currently, let's limit them to the team's league
+      #       # Be sure to limit if there are a lot of Players and order them by position
+      #       scope = scope.joins(:period)
+      #       scope = scope.limit(30) # 'order' does not work here
+      #     }
+      #   end
+      # end
+
+      field :get_value_by_status, :string do
+        label 'Calificación Definitiva'
+      end
+      fields :status, :qualifications, :period_type, :student, :user, :address, :subject
     end
   end  
 

@@ -1,6 +1,34 @@
 class SchoolsController < ApplicationController
   before_action :logged_as_admin?
-  before_action :set_school, only: %i[ show edit update destroy ]
+  before_action :set_school, only: %i[ show edit update destroy export_grades export_grades_stream]
+
+  def export_grades
+    respond_to do |format|
+      format.xls {send_data @school.all_grades_to_csv, filename: "#{@school.short_name}_todos.xls"}
+    end
+  end
+
+
+  def export_grades_stream
+    respond_to do |format|
+      format.xls do
+        begin          
+          response.headers.delete('Content-Length')
+          response.headers['Cache-Control'] = 'no-cache'
+          response.headers['X-Accel-Buffering'] = 'no'
+          response.headers['Content-Type'] = 'text/event-stream'
+          response.headers['ETag'] = '0'
+          response.headers['Last-Modified'] = '0'
+          response.headers['Content-Disposition'] = "attachment; filename=#{@school.short_name}_todos_stream.xls"
+
+          response.stream.write @school.all_grades_to_csv
+        ensure
+          response.stream.close
+        end
+      end
+    end
+  end  
+
 
   # GET /schools or /schools.json
   def index

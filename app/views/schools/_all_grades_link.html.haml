@@ -1,0 +1,8 @@
+- total = school.grades.count
+= link_to "/schools/#{school.id}/export_grades_stream.xls", class: 'btn btn-success float-end m-1 btn-sm', title: '2X' do
+  .fa.fa-download
+  = total
+
+= link_to "/schools/#{school.id}/export_grades.xls", class: 'btn btn-info float-end m-1 btn-sm' do
+  .fa.fa-download
+  = total

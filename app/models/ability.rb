@@ -25,6 +25,7 @@ class Ability
         can :import, Authorizable::IMPORTABLES
         can :manage, [Admin, Student, Teacher, Area, ParentArea, Subject, Course, Grade, AcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address, StudyPlan, Period, SubjectLink, Schedule, EnrollmentDay, Billboard, User, EnrollAcademicProcess, PaymentReport, Bank, BankAccount]
         can :ru, [School]
+        can :organization_chart, [School] 
       else
         can :manage, [User]
         user.admin.authorizeds.each do |authd|
@@ -41,6 +42,9 @@ class Ability
             end
             if authd.authorizable.klazz.eql? 'School' and authd.can_read?
                can :organization_chart, [School] 
+            end
+            if authd.authorizable.klazz.eql? 'School' and authd.can_manage?
+               can :manage, [Bank, BankAccount] 
             end
             if authd.authorizable.klazz.eql? 'AcademicProcess' and authd.can_manage?
                 can :manage, [Period, PeriodType]

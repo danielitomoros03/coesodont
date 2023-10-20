@@ -119,13 +119,17 @@ class AcademicProcess < ApplicationRecord
     total = []
 
     # [:preinscrito, :reservado, :confirmado, :retirado]
-    total << ApplicationController.helpers.label_status_with_tooptip('bg-secondary', self.enroll_academic_processes.count, 'Total') 
+    total << ApplicationController.helpers.label_status_with_tooptip('bg-secondary', self.enroll_academic_processes.count, 'Total')
+
+    total << ApplicationController.helpers.label_status_with_tooptip('bg-secondary', self.enroll_academic_processes.total_with_payment_report, 'Con Reportes de Pago')    
 
     EnrollAcademicProcess.enroll_statuses.map do |k,v|
       total_aux = self.enroll_academic_processes.where(enroll_status: v).count 
       tipo = EnrollAcademicProcess.type_label_by_enroll k
       total << ApplicationController.helpers.label_status_with_tooptip("bg-#{tipo}", total_aux, k&.pluralize&.titleize)
     end
+
+
     return total.join
   end
 
@@ -133,6 +137,9 @@ class AcademicProcess < ApplicationRecord
     total = []
     link = "/admin/enroll_academic_process?query=#{period_name}"
     total << ApplicationController.helpers.label_link_with_tooptip(link, 'bg-secondary', self.enroll_academic_processes.count, 'Total')
+
+    total << ApplicationController.helpers.label_link_with_tooptip('javascript:void(0)', 'bg-secondary', self.enroll_academic_processes.total_with_payment_report, 'Con Reportes de Pago')    
+
 
     EnrollAcademicProcess.enroll_statuses.map do |k,v|
       total_aux = self.enroll_academic_processes.where(enroll_status: v).count 

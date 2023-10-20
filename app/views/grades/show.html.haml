@@ -94,7 +94,7 @@
           - elsif ['nuevo', 'intercambio', 'egresado', 'egresado_doble_titulo'].include? grade.current_permanence_status
             .alert.alert-warning
               %b ATENCIÓN:
-              Su estado actual indica que su inscripción debe realizarse directamente por Control de Estudio.
+              Si desea inscribirse debe realizarlo directamente por Control de Estudio.
               = grade.help_msg
           - elsif ['desertor', 'permiso_para_no_cursar'].include? grade.current_permanence_status
             .alert.alert-danger 

@@ -68,6 +68,9 @@ class EnrollAcademicProcess < ApplicationRecord
 
   scope :custom_search, -> (keyword) { joins(:user, :period).where("users.ci ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'") }
 
+  scope :with_payment_report, -> {joins(:payment_reports)}
+  scope :total_with_payment_report, -> {with_payment_report.count}
+
   def total_retire?
     academic_records.any? and (academic_records.count.eql? academic_records.retirado.count)
   end
@@ -290,12 +293,35 @@ class EnrollAcademicProcess < ApplicationRecord
       field :permanence_status do
         pretty_value do
           bindings[:object].label_permanence_status
+        end
+      end
+
+      field :payment_reports do
+        # filterable true #"joins(:payment_reports).count"
+        # queryable true
+        associated_collection_cache_all false
+        associated_collection_scope do
+
+          Proc.new { |scope|
+            scope = scope.joins(:payment_reports)
+            scope = scope.limit(30)
+          }
         end        
       end
     end
 
     export do
-      fields :enroll_status, :permanence_status, :grade, :period, :student, :user
+      fields :enroll_status, :permanence_status, :grade
+
+      field :period do
+        label 'Período'
+        column_width 100
+        searchable :name
+        # filterable 'periods.name'
+        sortable :name
+      end
+
+      fields :student, :user
 
       field :resume_sections do
         label 'Resumen Asignaturas'
@@ -306,6 +332,10 @@ class EnrollAcademicProcess < ApplicationRecord
       field :total_credits do
         label 'Total Créditos'
       end
+      field :payment_reports do
+        label 'Reporte de Pago'
+      end
+
     end
   end
 

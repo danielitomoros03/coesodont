@@ -431,7 +431,8 @@ class Subject < ApplicationRecord
     end
 
     export do
-      fields :code, :name, :area, :unit_credits, :ordinal, :qualification_type, :modality
+      field :code, :string 
+      fields :name, :area, :unit_credits, :ordinal, :qualification_type, :modality
     end
   end
 

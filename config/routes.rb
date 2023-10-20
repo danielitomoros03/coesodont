@@ -94,7 +94,12 @@ Rails.application.routes.draw do
     resources :payment_reports
   end
   resources :payment_reports
-  resources :schools, only: [:update]
+  resources :schools, only: [:update] do
+    member do
+      get 'export_grades'
+      get 'export_grades_stream'
+    end
+  end
   resources :subjects, only: [:show]
   resources :faculties do
     resources :schools do

@@ -41,7 +41,7 @@ class EnrollAcademicProcessesController < ApplicationController
       end
 
     else
-      flash[:warning] = 'Debe estar confirmado la inscripción y activado el período o la inscripción para descargar el documento solicitado.'
+      flash[:warning] = 'Debe estar confirmada la inscripción y activado el período de inscripción para descargar el documento solicitado.'
       redirect_back fallback_location: '/admin'
     end
   end
@@ -144,7 +144,8 @@ class EnrollAcademicProcessesController < ApplicationController
       estado = 'error'
       msg = "Error: #{e}"       
     end
-    cupo = section ? section.description_with_quotes : 'Seleccione Sección'
+
+    cupo = section ? section.description_with_quotes : 'Seleccione sección o libere cupo'
     respond_to do |format|
       format.json do 
         render json: {data: msg, status: estado, cupo: cupo}

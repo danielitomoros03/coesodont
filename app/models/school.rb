@@ -74,6 +74,18 @@ class School < ApplicationRecord
   end
 
   # FUNCTIONS:
+  def all_grades_to_csv
+
+    CSV.generate do |csv|
+      csv << ['Cédula', 'Apellido y Nombre', 'Sede', 'Eficiencia', 'Promedio', 'Ponderado', 'Última Calificación']
+      grades.all.each do |grade|
+        user = grade.user
+        csv << [user.ci, user.reverse_name, grade.student.sede, grade.efficiency, grade.simple_average, grade.weighted_average, grade.academic_records.last&.get_value_by_status]
+      end
+    end
+  end
+
+
   def enroll_period_name
     self.enroll_process ? self.enroll_process.name : 'Inscripción Cerrada'
   end
@@ -163,9 +175,7 @@ class School < ApplicationRecord
             value
           end
         end
-
       end
-
 
       fields :enroll_process do
         label 'Período Inscripción'
@@ -227,7 +237,19 @@ class School < ApplicationRecord
             value
           end
         end
-      end   
+      end
+
+      field :download_all_grades do
+        label 'Total Estudiantes'
+
+        pretty_value do
+          if bindings[:view]._current_user&.admin&.yo?
+            bindings[:view].render(partial: "/schools/all_grades_link", locals: {school: bindings[:object]})
+          else
+            ApplicationController.helpers.label_status('bg-info', bindings[:object].grades.count)
+          end
+        end
+      end 
     end
 
     show do

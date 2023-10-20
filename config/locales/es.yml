@@ -323,6 +323,8 @@ es:
                 has_many: 'Tiene asignaturas o profesores asociadas'
         bank_account:
           attributes:
+            bank:
+              required: requerido
             bank_id:
               required: requerido
             code:
@@ -594,6 +596,7 @@ es:
         period: 'Período'
         user: Usuario
         academic_records: Registros Académicos
+        payment_reports: Reportes de Pago
       enrollment_day:
         start: Inicio
         total_duration_hours: Total Duración de la Jornada

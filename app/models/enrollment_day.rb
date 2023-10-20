@@ -42,11 +42,12 @@ class EnrollmentDay < ApplicationRecord
   def own_grades_to_csv
 
     CSV.generate do |csv|
-      csv << ['Cédula', 'Apellido y Nombre', 'Sede', 'Ubicación', 'Desde', 'Hasta', 'Eficiencia', 'Promedio', 'Ponderado']
+      csv << ['Cédula', 'Apellido y Nombre', 'Sede', 'Desde', 'Hasta', 'Eficiencia', 'Promedio', 'Ponderado']
       own_grades_sort_by_appointment.each do |grade|
         user = grade.user
-        address = grade.student.address ? grade.student.address.city_and_state : '' 
-        csv << [user.ci, user.reverse_name, grade.student.sede, address, grade.appointment_from, grade.appointment_to, grade.efficiency, grade.simple_average, grade.weighted_average]
+        eap = grade.enroll_academic_processes.joins(:period).order(['periods.year': :desc, 'periods.period_type_id': :desc]).first
+        
+        csv << [user.ci, user.reverse_name, grade.student.sede, grade.appointment_from, grade.appointment_to, eap.efficiency, eap.simple_average, eap.weighted_average]
       end
     end
   end
@@ -77,7 +78,9 @@ class EnrollmentDay < ApplicationRecord
   end
 
   def own_grades_sort_by_appointment
-    self.own_grades.order([appointment_time: :asc, duration_slot_time: :asc, efficiency: :desc, simple_average: :desc, weighted_average: :desc])
+    # self.own_grades.order([appointment_time: :asc, duration_slot_time: :asc, efficiency: :desc, simple_average: :desc, weighted_average: :desc])
+    
+    self.own_grades.joins(:enroll_academic_processes).order([appointment_time: :asc, duration_slot_time: :asc, 'enroll_academic_processes.efficiency': :desc, 'enroll_academic_processes.simple_average': :desc, 'enroll_academic_processes.weighted_average': :desc]).uniq
   end
 
   def own_grades_sort_by_numbers

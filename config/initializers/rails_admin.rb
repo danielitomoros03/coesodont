@@ -1,4 +1,9 @@
 require 'same_period_validator'
+
+Dir[Rails.root.join('app', 'rails_admin', '**/*.rb')].each { |file| require file }
+
+# RailsAdmin::Config::Actions.register(:custom_export, RailsAdmin::Config::Actions::CustomExport)
+
 RailsAdmin.config do |config|
   config.asset_source = :webpack
 
@@ -51,7 +56,6 @@ RailsAdmin.config do |config|
   # config.navigation_static_label = "Opciones"
 
   config.actions do
-    
     dashboard do                     # mandatory
       # require_relative '../../lib/rails_admin/config/actions/dashboard'
       show_in_menu false
@@ -100,7 +104,7 @@ RailsAdmin.config do |config|
     end
 
     new do
-      except [School, Faculty, EnrollAcademicProcess, AcademicRecord, Course]
+      except [School, Faculty, EnrollAcademicProcess, Course]
     end
 
     export do
@@ -181,4 +185,6 @@ RailsAdmin.config do |config|
   config.model "ActiveStorage::VariantRecord" do
     visible false
   end
+
+  config.parent_controller = 'EnhancedController'
 end

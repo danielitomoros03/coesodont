@@ -49,6 +49,14 @@ class PaymentReport < ApplicationRecord
 
   enum transaction_type: [:transferencia, :efectivo, :punto_venta]
 
+  def name
+    "#{transaction_id} - #{amount_to_bs}"
+  end
+
+  def amount_to_bs
+    ActionController::Base.helpers.number_to_currency(self.amount, unit: 'Bs.', separator: ",", delimiter: ".")
+  end
+
   rails_admin do
     navigation_label 'Administrativa'
     navigation_icon 'fa-solid fa-cash-register'

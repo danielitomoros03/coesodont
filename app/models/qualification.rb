@@ -80,7 +80,8 @@ class Qualification < ApplicationRecord
       fields :value, :type_q
     end
     export do
-      fields :value, :type_q
+      field :value, :string
+      field :type_q
     end
   end
 
