@@ -8,7 +8,7 @@
   %thead
     %tr.text-center
       %th{style: 'width: 30px'} #
-      - if (current_user&.admin&.yo?)
+      - if false #(current_user&.admin&.yo?)
         %th AcRe ID
         %th Sec ID
         %th EnrollID
@@ -21,7 +21,7 @@
         - if (admin_authorized_to_qualify or teacher_authorized_to_qualify)
           %th.text-center PI
         %th.text-center Cal. Final
-        - if false
+        - if GeneralSetup.enabled_post_qualification?
           %th CD
           %th CR
           %th Cal. Repar
@@ -41,7 +41,7 @@
       - status = acre.status
       %tr{id: "acRe#{acre.id}", class: acre.tr_class_by_status_q}
         %td.text-center= i+1
-        - if current_user&.admin&.yo?
+        - if false #current_user&.admin&.yo?
           %td= acre.id
           %td= acre.section.id
           %td= acre.enroll_academic_process_id

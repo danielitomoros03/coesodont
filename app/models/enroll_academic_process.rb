@@ -78,7 +78,8 @@ class EnrollAcademicProcess < ApplicationRecord
   # FUNCTIONS:
 
   def overlapped? schedule2
-    self.schedules.where(day: schedule2.day).each do |sh|
+    # self.schedules.where(day: schedule2.day).each do |sh|
+    self.schedules.where.not('academic_records.status': 3).where(day: schedule2.day).each do |sh|
       if ((sh.starttime&.to_i < schedule2&.endtime&.to_i) and (schedule2&.starttime&.to_i < sh.endtime&.to_i) )
         return true 
       end
@@ -171,9 +172,17 @@ class EnrollAcademicProcess < ApplicationRecord
     subjects.count
   end
 
+  def total_subjects_not_retired
+    subjects.where.not('academic_records.status': 3).count
+  end
+
   def total_credits
     subjects.sum(:unit_credits)
   end
+
+  def total_credits_not_retired
+    subjects.where.not('academic_records.status': 3).sum(:unit_credits)
+  end  
 
   def short_name
     "#{self.school.code}_#{self.period.name_revert}_#{self.student.user_ci}"
@@ -230,8 +239,8 @@ class EnrollAcademicProcess < ApplicationRecord
         formatted_value do          
           grade = bindings[:object].grade          
           if bindings[:object].enrolling?
-            totalCreditsReserved = bindings[:object].total_credits
-            totalSubjectsReserved = bindings[:object].total_subjects
+            totalCreditsReserved = bindings[:object].total_credits_not_retired
+            totalSubjectsReserved = bindings[:object].total_subjects_not_retired
 
             bindings[:view].render(partial: '/enroll_academic_processes/form', locals: {grade: grade, academic_process: bindings[:object].academic_process, totalCreditsReserved: totalCreditsReserved, totalSubjectsReserved: totalSubjectsReserved})
           else
@@ -308,6 +317,7 @@ class EnrollAcademicProcess < ApplicationRecord
           }
         end        
       end
+      fields :efficiency, :simple_average, :weighted_average
     end
 
     export do
@@ -335,6 +345,8 @@ class EnrollAcademicProcess < ApplicationRecord
       field :payment_reports do
         label 'Reporte de Pago'
       end
+
+      fields :efficiency, :simple_average, :weighted_average
 
     end
   end

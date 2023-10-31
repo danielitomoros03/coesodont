@@ -104,9 +104,11 @@ class AcademicRecord < ApplicationRecord
   scope :total_credits_approved, -> {aprobado.total_credits}
   scope :total_credits_equivalence, -> {equivalencia.total_credits}
   
-  scope :weighted_average, -> {joins(:subject).joins(:qualifications).coursed.sum('subjects.unit_credits * qualifications.value')}
+  scope :weighted_average, -> {joins(:subject).joins(:qualifications).definitives.coursed.sum('subjects.unit_credits * qualifications.value')}
 
-  scope :promedio, -> {joins(:qualifications).coursed.average('qualifications.value')}
+  scope :definitives, -> {joins(:qualifications).where('qualifications.definitive': true)}
+
+  scope :promedio, -> {joins(:qualifications).coursed.definitives.average('qualifications.value')}
   scope :promedio_approved, -> {aprobado.promedio}
   scope :weighted_average_approved, -> {aprobado.weighted_average}
 
@@ -211,7 +213,7 @@ class AcademicRecord < ApplicationRecord
     valor = 'secondary'
     valor = 'success' if self.aprobado?
     valor = 'danger' if (self.aplazado? || self.retirado? || self.pi?)
-    valor += ' text-muted' if self.retirado?
+    # valor += ' text-muted' if self.retirado?
     return valor    
   end
 

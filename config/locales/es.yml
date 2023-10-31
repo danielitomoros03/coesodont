@@ -436,6 +436,9 @@ es:
       grade:
         one: 'Grado'
         other: 'Grados'
+      general_setup:
+        one: 'Configuración General'
+        other: 'Configuraciones generales'
       payment_report:
         one: 'Reporte de Pago'
         other: 'Reportes de Pago'
@@ -597,6 +600,9 @@ es:
         user: Usuario
         academic_records: Registros Académicos
         payment_reports: Reportes de Pago
+        efficiency: Eficiencia
+        simple_average: Promedio Simple
+        weighted_average: Promedio Ponderado
       enrollment_day:
         start: Inicio
         total_duration_hours: Total Duración de la Jornada

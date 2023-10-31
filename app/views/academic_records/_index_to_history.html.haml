@@ -29,7 +29,7 @@
         %td.text-center= subject.unit_credits
         %td.text-center= subject.modality_initial_letter
         %td.text-center{title: 'Ir al detalle de la sección'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Section'), academic_record.section.code, "/admin/section/#{academic_record.section.id}"
-        %td.text-center= academic_record.final_q_to_02i
+        %td.text-center= academic_record.q_value_to_02i
         %td.text-center.align-middle= academic_record.badge_status.html_safe
         - if (logged_as_admin and admin.authorized_manage? 'AcademicRecord' and ( enabled_delete or enabled_change or enabled_retire))
           %td.align-middle

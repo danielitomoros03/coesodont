@@ -231,7 +231,7 @@ class Section < ApplicationRecord
   end
 
   def subject_desc
-    subject.desc if subject
+    subject&.desc
   end
 
   def period_name

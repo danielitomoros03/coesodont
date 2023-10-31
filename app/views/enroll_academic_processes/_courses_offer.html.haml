@@ -22,11 +22,18 @@
       - section_id = ac&.section_id # ? ac.section_id : nil
       - approved = false
       - desc_qualification = nil
-      - if ac&.aprobado?
+      
+      - if ac&.retirado?
+        - trStatus = 'text-muted border table-danger'      
+      - elsif ac&.aprobado?
         - approved = true
         - desc_qualification = ac.q_value_to_02i
-      - reservada = !section_id.nil? ? 'table-success' : ''
-      - asigApproved = approved ? 'text-muted border table-success' : ''
+        - trStatus = 'text-muted border table-success'
+      - elsif (!section_id.nil?)
+        - trStatus = 'table-success'
+      - else
+        - trStatus = ''
+
       - if grade.school.code&.eql? 'EACRV'
         - # OJO: CONDICIÓN PARTICULAR DE ARQUITACTURA!!!!
         - if grade.student.Caracas?
@@ -39,20 +46,25 @@
 
       - if sections.any?
         - subject = course.subject
-        %tr{class: "#{asigApproved} #{reservada}"}
+        %tr{class: "#{trStatus}"}
           %td.align-middle.text-right= i+1
           %td.align-middle
             = course.subject_desc_with_pci
-            = ac.badge_approved.html_safe if (ac and ac.badge_approved)
+            = ac.badge_approved.html_safe if ac&.badge_approved
+            = ac.badge_status.html_safe if ac&.retirado?
+
           %td.align-middle.text-center= subject.ordinal
           %td.align-middle.text-center= subject.unit_credits
           %td.align-middle.pl-3
-            -unless approved
-              - sections = sections.select{|s| s.has_capacity? or s.has_academic_record? grade.student_id or s.id.eql? section_id}
-              - disable_promt = ''
-              - if sections.any?
-                = collection_select("sections", nil, sections, :id, :description_with_quotes, {selected: section_id, include_blank: 'Seleccione sección o libere cupo'}, {class: "form-control selectInscripcion", style: 'width: 100%', titulo: subject.desc_to_select, credits: subject.unit_credits, gradeId: grade.id, courseId: course.id, pci: pcis, onchange: "selected(this);", name: "sections_course_id_#{course.id}", id: "sections_course_id_#{course.id}"})
+            - unless approved
+              - if ac&.retirado?
+                .text-center.text-muted= 'RETIRADO'
               - else
-                - disable_promt = 'Sin cupos'
-                %b.pl-3.text-muted
-                  = collection_select(nil, nil, sections, nil, nil, { prompt: disable_promt}, {class: "form-control", style: 'width: 100%', disabled: true, readonly: true, name: "sections_void#{course.id}", id: "sections_void#{course.id}"})
+                - sections = sections.select{|s| s.has_capacity? or s.has_academic_record? grade.student_id or s.id.eql? section_id}
+                - disable_promt = ''
+                - if sections.any?
+                  = collection_select("sections", nil, sections, :id, :description_with_quotes, {selected: section_id, include_blank: 'Seleccione sección o libere cupo'}, {class: "form-control selectInscripcion", style: 'width: 100%', titulo: subject.desc_to_select, credits: subject.unit_credits, gradeId: grade.id, courseId: course.id, pci: pcis, onchange: "selected(this);", name: "sections_course_id_#{course.id}", id: "sections_course_id_#{course.id}"})
+                - else
+                  - disable_promt = 'Sin cupos'
+                  %b.pl-3.text-muted
+                    = collection_select(nil, nil, sections, nil, nil, { prompt: disable_promt}, {class: "form-control", style: 'width: 100%', disabled: true, readonly: true, name: "sections_void#{course.id}", id: "sections_void#{course.id}"})

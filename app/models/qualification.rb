@@ -12,6 +12,8 @@ class Qualification < ApplicationRecord
   scope :by_type_q, -> (type_q) {where(type_q: type_q)}
   scope :post, -> {where(type_q: [:diferido, :reparacion])}
 
+  scope :definitive, -> {where(definitive: true)}
+
   enum type_q: [:final, :diferido, :reparacion]
 
   validates :academic_record, presence: true
@@ -88,6 +90,10 @@ class Qualification < ApplicationRecord
   private
 
   def update_status
+
+    if self.diferido? or self.reparacion?
+      self.academic_record.qualifications.final.first.update(definitive: false)
+    end
 
     eap = self.enroll_academic_process
     eap.update(permanence_status: eap.get_regulation) if enroll_academic_process&.finished?

@@ -19,7 +19,7 @@
   %td= check_box_tag nil, 'pi', academic_record.pi?, {class: 'pi', id_obj: id, disabled: preinscrito, onclick: 'pi(this);'}
   %td= text_field_tag "[qualification]final", {}, {value: final_q_to_02i, placeholder: 'Final', class: 'form-control form-control-sm qualifiable final onlyQualify', disabled: disabled_final_q, required:!disabled_final_q, step: 1, in: 0...21, id_obj: id, type_q: :final, onchange: 'sendQualification(this);final(this);', oninput: 'onlyValidQ(this);'}
 
-  - if false
+  - if GeneralSetup.enabled_post_qualification?
     - checkbox_disabled = (disable_row or aprobado or final_q_to_02i.nil?)
     %td= check_box_tag nil, :diferido, diferido, {disabled: (checkbox_disabled or reparacion), class: 'checkPost', id_obj: id, onclick: 'checkPost(this);'}
 
