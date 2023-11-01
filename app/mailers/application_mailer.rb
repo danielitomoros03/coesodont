@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "SOPORTE ODONTOLOGIA <#{School.first&.contact_email}>"
+  default from: "SOPORTE COES-ODONT <coes.odon@gmail.com>"
   layout "mailer"
 end
