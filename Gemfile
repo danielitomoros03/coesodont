@@ -116,8 +116,9 @@ gem "cssbundling-rails"
 # Gema del Gestor de Correos
 gem 'mail'
 
-
 # Bitácora
 gem "paper_trail"
 
-# For Carrousel
+# Delayed Job
+gem 'delayed_job_active_record'
+gem 'daemons'

@@ -15,12 +15,16 @@
     "sass": "^1.57.1",
     "toastr": "^2.1.4",
     "trix": "^2.0.4",
-    "webpack": "^5.75.0",
+    "webpack": "^5.89.0",
     "webpack-cli": "^5.0.0"
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "build:css": "cp -r ./node_modules/@fortawesome/fontawesome-free/webfonts ./app/assets/builds && sass ./app/assets/stylesheets/application.scss:./app/assets/builds/application.css ./app/assets/stylesheets/rails_admin.scss:./app/assets/builds/rails_admin.css ./app/assets/stylesheets/fontawesome.scss:./app/assets/builds/fontawesome.css --no-source-map --load-path=node_modules"
   },
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "engine": {
+    "node": "16.x",
+    "yarn": "1.22.19"
+  }
 }

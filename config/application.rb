@@ -21,7 +21,7 @@ module Coesodont
     config.i18n.default_locale = :es
     config.time_zone = "Caracas"
     # config.assets.initialize_on_precompile = false
-    # config.active_job.queue_adapter = :delayed_job
+    config.active_job.queue_adapter = :delayed_job
 
     # Don't generate system test files.
     config.generators.system_tests = nil
