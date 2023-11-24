@@ -49,7 +49,7 @@ class AcademicRecord < ApplicationRecord
   # validates :qualifications, presence: true, if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado? or object.equivalencia? ))}
 
   # OJO: Se usó este validador en luegar del de arriba para poder espeficificar el mensaje
-  validates_presence_of :qualifications, message: "Calificación no puede estar en blanco. Si desea eliminar la calificación, coloque el estado de calificación a 'Sin Calificar'", if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado? or object.equivalencia?))}
+  validates_presence_of :qualifications, message: "Calificación no puede estar en blanco. Si desea eliminar la calificación, coloque el estado de calificación a 'Sin Calificar'", if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado?))}
 
   # CALLBACK
   after_save :set_options_q
@@ -344,7 +344,13 @@ class AcademicRecord < ApplicationRecord
     qualification ? qualification.value_to_02i : nil
   end
   def q_value_to_02i qualification=definitive_q
-    qualification ? qualification.value_to_02i : '--'
+    if qualification
+      qualification.value_to_02i
+    elsif equivalencia?
+      'EQ'
+    else 
+      '--'
+    end
   end
 
   def description_q force_final = false

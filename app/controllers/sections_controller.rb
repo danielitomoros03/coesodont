@@ -1,6 +1,8 @@
 class SectionsController < ApplicationController
   before_action :set_section, only: %i[ show update export change]
 
+  layout 'logged'
+
   # GET /sections or /sections.json
   def index
     @sections = Section.all
