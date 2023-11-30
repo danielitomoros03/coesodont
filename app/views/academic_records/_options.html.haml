@@ -5,6 +5,7 @@
 - if (admin&.authorized_delete? 'AcademicRecord') and enabled_delete
   - msg = 'Eliminar Asignatura'
   - confirm = "Está acción eliminará el registro de inscripción de #{user_student.reverse_name} en la sección #{section.code} de #{section.subject_desc} del periodo #{section.period.name} ¿Está completamente seguro?"
+  - confirm_retire = "Está acción retirará a #{user_student.reverse_name} de la sección #{section.code} de #{section.subject_desc} del periodo #{section.period.name} ¿Está seguro?"
 
   = link_to "/academic_records/#{academic_record.id}", class: 'btn btn-danger btn-sm float-end align-middle mx-2', 'data-confirm': confirm, method: :delete, 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip" do
     .fa-solid.fa-remove
@@ -32,6 +33,6 @@
     - msg = 'Retirar Asignatura'
     = form_tag "/academic_records/#{academic_record.id}", method: :put, class: 'float-end align-middle' do
       = hidden_field_tag '[academic_record]status', :retirado
-      = button_tag(class: 'btn btn-danger btn-sm', 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip", type: :submit, 'data-confirm': confirm) do
+      = button_tag(class: 'btn btn-danger btn-sm', 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip", type: :submit, 'data-confirm': confirm_retire) do
         .fa.fa-calendar-minus
 
