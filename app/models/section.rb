@@ -460,24 +460,13 @@ class Section < ApplicationRecord
       field :qualified do
         column_width 20
       end
-
+      
       field :options do
         label 'Opciones'
         pretty_value do
           current_user = bindings[:view]._current_user
-          if bindings[:object].qualified?
-            title = 'Habilitar para Calificar (Abrir)'
-            value = false
-            icon = 'fas fa-times'
-            type = 'btn-danger'
-          else
-            title = 'Marcar como Calificada (Cerrar)'
-            value = true
-            icon = 'fas fa-check'
-            type = 'btn-success'
-          end
-          url = "/sections/#{bindings[:object].id}/change_qualification_status?section[qualified]=#{value}"
-          display = ApplicationController.helpers.btn_toggle type, icon, url, title, ''
+
+          display = ApplicationController.helpers.badge_toggle_section_qualified bindings[:object]
           if (current_user.admin? and bindings[:view].session[:rol] and bindings[:view].session[:rol].eql? 'admin' and current_user.admin.authorized_manage? 'Section' and bindings[:object].academic_records.any?) #and bindings[:object].qualified?
             display += ApplicationController.helpers.btn_toggle_download 'mx-3 btn-success', "/sections/#{bindings[:object].id}.pdf", 'Generar Acta', nil
           end
