@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   resources :sections do
     member do
       get :export
+      get :change_qualification_status
     end
     collection do
       post :bulk_delete
