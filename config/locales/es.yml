@@ -603,6 +603,7 @@ es:
         efficiency: Eficiencia
         simple_average: Promedio Simple
         weighted_average: Promedio Ponderado
+        study_plan: Plan de Estudio
       enrollment_day:
         start: Inicio
         total_duration_hours: Total Duración de la Jornada

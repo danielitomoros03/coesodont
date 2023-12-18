@@ -25,6 +25,7 @@ class AcademicRecordsController < ApplicationController
 
   # POST /academic_records or /academic_records.json
   def create
+
     @academic_record = AcademicRecord.new(academic_record_params)
 
     if enroll_academic_process = @academic_record.enroll_academic_process
@@ -46,7 +47,16 @@ class AcademicRecordsController < ApplicationController
               if params[:approved]
                 @academic_record.status = :aprobado
               else
-                @academic_record.status = :aplazado
+                # @academic_record.status = :aplazado
+                if params[:pi]
+                  @academic_record.status = :perdida_por_inasistencia
+                elsif params[:rt]
+                  @academic_record.status = :retirado
+                elsif params[:eq]
+                  @academic_record.status = :equivalencia
+                else
+                  @academic_record.status = :aplazado
+                end
               end
             elsif params[:pi]
               @academic_record.status = :perdida_por_inasistencia
@@ -56,7 +66,7 @@ class AcademicRecordsController < ApplicationController
             if @academic_record.save
               flash[:success] = 'Se guardó el historial ' 
               if subject.numerica? and @academic_record.sin_calificar?
-                if params[:qualifications] 
+                if params[:qualifications] and !params[:qualifications][:value].blank?
                   qa = @academic_record.qualifications.new
                   qa.type_q = params[:qualifications][:type_q]
                   qa.value = params[:qualifications][:value]
@@ -66,7 +76,7 @@ class AcademicRecordsController < ApplicationController
                     flash[:danger] = "Error al intentar guardar la calificación: #{qa.errors.full_messages.to_sentence}"
                   end
                 else
-                  flash[:danger] = 'No se especificó la calificación'
+                  flash[:warning] = 'No se especificó la calificación'
                 end
               end
             else
@@ -115,7 +125,7 @@ class AcademicRecordsController < ApplicationController
     flash[:info] = '¡Registro Eliminado!'
 
     respond_to do |format|
-      format.html { redirect_to "/admin/student/#{student_id}"}
+      format.html { redirect_back fallback_location: "/admin/student/#{student_id}"}
       format.json { head :no_content }
     end
   end

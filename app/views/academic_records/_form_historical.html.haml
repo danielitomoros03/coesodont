@@ -3,12 +3,13 @@
   .row.text-center.fw-bold
     .col-3{title: 'Descripción de la asigntura'} Asignatura
     .col-2{title: 'Identificador de la Sección'} Sección
-    .col-1.border-end{title: 'Equivalencia'} EQ
-    .col-4.absoluta{style: 'display:none'} ¿Aprobado?
+    .col-1.dual{style: 'display:none',title: 'Equivalencia'} EQ
     
     .col-1.numerica{style: 'display:none', title: 'Pérdida por Inasistencia'} PI
-    .col-1.numerica{style: 'display:none', title: 'Retirada'} RT
-    .col-1.numerica{style: 'display:none', title: 'Tipo de Calificación'} Tipo
+    .col-1.dual.border-end{style: 'display:none', title: 'Retirada'} RT
+    .col-3.absoluta{style: 'display:none'} ¿Aprobado?
+    - if GeneralSetup.enabled_post_qualification?
+      .col-1.numerica{style: 'display:none', title: 'Tipo de Calificación'} Tipo
     .col-1.numerica{style: 'display:none', title: 'Calificación'} Calif
     .col-2 
 
@@ -26,7 +27,8 @@
         =# EXISTENTS SECTIONS CODES 
         #subjectSectionsCode.text-center
           .input-group
-            = select_tag :section_code, options_for_select(Section.codes), {class: "form-control", id: 'sessions'} 
+            =# select_tag :section_code, options_for_select(Section.codes), {class: "form-control", id: 'sessions'} 
+            = select_tag :section_code, nil, {class: "form-control", id: 'sessions'} 
 
             = link_to 'javascript:void(0)', id: 'addCode', class: 'input-group-text btn btn-success', title: 'Agregar Identificador', onclick: "showSections(false);" do
               %i.fa-regular.fa-plus
@@ -38,37 +40,53 @@
                     
             = link_to 'javascript:void(0)', id: 'restoreSections', class: 'input-group-text btn btn-success', title: 'Códigos existentes', onclick: "showSections(true);" do
               %i.fa-regular.fa-minus
-      .col-1.text-center.border-end{title: 'Marque esta casilla para indicar que la sección es de Equivalencia'}
-        =# EQUIVALENCIA
-        = check_box_tag :eq, nil, false, {class: 'btn-check', autocomplete: :off}
-        %label.btn.btn-outline-primary{for: :eq}
-          .fa-regular.fa-check
-      
-      .col-4.text-center.absoluta{style: 'display:none', title: 'Marque esta casilla si aprobó el curso'}
-        =# ABSOLUTAS
+        - if false 
+          .radios
+            .form-check.form-check-inline
+              .mx-2 
+                = radio_button :options, nil, :eq, {class: 'form-check-input', checked: false}
+                EQ
+              .mx-2
+                = radio_button :options, nil, :pi, {class: 'form-check-input', checked: false}
+                PI
+              .mx-2  
+                = radio_button :options, nil, :rt, {class: 'form-check-input', checked: false}
+                RT
 
-        = check_box_tag :approved, nil, false, {class: 'btn-check', autocomplete: :off}
-        %label.btn.btn-outline-primary{for: :approved}
-          .fa-regular.fa-check
-      
+
+      .col-1.text-center.dual{style: 'display:none', title: 'Marque esta casilla para indicar que la sección es de Equivalencia'}
+        =# EQUIVALENCIA
+        = check_box_tag :eq, nil, false, {class: 'checkeable btn-check', autocomplete: :off, onclick: "disabledByCheck(this);"}
+        %label.btn.btn-outline-primary{for: :eq}
+          .fa-regular.fa-check      
+      = # CHECKS
       .col-1.text-center.numerica{style: 'display:none', title: 'Marque esta casilla para indicar Pérdida por Inasistencia'}
         =# PI'S
-        = check_box_tag :pi, nil, false, {class: 'btn-check', onclick: "disabledByCheck(this, 'rt');", autocomplete: :off}
+        = check_box_tag :pi, nil, false, {class: 'checkeable btn-check', onclick: "disabledByCheck(this);", autocomplete: :off}
         %label.btn.btn-outline-primary{for: :pi}
           .fa-regular.fa-check
 
-      .col-1.text-center.numerica{style: 'display:none', title: 'Marque esta casilla para indicar Retiro'}
+      .col-1.text-center.dual.border-end{style: 'display:none', title: 'Marque esta casilla para indicar Retiro'}
         =# RETIRO
-        = check_box_tag :rt, nil, false, {class: 'btn-check', onclick: "disabledByCheck(this, 'pi');", autocomplete: :off}
+        = check_box_tag :rt, nil, false, {class: 'checkeable btn-check', onclick: "disabledByCheck(this);", autocomplete: :off}
         %label.btn.btn-outline-primary{for: :rt}
           .fa-regular.fa-check
-      .col-1.numerica{style: 'display:none'}
-        =# NUMERICAS
-        = select_tag '[qualifications]type_q', options_for_select(Qualification.type_qs.keys), {class: "form-control qualificable text-capitalize"}
+
+      .col-3.text-center.absoluta{style: 'display:none', title: 'Marque esta casilla si aprobó el curso'}
+        =# ABSOLUTAS
+        = check_box_tag :approved, nil, false, {class: 'btn-check', autocomplete: :off}
+        %label.btn.btn-outline-primary{for: :approved}
+          .fa-regular.fa-check
+      - if GeneralSetup.enabled_post_qualification?
+        .col-1.numerica{style: 'display:none'}
+          =# NUMERICAS
+          = select_tag '[qualifications]type_q', options_for_select(Qualification.type_qs.keys), {class: "form-control qualificable text-capitalize"}
+      - else
+        = hidden_field_tag '[qualifications]type_q', :final
       .col-1.numerica{style: 'display:none'}
         =# QUALIFICATION VALUE
         =# text_field_tag '[qualifications]value', {}, {placeholder: 'Cal', class: "form-control qualificable", required: true, step: 1, in: 0...21, oninput: 'onlyValidQ(this);'}
-        = select_tag '[qualifications]value', options_for_select( (1..20).map{|a| sprintf("%02i", a)}), {class: "form-control qualificable", required: true, include_blank: '--'}
+        = select_tag '[qualifications]value', options_for_select( (1..20).map{|a| sprintf("%02i", a)}), {class: "form-control qualificable", include_blank: '--'}
       .col-2
         =# GUARDAR
         %button.btn.bt.btn-primary.float-end{type: :submit}
@@ -87,14 +105,22 @@
     node.val(node.val().replace(/[^0-9]/g,'') );
   }
 
-  function disabledByCheck(ele, dis) {
-    let checked = $(ele).prop('checked');
+  function disabledByCheck(ele) {
+    let elem = $(ele);
+    let checked = elem.prop('checked');
+    
+    $('.checkeable').prop('disabled', checked);
 
-    // console.log(dis);
-    $('#'+dis).prop('disabled', checked);
+    elem.prop('disabled', false);
     let qa = $(`.qualificable`);
-    qa.prop('disabled', checked);
-    qa.prop('readonly', checked);
+    if (elem.prop('id') != 'eq') {
+      
+      qa.prop('disabled', checked);
+      qa.prop('readonly', checked);
+      qa.prop('required', false);
+    } else {
+      qa.prop('required', checked);
+    }
   }
 
   function showSections(value){
@@ -121,7 +147,6 @@
   function getSections(ele){
     let sections = $('#sessions');
     sections.find('option').remove();
-    console.log(ele.value);
     $.ajax({
       url: `/subjects/${ele.value}`,
       type: 'GET',
@@ -159,6 +184,8 @@
         let qa = $('#_qualificationsvalue');
         let tq = $('#_qualificationstype_q');
 
+        $('.dual').show();
+        
         if (data.qualification_type == 'absoluta') {
           abs.show();
           num.hide(); 
@@ -169,7 +196,6 @@
         }else {
           abs.hide(); 
           num.show();
-          qa.prop('required', true); 
           qa.prop('disabled', false);
           tq.prop('disabled', false);
         }
