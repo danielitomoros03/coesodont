@@ -154,12 +154,16 @@ class User < ApplicationRecord
   #FUNCTIONS:
 
   # PERSONAL AND CONTACT DETAILS
+  def false_email?
+    email&.include? "mailinator"
+  end
+
   def empty_info?
     empty_any_image? or empty_personal_info?
   end
 
   def empty_personal_info?
-    (self.email.blank? or self.first_name.blank? or last_name.blank? or self.number_phone.blank? or self.sex.blank?)
+    (self.email.blank? or self.false_email? or self.first_name.blank? or last_name.blank? or self.number_phone.blank? or self.sex.blank?)
   end
 
   def empty_any_image?
@@ -405,8 +409,10 @@ class User < ApplicationRecord
 
     def send_welcome_email
       begin
-        UserMailer.welcome(self).deliver_now
-        # UserMailer.welcome(self).deliver_later
+        if GeneralSetup.send_wellcome_mailer_on_create_user?
+          UserMailer.welcome(self).deliver_now
+          # UserMailer.welcome(self).deliver_later
+        end
       rescue Exception => e
         
       end

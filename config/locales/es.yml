@@ -15,6 +15,19 @@ es:
   final: NF
   reparacion: NR
   
+  S: Semestral
+  Semestral: S
+
+  I: Intensivo
+  Intensivo: I
+
+  A: Anual
+  Anual: A
+
+
+  NP: no_presento
+  no_presento: NP
+
   perdida_por_inasistencia: PI
   PI: perdida_por_inasistencia
 

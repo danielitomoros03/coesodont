@@ -39,7 +39,7 @@ class AcademicProcess < ApplicationRecord
   has_many :subjects, through: :courses
 
   # ENUMERIZE:
-  enum modality: [:Semestral, :Anual]
+  enum modality: [:Semestral, :Anual, :Intensivo]
 
   #VALIDATIONS:
   validates :school, presence: true
@@ -93,9 +93,9 @@ class AcademicProcess < ApplicationRecord
   end
 
   def default_value_by_import
-    max_credits = 24
-    max_subject = 5
-    modality = :semestral
+    max_credits ||= 24
+    max_subject ||= 5
+    modality ||= :Anual
   end
 
   def short_desc

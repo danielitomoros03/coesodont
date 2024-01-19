@@ -1,3 +1,23 @@
+desc "Importación inicial de estudiantes"
+task :import_students_by_console => :environment do
+	begin
+		p "Iniciando..."
+		ImportXslx.import_students_by_console
+	rescue Exception => e
+			p "Error: <#{e}>"
+	end	
+end
+
+desc "Importación inicial de registros históricos"
+task :import_academic_records_by_console => :environment do
+	begin
+		p "Iniciando..."
+		ImportXslx.import_academic_records_by_console
+	rescue Exception => e
+			p "Error: <#{e}>"
+	end	
+end
+
 desc "Actualiza todas inscripciones segun el reglamento"
 task :update_all_enrollment_status => :environment do
 	begin
