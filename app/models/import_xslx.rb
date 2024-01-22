@@ -34,27 +34,6 @@ class ImportXslx
 
 			print " #{aux},"
 		end
-
-
-		# rows.each_with_index do |row,i|
-		# 	# print (entity.import row, fields)
-		# 	begin
-		# 		respond = entity.import row, fields
-		# 		if respond[0].eql? 1
-		# 			aux = 'A'
-		# 			total_added += 1
-		# 		elsif respond[1].eql? 1
-		# 			aux = 'U'
-		# 			total_updated += 1
-		# 		else
-		# 			aux = respond
-		# 		end
-				
-		# 	rescue Exception => e
-		# 		aux = "#{i+1} #{e}"
-		# 	end
-		# 	print aux
-		# end
 		
 		p "---- Proceso completado -----"
 		p "Resumen:"
