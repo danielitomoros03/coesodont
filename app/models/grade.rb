@@ -230,6 +230,21 @@ class Grade < ApplicationRecord
     academic_records.aprobado.any?
   end
 
+
+  def subjects_offer_by_level_approved
+    if is_new? or !any_approved?
+      # Si es nuevo o no tiene asignaturas aporvadas, le ofertamos las de 1er año
+      Subject.independents.where(ordinal: 1)
+    else
+      enroll_process = school&.enroll_process
+      before_process = enroll_process&.before_process
+
+      if enroll_process and beoer_process
+        subject_approbed_before_process = academic_records_from_subjects_approved.of_period(before_process).group('subjects.order').count
+      end
+    end    
+  end
+
   def subjects_offer_by_dependent
 
     if is_new? or !any_approved?
