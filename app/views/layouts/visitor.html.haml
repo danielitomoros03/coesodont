@@ -2,7 +2,7 @@
 %html{ lang: "#{I18n.locale}"}
   %head
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
-    %title Coesfau - Bienvenido
+    %title Coesodont - Bienvenido
     %meta{:content => "width=device-width, initial-scale=1, shrink-to-fit=no", :name => "viewport"}/
     = csrf_meta_tags
     = csp_meta_tag
@@ -22,9 +22,8 @@
             .col-12.col-lg-6.d-md-flex.align-items-center.justify-content-center.bg-primary.bg-opacity-10.vh-lg-100
               .p-3.p-lg-5
                 / Title
-                = render partial: 'layouts/main_banner', locals: {width: '96%', bg_color: ' '}
-
-                / Carousel
+                = render partial: 'layouts/main_banner', locals: {width: '100%', bg_color: ' '}
+                / SVG Image and Carousel
                 = render partial: 'layouts/carousel', locals: {billboards: Billboard.activas}
 
             / Right

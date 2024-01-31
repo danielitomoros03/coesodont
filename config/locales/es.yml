@@ -15,6 +15,19 @@ es:
   final: NF
   reparacion: NR
   
+  S: Semestral
+  Semestral: S
+
+  I: Intensivo
+  Intensivo: I
+
+  A: Anual
+  Anual: A
+
+
+  NP: no_presento
+  no_presento: NP
+
   perdida_por_inasistencia: PI
   PI: perdida_por_inasistencia
 
@@ -320,7 +333,7 @@ es:
           attributes:
             base:
               restrict_dependent_destroy:
-                has_many: 'Tiene asignaturas asociadas'
+                has_many: 'Tiene asignaturas o profesores asociadas'
         bank_account:
           attributes:
             bank:
@@ -410,8 +423,8 @@ es:
         one: 'Tipo de Admisión'  
         other: 'Tipos de Admisión'
       area:
-        one: 'Área de Conocimiento'
-        other: 'Áreas de Conocimiento'
+        one: 'Cátedra'
+        other: 'Cátedras'
       bank:
         one: 'Banco'
         other: 'Bancos'
@@ -443,8 +456,8 @@ es:
         one: 'Reporte de Pago'
         other: 'Reportes de Pago'
       parent_area:
-        one: 'Área Madre'
-        other: 'Áreas Madres'
+        one: 'Departamento'
+        other: 'Departamentos'
       period:
         one: 'Período'
         other: 'Períodos'
@@ -542,7 +555,9 @@ es:
       area_authorizable:
         name: Nombre
         description: Descripción
-        icon: Ícono 
+        icon: Ícono
+        created_at: 'Creado'
+        updated_at: 'Actualizado'
         authorizables: Accesibles       
       admin:
         user: 'Usuario'
@@ -559,12 +574,13 @@ es:
       area:
         name: 'Nombre'
         school: 'Escuela'
-        parent_area: 'Área Madre'
+        parent_area: 'Departamento'
         subjects: 'Asignaturas'
         subarea: 'Subáreas'
       parent_area:
         name: 'Nombre'
         school: 'Escuela'
+        areas: 'Cátedras'
       bank:
         code: 'Código'
         name: 'Nombre'
@@ -576,11 +592,11 @@ es:
         school: 'Escuela'
       billboard:
         active: 'Publicar'
+        content: 'Contenido de Cartelera'
         created_at: 'Fecha de Creación'
         updated_at: 'Fecha de Edición'
-        content: 'Contenido de Cartelera'
       course:
-        area: 'Área'
+        area: 'Cátedra'
         period: Período
         school: Escuela
         sections: Secciones
@@ -671,7 +687,7 @@ es:
         enroll_process: Inscripción en Período
         faculty: 'Facultad'
         periods: 'Períodos'
-        areas: 'Áreas'
+        areas: 'Departamentos'
         bank_accounts: Cuentas Bancarias
         study_plans: Planes de Estudio
         admission_types: Tipos de Admisión
@@ -681,7 +697,7 @@ es:
         starttime: Hora Inicio
         endtime: Hora Final
       section:
-        area: 'Área'
+        area: 'Cátedra'
         code: 'Sección'
         capacity: 'Capacidad'
         course: 'Curso (Período/Asignatura)'
@@ -735,8 +751,8 @@ es:
         unit_credits: 'Unidad de Créditos'
         ordinal: 'Orden'
         qualification_type: 'Tipo de calificación'
-        modality: 'Tipo'
-        area: 'Área'
+        modality: 'Modalidad'
+        area: 'Cátedra'
         prelate_subjects: Prelaciones
         depend_subjects: Asignaturas que prela
         created_at: 'Fecha de Registro'
@@ -749,7 +765,7 @@ es:
         created_at: Creado en
         updated_at: Actualizado en
       teacher:
-        area: 'Área'
+        area: 'Cátedra'
         user: 'Usuario'
         created_at: 'Fecha de Registro'
         sections: 'Secciones'

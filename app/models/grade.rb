@@ -505,6 +505,7 @@ class Grade < ApplicationRecord
   after_initialize do
     if new_record?
       self.study_plan_id ||= StudyPlan.first.id if StudyPlan.first
+      self.registration_status = :universidad
     end
   end  
 

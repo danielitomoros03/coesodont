@@ -80,7 +80,7 @@ class Subject < ApplicationRecord
     self.code.strip!
     self.name.upcase!
     self.code.upcase!
-    self.code = "0#{self.code}" if self.code[0] != '0' 
+    # self.code = "0#{self.code}" if self.code[0] != '0' 
   end
 
   # GENERALS FUNCTIONS: 
@@ -224,12 +224,8 @@ class Subject < ApplicationRecord
   def modality_initial_letter
     case modality
     when 'obligatoria'
-      'B'
-    when 'electiva'
       'O'
     when 'optativa'
-      'L'
-    when 'proyecto'
       'P'
     end      
   end

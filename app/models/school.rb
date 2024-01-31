@@ -11,7 +11,7 @@ class School < ApplicationRecord
   # t.datetime "created_at", null: false
   # t.datetime "updated_at", null: false
   # t.bigint "faculty_id"
-  # t.string "contact_email", default: "coes.fau@gmail.com", null: false
+  # t.string "contact_email", default: "coes.odon@gmail.com", null: false
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]

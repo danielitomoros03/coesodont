@@ -113,8 +113,8 @@ group :test do
 end
 gem "cssbundling-rails"
 
-# Gestor de Correos
-gem "mailersend-ruby"
+# Gema del Gestor de Correos
+gem 'mail'
 
 # Bitácora
 gem "paper_trail"
