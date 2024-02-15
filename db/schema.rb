@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_10_31_200200) do
+ActiveRecord::Schema[7.0].define(version: 2024_02_14_212059) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -282,6 +282,23 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_31_200200) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "mentions", force: :cascade do |t|
+    t.string "name"
+    t.bigint "study_plan_id", null: false
+    t.integer "total_required_subjects", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["study_plan_id"], name: "index_mentions_on_study_plan_id"
+  end
+
+  create_table "mentions_subjects", id: false, force: :cascade do |t|
+    t.bigint "mention_id", null: false
+    t.bigint "subject_id", null: false
+    t.index ["mention_id", "subject_id"], name: "index_mentions_subjects_on_mention_id_and_subject_id", unique: true
+    t.index ["mention_id"], name: "index_mentions_subjects_on_mention_id"
+    t.index ["subject_id"], name: "index_mentions_subjects_on_subject_id"
+  end
+
   create_table "parent_areas", force: :cascade do |t|
     t.string "name"
     t.bigint "school_id", null: false
@@ -338,6 +355,18 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_31_200200) do
     t.index ["academic_record_id"], name: "index_qualifications_on_academic_record_id"
   end
 
+  create_table "requirement_by_levels", force: :cascade do |t|
+    t.integer "level"
+    t.bigint "study_plan_id", null: false
+    t.bigint "subject_type_id", null: false
+    t.integer "required_subjects"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["study_plan_id", "level", "subject_type_id"], name: "study_plan_level_subject_type_unique", unique: true
+    t.index ["study_plan_id"], name: "index_requirement_by_levels_on_study_plan_id"
+    t.index ["subject_type_id"], name: "index_requirement_by_levels_on_subject_type_id"
+  end
+
   create_table "schedules", force: :cascade do |t|
     t.bigint "section_id", null: false
     t.integer "day"
@@ -363,6 +392,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_31_200200) do
     t.bigint "enroll_process_id"
     t.string "boss_name", default: ""
     t.boolean "enable_enroll_payment_report", default: false, null: false
+    t.boolean "enable_by_level", default: false
     t.index ["active_process_id"], name: "index_schools_on_active_process_id"
     t.index ["enroll_process_id"], name: "index_schools_on_enroll_process_id"
     t.index ["faculty_id"], name: "index_schools_on_faculty_id"
@@ -414,6 +444,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_31_200200) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "total_credits", default: 0
+    t.integer "modality", default: 0, null: false
+    t.integer "levels", default: 10, null: false
     t.index ["school_id"], name: "index_study_plans_on_school_id"
   end
 
@@ -529,10 +561,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_10_31_200200) do
   add_foreign_key "grades", "admission_types"
   add_foreign_key "grades", "students", primary_key: "user_id", on_update: :cascade, on_delete: :cascade
   add_foreign_key "grades", "study_plans"
+  add_foreign_key "mentions", "study_plans"
+  add_foreign_key "mentions_subjects", "mentions"
+  add_foreign_key "mentions_subjects", "subjects"
   add_foreign_key "parent_areas", "schools"
   add_foreign_key "payment_reports", "bank_accounts", column: "receiving_bank_account_id", on_update: :cascade, on_delete: :nullify
   add_foreign_key "payment_reports", "banks", column: "origin_bank_id"
   add_foreign_key "qualifications", "academic_records"
+  add_foreign_key "requirement_by_levels", "study_plans"
+  add_foreign_key "requirement_by_levels", "subject_types"
   add_foreign_key "schedules", "sections"
   add_foreign_key "schools", "academic_processes", column: "active_process_id"
   add_foreign_key "schools", "academic_processes", column: "enroll_process_id"

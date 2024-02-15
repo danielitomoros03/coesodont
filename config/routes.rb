@@ -111,6 +111,12 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :study_plans do
+    member do
+      post 'save_requirement_by_level'
+    end
+  end
+
   resources :grades do
     member do
       get 'kardex'

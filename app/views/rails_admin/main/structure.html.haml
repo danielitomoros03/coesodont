@@ -1,0 +1,22 @@
+- if (current_user&.admin&.authorized_manage? 'StudyPlan')
+  - school = @object.school  
+  - subjects = school.subjects.order(:ordinal)
+  - if subjects.any?
+    = render(partial: "/schools/subjects_organization", locals: {subjects: subjects, orders: subjects.group(:ordinal).count})
+  - else
+    %h3.alert.alert-warning Sin asignaturas
+
+  - if false
+    %h4.text-center.bg-primary.text-light= "Requerimientos Por Nivel para #{@object.desc}"
+
+    = form_tag("/study_plans/#{@object.id}/save_requirement_by_level", class: 'form-horizontal') do
+      .table-responsive
+        %table.text-center.m-0
+          %tr
+            - @object.levels.times do |count|
+              %td= render partial: '/requirement_by_levels/card', locals: {level: count+1, tipo: @object.modality_to_tipo}
+          
+      .text-center.mt-3= submit_tag 'Guradar Configuración', class: 'btn btn-lg btn-success' 
+
+- else
+  %h1.text-center.alert.alert-warning Acceso Restringido

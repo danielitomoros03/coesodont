@@ -230,19 +230,39 @@ class Grade < ApplicationRecord
     academic_records.aprobado.any?
   end
 
+  def current_level
+    # OJO: REVISAR ALGORITMO, SIEMPRE SALE LEVEL 1 🤮
+    levels = study_plan.levels
+    levels.times do |level|
+      level = level+1
+      study_plan.requirement_by_levels.where(level: level).each do |requirement|
+        required_subjects = requirement.required_subjects
+         # ATENCIÓN: Condición especial para Odontología por el campo modality que fue sustituido por SubjectType
+         tipo = requirement.subject_type.name.downcase
+         # type = requirement.subject_type_id
+         # OJO: 👆🏽 Así debe ser en el Plus 
 
-  def subjects_offer_by_level_approved
-    if is_new? or !any_approved?
-      # Si es nuevo o no tiene asignaturas aporvadas, le ofertamos las de 1er año
-      Subject.independents.where(ordinal: 1)
-    else
-      enroll_process = school&.enroll_process
-      before_process = enroll_process&.before_process
+         total_subjects_approved = total_subjects_approved_by_type_subject_and_level level, tipo
 
-      if enroll_process and beoer_process
-        subject_approbed_before_process = academic_records_from_subjects_approved.of_period(before_process).group('subjects.order').count
+
+         diference = (required_subjects - total_subjects_approved).abs
+         p " Level: #{level} de #{levels} | Tipo: #{tipo} |  Requirement: #{required_subjects}  Aprobados: #{total_subjects_approved}  Diference: #{diference}   ".center(500, "=")
+        if level.eql? levels+1 or (required_subjects > 0 and required_subjects > total_subjects_approved and diference > 1) 
+          return [level]
+        elsif diference.eql? 1
+          return [level, level+1]
+        end
       end
-    end    
+    end
+    
+    return [levels+1]
+  end
+
+  # OFERTA POR ASIGNATURAS
+  def subjects_offer_by_level_approved
+      # Buscamos los ids de las asignaturas aprobadas
+      asig_aprobadas_ids = self.subjects_approved_ids    
+    Subject.where(ordinal: current_level).where.not(id: asig_aprobadas_ids)
   end
 
   def subjects_offer_by_dependent
@@ -352,6 +372,14 @@ class Grade < ApplicationRecord
   def total_credits_by_type_subject tipo
     academic_records.joins(:subject).by_type(tipo).total_credits
   end
+
+  def total_credits_approved_by_type_subject_and_level tipo, level
+    academic_records.total_credits_approved_by_level_and_type tipo, level
+  end
+
+  def total_subjects_approved_by_type_subject_and_level level, tipo
+    academic_records.total_subjects_approved_by_level_and_type level, tipo 
+  end  
 
   # def credits_approved_by_eq
     # Ojo: Esta función siempre arroja cero porque no pueden existir EI y A, porque son estados direrentes

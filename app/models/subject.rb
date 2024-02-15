@@ -18,6 +18,8 @@ class Subject < ApplicationRecord
   before_update :paper_trail_update
 
   # ASSOCIATIONS:
+  has_and_belongs_to_many :mentions
+
   belongs_to :area
   has_one :school, through: :area
 

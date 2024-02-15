@@ -6,6 +6,8 @@ class StudyPlan < ApplicationRecord
   # t.integer "optative_credits"
   # t.integer "elective_credits"
   # t.bigint "school_id", null: false 
+  # t.bigint "levels", null: false 
+  # t.bigint "modality", null: false 
   
   
   # HISTORY:
@@ -18,14 +20,22 @@ class StudyPlan < ApplicationRecord
   # ASSOCIATIONS:
   belongs_to :school
   has_many :grades, dependent: :destroy
+  has_many :requirement_by_levels, dependent: :destroy
+
   has_many :subject_types, dependent: :destroy
   accepts_nested_attributes_for :subject_types, allow_destroy: true  
+  
+  has_many :mentions, dependent: :destroy
+  accepts_nested_attributes_for :mentions, allow_destroy: true  
 
   # VALIDATIONS:
   validates :code, presence: true, uniqueness: {case_sensitive: false}
   validates :name, presence: true, uniqueness: {case_sensitive: false}
   validates :subject_types, presence: true
   validates :school, presence: true
+
+  # ENUMS:
+  enum modality: [:Anual, :Semestral]
 
   # CALLBACKS:
   after_initialize :set_unique_school
@@ -42,6 +52,14 @@ class StudyPlan < ApplicationRecord
   end
 
   # FUNTIONS:
+  # def initialization
+  #   requirement_by_levels
+  # end
+
+  def modality_to_tipo
+    Anual? ? 'Año' : 'Semestral'
+  end
+
   def desc
     "(#{code}) #{name}"
   end
@@ -56,11 +74,11 @@ class StudyPlan < ApplicationRecord
     weight -2
 
     show do
-      fields :school, :code, :name, :subject_types
+      fields :school, :code, :modality, :levels, :name, :subject_types, :mentions
     end
 
     list do
-      fields :code, :name, :subject_types do
+      fields :code, :name, :modality, :levels, :subject_types, :mentions do
         sortable false
         filterable false
         searchable false
@@ -69,7 +87,7 @@ class StudyPlan < ApplicationRecord
     end
 
     export do
-      fields :code, :name, :subject_types
+      fields :code, :name, :modality, :subject_types
     end
 
     edit do
@@ -79,8 +97,8 @@ class StudyPlan < ApplicationRecord
           {:length => 8, :size => 8, :onInput => "$(this).val($(this).val().toUpperCase().replace(/[^a-zA-Z0-9\u00f1\u00d1 ]/g,''))"}
         end
       end
-      field :name#, :subject_types
-      field :subject_types
+      fields :name, :modality, :levels, :subject_types, :mentions
+
     end
 
   end

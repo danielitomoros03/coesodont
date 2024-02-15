@@ -1,8 +1,8 @@
 
 
 .input-group.input-group-sm    
-  = link_to 'javascript:void(0)', onclick: "$('.arbol').toggleClass('d-none'); $('.fa-chevron-right').toggleClass('fa-rotate-90');", class: 'btn btn-sm btn-success', style: 'margin-right: 15px' do
-    Desplegar todos
+  = link_to 'javascript:void(0)', onclick: "$('.arbol').toggleClass('d-none'); $('.fa-chevron-right').toggleClass('fa-rotate-90');", class: 'btn btn-sm btn-info', style: 'margin-right: 15px' do
+    Desplegar Todo el Árbol de Asignaturas 
     %i.fa.fa-chevron-right
   %input.form-control{"aria-label": "", type: "text", placeholder: 'Buscar asignaturas por código', id: 'filterTable', name: 'filterSubject'}
 
@@ -20,11 +20,13 @@
           - else
             - title = "#{Subject.ordinal_to_cardinal(k,'Año')}"
             - bg = 'bg-success'
-          %th{class: bg}
-            = title
+            
+          %td{class: bg}
+            %b= title
             %span.badge.bg-dark{title: 'Total de Asignaturas'}= "#{v}"
-
-
+      %tr
+        - orders.each do |k,v|
+          %td= render partial: '/requirement_by_levels/card', locals: {level: k, tipo: 'Año'} #@object.modality_to_tipo
     %tbody
       %tr
         - orders.each do |k,v|

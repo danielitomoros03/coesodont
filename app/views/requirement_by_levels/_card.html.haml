@@ -1,0 +1,32 @@
+- if false
+    .card.m-1.border.border-info
+        .card-header.bg-info
+            = "#{level}˚ #{tipo}"
+        .card-body.p-1
+            - SubjectType.all.each do |st|
+                .card-title.bg-dark.text-light.mb-0= st.name.titleize
+                = hidden_field_tag 'requirement_by_levels[][level]', level
+                = hidden_field_tag 'requirement_by_levels[][subject_type_id]', st.id
+                -# rbl = @object.requirement_by_levels.where(level: level, subject_type_id: st.id).first
+                - rbl = @object.requirement_by_levels.where(level: level, subject_type_id: st.id).first
+                .mb-1
+                    .form-floating
+                        %input.form-control.form-control-sm{:placeholder => "Asignaturas ", :type => "number", :value => rbl&.required_subjects, id: "subjects#{st.id}#{level}", name: "requirement_by_levels[][required_subjects]", required: true, min: 0, step: 1}
+                        %label{:for => "subjects#{st.id}#{level}"}= "Asignaturas"
+                    - if false
+                        .form-floating
+                            %input.form-control.form-control-sm{:placeholder => "Créditos ", :type => "number", :value => rbl&.required_credits, id: "credits#{st.id}#{level}", name: "requirement_by_levels[][required_credits]", required: true, min: 0, step: 1}
+                            %label{:for => "credits#{st.id}#{level}"}= "Créditos"
+= form_tag("/study_plans/#{@object.id}/save_requirement_by_level") do
+    .row
+        %small.text-center.bg-dark.text-light Requerimientos
+    - SubjectType.all.each do |st|
+        = hidden_field_tag 'requirement_by_levels[][level]', level
+        = hidden_field_tag 'requirement_by_levels[][subject_type_id]', st.id
+        - rbl = @object.requirement_by_levels.where(level: level, subject_type_id: st.id).first
+        .row.mt-1
+            .col-sm-8.text-end.text-sm
+                %small{style: 'font-size: 11px'}= "Asig. #{st.name.downcase.pluralize.titleize}"
+            .col-sm-4 
+                %input.form-control.form-control-sm{placeholder: "Asignaturas ", type: :number, value: rbl&.required_subjects, id: "subjects#{st.id}#{level}", name: "requirement_by_levels[][required_subjects]", required: true, min: 0, step: 1, style: 'font-size: 11px'}
+    .text-end.mt-1= submit_tag 'Guardar', class: 'btn btn-sm btn-info p-1', style: 'font-size: 11px'
