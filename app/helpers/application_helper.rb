@@ -115,7 +115,7 @@ module ApplicationHelper
 
 	def simple_toggle href, value, title_tooltip, color_type, icon, onclick_action = nil
 		target = (href.include? 'descargar') ? '_blank' : ''
-		link_to href, class: "tooltip-btn text-#{color_type}", onclick: onclick_action, target: target, 'data_toggle': :tooltip, title: title_tooltip do
+		link_to href, class: "tooltip-btn text-#{color_type} btn btn-sm", onclick: onclick_action, target: target, 'data_toggle': :tooltip, title: title_tooltip do
 			capture_haml{"<i class= '#{icon}'></i> #{value}".html_safe}
 		end
 

@@ -44,11 +44,20 @@
                 - table = ''
 
               %table.table.table-bordered.table-sm.table.table-striped
-                %thead
-                %tbody
-                  - subjects.where(ordinal: k).order(:code).each do |asig|
-                    %tr.trFiltrable{class: table}
-                      = render partial: '/subject_links/tree_by_school', locals: {subject: asig}
+                - SubjectType.all.order(:name).each do |s_type|
+                  - tipo = s_type.name.downcase
+                  - subjects_by_type = subjects.where(ordinal: k, modality: tipo).order(:code)
+                  %thead
+                    %tr
+                      %td.text-center.bg-dark.text-light
+                        - title = "#{s_type.name.downcase.pluralize.titleize}"
+                        %small
+                          = title
+                          %span.label{title: "Total Asignaturas #{title}"}= "#{subjects_by_type.count}"
+                  %tbody
+                    - subjects_by_type.each do |asig|
+                      %tr.trFiltrable{class: table}
+                        = render partial: '/subject_links/tree_by_school', locals: {subject: asig}
 
 
 :javascript

@@ -15,7 +15,7 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.plural "Inscripción", "Inscripciones"
   inflect.plural "Error", "Errores"
   inflect.plural "error", "errores"
-  # inflect.plural "obligatoria", "obligatorias"
+  inflect.plural "obligatoria", "obligatorias"
   # inflect.plural "optativa", "optativas"
   # inflect.plural "electiva", "electivas"
 end
