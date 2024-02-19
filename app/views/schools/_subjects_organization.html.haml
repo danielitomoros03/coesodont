@@ -26,7 +26,10 @@
             %span.badge.bg-dark{title: 'Total de Asignaturas'}= "#{v}"
       %tr
         - orders.each do |k,v|
-          %td= render partial: '/requirement_by_levels/card', locals: {level: k, tipo: 'Año'} #@object.modality_to_tipo
+          %td= render partial: '/requirement_by_levels/card', locals: {level: k, tipo: 'Año', subjects: subjects} #@object.modality_to_tipo
+      %tr
+        %td{colspan: orders.max.first}
+          .text-center.mt-1= submit_tag 'Guardar', class: 'btn btn-sm btn-info p-1', style: 'font-size: 11px'
     %tbody
       %tr
         - orders.each do |k,v|

@@ -13,7 +13,7 @@
             = "Asignaturas:"
           %input.form-control{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", onkeyup: 'filterSections(this);', placeholder: 'Buscar', autofocus: true, id: 'filterOffer', name: 'filterOffer'}
 
-      %th.headers{style: 'width: 5%', scope: :col} Sem
+      %th.headers{style: 'width: 5%', scope: :col} Año
       %th.headers{style: 'width: 5%', scope: :col} Créd
       %th.text-center.headers{style: 'width: 30%;', scope: :col} Sección
   %tbody
@@ -53,7 +53,7 @@
             = ac.badge_approved.html_safe if ac&.badge_approved
             = ac.badge_status.html_safe if ac&.retirado?
 
-          %td.align-middle.text-center= subject.ordinal
+          %td.align-middle.text-center= "#{subject.ordinal}º"
           %td.align-middle.text-center= subject.unit_credits
           %td.align-middle.pl-3
             - unless approved

@@ -7,7 +7,7 @@
       - if (current_user&.admin&.yo?)
         %th ID
       %th{style: 'width:120px;'} Código
-      %th.text-center{style: 'width:10px;'} Sem
+      %th.text-center{style: 'width:10px;'} Año
       %th Asignatura
       %th.text-center{style: 'width:10px;'} Créd
       %th.text-center{style: 'width:10px;'} Tipo
@@ -24,7 +24,7 @@
         - if (current_user&.admin&.yo?)
           %td= academic_record.id
         %td{title: 'Ir al detalle de la asignatura'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Subject'), subject.code, "/admin/subject/#{subject.id}"
-        %td.text-center= subject.ordinal
+        %td.text-center= "#{subject.ordinal}º"
         %td{title: subject.name}= subject.name
         %td.text-center= subject.unit_credits
         %td.text-center= subject.modality_initial_letter
