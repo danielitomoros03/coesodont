@@ -3,38 +3,44 @@ class ImportXslx
 	def self.import_by_console url, fields, entity
 
 		require 'simple_xlsx_reader'
+		require 'csv'
 
 		doc = SimpleXlsxReader.open(url)
-
+				
 		hoja = doc.sheets.first
-
+		
 		hoja.rows.shift if hoja.headers.include? nil
 		headers = hoja.headers
 		rows = hoja.data
-
+		
 		total_added = 0
 		total_updated = 0
 		total_errors = 0
 		errors = []
-
-		rows.each_with_index do |row,i|
-			print "#{i}:"
-			respond = entity.import row, fields
-			if respond[0].eql? 1
-				aux = 'A'
-				total_added += 1
-			elsif respond[1].eql? 1
-				aux = 'U'
-				total_updated += 1
-			else
-				aux = 'X'
-				total_errors += 1
-				errors += respond
-			end
-
-			print " #{aux},"
-		end
 		
+		CSV.open("/Users/danielmoros/Documents/desarrollo/COESODON/data_para_migrar/#{entity.to_s}_errores.csv", "w") do |errores_file|
+			# Enviar errores por correo
+			# Incluir fecha
+			rows.each_with_index do |row,i|
+				print "#{i}:"
+				respond = entity.import row, fields
+				if respond[0].eql? 1
+					aux = 'A'
+					total_added += 1
+				elsif respond[1].eql? 1
+					aux = 'U'
+					total_updated += 1
+				else
+					errores_file << row
+					aux = 'X'
+					total_errors += 1
+					errors += respond
+				end
+
+				print " #{aux},"
+			end
+			
+		end
 		p "---- Proceso completado -----"
 		p "Resumen:"
 		p "Toral registros: #{rows.count}"
@@ -52,7 +58,7 @@ class ImportXslx
 
 	def self.import_academic_records_by_console
 
-		import_by_console '/Users/danielmoros/Documents/desarrollo/COESODON/data_para_migrar/registros_academicos_completos.xlsx', {nombre_periodo: nil, study_plan_id: StudyPlan.first.id}, AcademicRecord
+		import_by_console '/Users/danielmoros/Documents/desarrollo/COESODON/data_para_migrar/final_registros_academicos_con_errores.xlsx', {nombre_periodo: nil, study_plan_id: StudyPlan.first.id}, AcademicRecord
 	end
 
 

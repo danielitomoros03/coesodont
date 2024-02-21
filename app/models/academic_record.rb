@@ -707,9 +707,15 @@ class AcademicRecord < ApplicationRecord
           escuela = study_plan.school
           
           # BUSCAR O CREAR PROCESO ACADEMICO:
-          modality = I18n.t(modality)
-          modality ||= :Anual
-
+          case modality
+          when 'S'
+            modality = :Semestral
+          when 'I'
+            modality = :Intensivo
+          else
+            modality = :Anual
+          end
+          
           academic_process = AcademicProcess.where(period_id: period.id, modality: modality, school_id: escuela.id).first
 
           if academic_process.nil?

@@ -21,8 +21,9 @@ es:
   I: Intensivo
   Intensivo: I
 
-  A: Anual
-  Anual: A
+  # OJO: SI SE INCLUYE CHOCA CON A=aprobado Enum de AcademicRecord
+  # A: Anual
+  # Anual: A
 
 
   NP: no_presento
