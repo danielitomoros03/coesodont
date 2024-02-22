@@ -240,16 +240,21 @@ class AcademicRecord < ApplicationRecord
     subject&.absoluta?
   end
 
+  def absolute_pi_or_rt?
+    (absolute? or pi? or rt?)
+  end
+
   def cal_alfa
-    if absolute? or pi? or rt?
-      desc_conv_absolute
-    else
-      'NF'
-    end
+    value = absolute_pi_or_rt? ? self.status : qualifications.first.type_q
+    I18n.t(value)
   end
 
   def rt?
     retirado?
+  end
+
+  def desc_conv
+    I18n.t(self.status)
   end
 
   def desc_conv_absolute
@@ -392,16 +397,13 @@ class AcademicRecord < ApplicationRecord
 
 
   def conv_type
-
     type = definitive_type_q[0]
     type ||= 'F'
 
     modality_process = academic_process.modality[0]
-    modality_process ||= 'S'
+    modality_process ||= 'A'
 
-    aux = "#{type.upcase}#{modality_process.upcase}#{period.period_type.code.last}"
-
-    aux
+    "#{type.upcase}#{modality_process.upcase}#{period.period_type.code.last}"
   end  
 
   def conv_descrip force_final = false # convocados

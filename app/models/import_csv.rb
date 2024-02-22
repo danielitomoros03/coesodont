@@ -1,5 +1,62 @@
 class ImportCsv
 
+	def self.updated_reparacion_qualification_by_console
+		begin
+			CSV.open('/Users/danielmoros/Documents/desarrollo/COESODON/data_para_migrar/qualification_reparacion.csv', "w") do |errores_file|
+				csv_text = File.read('/Users/danielmoros/Documents/desarrollo/COESODON/data_para_migrar/listaestudnota_202312131403_macos.csv').encode('UTF-8', invalid: :replace, replace: '')
+				csv = CSV.parse(csv_text, headers: true)
+				csv.each_with_index do |row, i|
+					if row[7]&.eql? 'R'
+						ci = row[1]
+						codigo = row[2]
+						periodo = row[8]
+						seccion = "0#{row[9]}"
+						unless (ci.blank? & codigo.blank? & periodo.blank? & seccion.blank?)
+
+							year, type = periodo.split('-')
+							period_type_code = type[0..1]
+
+							case type[2]
+							when 'S'
+								modality = :Semestral
+							when 'A'
+								modality = :Anual
+							when 'I'
+								modality = :Intensivo
+							end
+							
+							print 'U' if Qualification.joins({academic_record: [{enroll_academic_process: {academic_process: [:school, {period: :period_type}]}}, {section: :subject}]}, {grade: [:study_plan, {student: :user}]}).where('users.ci': ci, 'subjects.code': codigo, 'periods.year': year, 'period_types.code': period_type_code, 'academic_processes.modality': modality, 'schools.id': 1, 'study_plans.id': 3, 'sections.code': seccion, 'qualifications.type_q': :final).update_all(type_q: 2)
+						end
+					else
+						print '-'
+					end
+				end
+			end
+		rescue Exception => e
+			e
+		end
+	end
+
+	def self.find_reparacion_qualification_by_console
+		begin
+			CSV.open('/Users/danielmoros/Documents/desarrollo/COESODON/data_para_migrar/qualification_reparacion.csv', "w") do |errores_file|
+				csv_text = File.read('/Users/danielmoros/Documents/desarrollo/COESODON/data_para_migrar/listaestudnota_202312131403_macos.csv').encode('UTF-8', invalid: :replace, replace: '')
+				csv = CSV.parse(csv_text, headers: true)
+				csv.each do |row|
+					if row[7]&.eql? 'R'
+						print 'x'
+						errores_file << row 
+					else
+						print '-'
+					end
+				end
+			end
+		rescue Exception => e
+			e
+		end
+	end
+
+
 	def self.find_errors_academic_records_by_console
 		no_found = [10014112,10016302,10017491,10017463,10018101,10012002,10012101,10015101,10011001,10013101,10013002,10018002,10015002,10015001,10011002,10012203,10013003,10018003,10012003,10012104,10013104,10012103,10012304,10012004,10015007,10012106,10012105,10018005,10014008,10012005,10013006,10018105,10014006,10013007,10012107,10014007,10012602,10012502,10015008,10015102,10012109,10011003,10017059,10017020,10011005,10011004,10011006,10011107,10017022,10017004,10013009,10014110,10014108,10012204,10014009,10013011,10012008,10012011,10012110,10014010,10012111,10015010,10015212,10012212,10017065,10011108,10011109,10011007,10011110,10011111,10011112,10011008,10015013,10015014,10015015,10011044,10011010,10016665,10018001,10017013,10017045,10017057,10011009,10017033,10012402,10016545,100192957,10017036,10017516,10017077,10017052,10015111,10016503,10015103,10017043,10017068,10017474,10013203,10013303,10017473,10017467,10011041,10011031,10011051,10018102,10018103,10017074,10017069,10016504,10017472,10017465,10017462,10017044,10017042,10017471,10017470,10017480,10017461,10011012,10012206,10017014,10017072,10016014,10018913,10016015,10017468,10018411,10018013,10016414,10017066,10017464,10017481,1001927511,1001944510,10017078,10017050,10019513,10017067,100194456,10019613,10011413,10011414,10019214,100192853,10019305,10017460,10012065,10017493,100192953,10017469,10015714,10019813,10015715,10017466,10013015,10013014,10016013,10017080,10017079,10019514,10019515,10019275,100192755,10017017,10017049,10019385,100194451,10019255,10019445,10017777,10017498,10019245,10019225,10019465,100194454,10017476,10019395,1001927512,100192851,1001944511,100192753,100192951,100192952,100192756,10017483,100192854,10017478,10017489,10019276,10019265,10019235,10019425,10017485,10019375,10014114,100192752,10019295,100194453,100115203,100194458,100192757,100192852,100194457,10017492,10017487,10019325,10019285,100192954,100194452,10017484,10019455,10017419,100194459,10017488,100118204,10019277,10017494,10017490,10014303,10017496,10019405,100192751,10017495,100192758,10013622,10013401,1001333,10017421,10017420,1001945512,10019376,10017420]
 
@@ -21,8 +78,6 @@ class ImportCsv
 		end
 
 	end
-
-
 
 	def self.import_students file, study_plan_id, admission_type_id, registration_status, send_welcome_emails= false
 		require 'csv'
