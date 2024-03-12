@@ -22,7 +22,7 @@ class AcademicProcessesController < ApplicationController
 
       if iep.is_the_last_enroll_of_grade?
 
-        if grade.update(current_permanence_status: iep.permanence_status, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
+        if grade.update(current_permanence_status: iep.permanence_status, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average) and iep.update(efficiency: iep.calculate_efficiency, simple_average: iep.calculate_average, weighted_average: iep.calculate_weighted_average)
           total_actualizados += 1
         else
           total_error += 1

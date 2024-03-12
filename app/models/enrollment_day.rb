@@ -46,8 +46,8 @@ class EnrollmentDay < ApplicationRecord
       own_grades_sort_by_appointment.each do |grade|
         user = grade.user
         eap = grade.enroll_academic_processes.joins(:period).order(['periods.year': :desc, 'periods.period_type_id': :desc]).first
-        
-        csv << [user.ci, user.reverse_name, grade.student.sede, grade.appointment_from, grade.appointment_to, eap.efficiency, eap.simple_average, eap.weighted_average]
+
+        csv << [user.ci, user.reverse_name, grade.student.sede, grade.appointment_from, grade.appointment_to, eap.efficiency_desc, eap.simple_average_desc, eap.weighted_average_desc]
       end
     end
   end
@@ -67,7 +67,6 @@ class EnrollmentDay < ApplicationRecord
   def mod_to_grades
     (total_timeslots.eql? 0) ? 0 : max_grades%total_timeslots
   end
-
 
   def own_grades
     self.school.grades.with_day_enroll_eql_to(self.start)
