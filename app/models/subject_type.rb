@@ -3,7 +3,7 @@ class SubjectType < ApplicationRecord
   # t.bigint "study_plan_id", null: false
   # t.string "name"
   # t.string "code"
-  # t.integer "required_credits", default: 0, null: false
+  # t.integer "required_credits", default: 0, null: false 
   
   # HISTORY:
 	has_paper_trail on: [:create, :destroy, :update]
@@ -12,7 +12,6 @@ class SubjectType < ApplicationRecord
 	before_destroy :paper_trail_destroy
 	before_update :paper_trail_update
 
-
   # ASSOCIATIONS:
   belongs_to :study_plan
 
@@ -20,7 +19,7 @@ class SubjectType < ApplicationRecord
   validates :code, presence: true, uniqueness: true
   validates :name, presence: true, uniqueness: true
   validates_format_of :code, with: /\A[a-z]+\z/i
-  validates :required_credits, presence: true, numericality: { only_integer: true, in: 0..200 }
+  validates :required_credits, presence: true, numericality: { only_integer: true, in: 0..230 }
 
   # RAILS_ADMIN:
   rails_admin do
@@ -45,20 +44,21 @@ class SubjectType < ApplicationRecord
   end  
 
   private
+		def paper_trail_update
+			# changed_fields = self.changes.keys - ['created_at', 'updated_at']
+			object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+			# self.paper_trail_event = "¡#{object} actualizado en #{changed_fields.to_sentence}"
+			self.paper_trail_event = "¡#{object} actualizada!"
+		end  
 
-    def paper_trail_update
-      changed_fields = self.changes.keys - ['created_at', 'updated_at']
-      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-      self.paper_trail_event = "¡#{object} actualizada en #{changed_fields.to_sentence}"
-    end  
+		def paper_trail_create
+			object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+			self.paper_trail_event = "¡#{object} registrada!"
+		end  
 
-    def paper_trail_create
-      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-      self.paper_trail_event = "¡#{object} creada!"
-    end  
+		def paper_trail_destroy
+			object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
+			self.paper_trail_event = "¡Tipo de Asignatura eliminada!"
+		end
 
-    def paper_trail_destroy
-      object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-      self.paper_trail_event = "¡Tipo de Asignatura eliminada!"
-    end
 end

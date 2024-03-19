@@ -39,7 +39,7 @@ class AcademicProcess < ApplicationRecord
   has_many :subjects, through: :courses
 
   # ENUMERIZE:
-  enum modality: [:Semestral, :Anual]
+  enum modality: [:Semestral, :Anual, :Intensivo]
 
   #VALIDATIONS:
   validates :school, presence: true
@@ -48,7 +48,7 @@ class AcademicProcess < ApplicationRecord
   validates :max_credits, presence: true
   validates :max_subjects, presence: true
 
-  validates_uniqueness_of :school, scope: [:period], message: 'Proceso academico ya creado', field_name: false
+  validates_uniqueness_of :school, scope: [:period, :modality], message: 'Proceso academico ya creado', field_name: false
 
   # SCOPE:
   default_scope { order(name: :desc) }
@@ -80,6 +80,9 @@ class AcademicProcess < ApplicationRecord
     subjects.ids.include?(subject_id)
   end
 
+  def period_desc_and_modality
+    "#{period&.name}#{self.modality[0]&.upcase}"
+  end
 
   def period_name
     period.name if period
@@ -90,17 +93,17 @@ class AcademicProcess < ApplicationRecord
   end
 
   def default_value_by_import
-    max_credits = 24
-    max_subject = 5
-    modality = :semestral
+    max_credits ||= 24
+    max_subject ||= 5
+    modality ||= :Anual
   end
 
   def short_desc
-    "#{self.school.short_name} #{self.period.name}" if (self.school and self.period)
+    "#{self.school.short_name} #{self.period_desc_and_modality}" if (self.school and self.period)
   end
 
   def get_name
-    "#{self.school.code} | #{self.period.name}" if (self.school and self.period)
+    "#{self.school.code} | #{self.period_desc_and_modality}" if (self.school and self.period)
   end
 
 
@@ -234,14 +237,15 @@ class AcademicProcess < ApplicationRecord
         label 'Período'
         column_width 100
         pretty_value do
-          value.name
+          # value.name
+          bindings[:object]&.period_desc_and_modality
         end
       end
 
       field :process_before do
         column_width 80
         pretty_value do
-          value.period.name if value
+          bindings[:object]&.process_before&.period_desc_and_modality
         end
       end
 
@@ -296,7 +300,7 @@ class AcademicProcess < ApplicationRecord
         pretty_value do
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')          
-            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Totas Inscripciones En Asignaturas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Total Inscripciones En Asignaturas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end

@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   resources :sections do
     member do
       get :export
+      get :change_qualification_status
     end
     collection do
       post :bulk_delete
@@ -107,6 +108,12 @@ Rails.application.routes.draw do
       resources :areas do
         resources :subjects
       end
+    end
+  end
+
+  resources :study_plans do
+    member do
+      post 'save_requirement_by_level'
     end
   end
 

@@ -6,12 +6,13 @@ class School < ApplicationRecord
   # t.boolean "enable_subject_retreat"
   # t.boolean "enable_change_course"
   # t.boolean "enable_dependents"
+  # t.boolean "enable_by_level"
   # t.bigint "active_process_id"
   # t.bigint "enroll_process_id"
   # t.datetime "created_at", null: false
   # t.datetime "updated_at", null: false
   # t.bigint "faculty_id"
-  # t.string "contact_email", default: "coes.fau@gmail.com", null: false
+  # t.string "contact_email", default: "coes.odon@gmail.com", null: false
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -134,8 +135,29 @@ class School < ApplicationRecord
         end
       end
 
-      field :enable_dependents do
-        label '¿Prelaciones?'
+      # field :enable_dependents do
+      #   label '¿inscripciones por Prelaciones?'
+      #   queryable false
+      #   filterable false
+      #   searchable false
+      #   sortable false
+      #   sortable false
+      #   pretty_value do
+
+      #     current_user = bindings[:view]._current_user
+      #     admin = current_user.admin
+      #     active = admin and admin.authorized_manage? 'School'
+
+      #     if active
+      #       bindings[:view].render(partial: "/schools/form_dependents", locals: {school: bindings[:object]})
+      #     else
+      #       value
+      #     end
+      #   end
+      # end
+
+      field :enable_by_level do
+        label '¿Inscripciones por Nivel?'
         queryable false
         filterable false
         searchable false
@@ -148,13 +170,13 @@ class School < ApplicationRecord
           active = admin and admin.authorized_manage? 'School'
 
           if active
-            bindings[:view].render(partial: "/schools/form_dependents", locals: {school: bindings[:object]})
+            bindings[:view].render(partial: "/schools/form_switch_by_level", locals: {school: bindings[:object]})
           else
             value
           end
         end
 
-      end
+      end      
 
       field :enable_enroll_payment_report do
         label '¿Permitir Reportes de Pago?'

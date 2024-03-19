@@ -2,12 +2,11 @@
 - if session[:rol]&.eql? 'admin' and (current_user&.admin&.authorized_manage? 'AcademicRecord')
   .m-3.p-3= render partial: 'enroll_academic_processes/new', locals: {grade: grade}
 - else
-  - school = grade.school
   - # NUEVO SECUENCIA DE INSCRIPCIÓN:
-
+  - school = grade.school
+  - # INSCRIPCIÓN ABIERTA!
   - if academic_process = school&.enroll_process
     - academic_process_before = academic_process&.process_before
-    - # INSCRIPCIÓN ABIERTA!
     .border.border-success.mb-3
       - title = "PROCESO DE INSCRIPCIÓN #{academic_process.period.name} "
       %h4#title.text-center.bg-success.text-light.py-2.mt-0
@@ -53,8 +52,9 @@
             - # ROYER RABIT
             = render partial: '/grades/regulation', locals: {grado: grade}
 
+            - # PROCESO DE INSCRIPCIÓN NO COMPLETADO
             - if (inscripcion.nil? or inscripcion&.reservado?)
-              - # PROCESO DE INSCRIPCIÓN NO COMPLETADO
+              
               - if academic_process.enroll_instructions
                 .border.m-2.p-2.text-center
                   = raw academic_process.enroll_instructions
@@ -68,16 +68,16 @@
                 - if grade.has_a_appointment_time?
                   - if grade.can_enroll_by_apponintment?
                     - if inscripcion&.reservado?
-                      - # InProgress
+                      - # INSCRIPCIÓN EN PROCESO
                       = render partial: '/enroll_academic_processes/msg_enroll_in_progress', locals: {grade: grade}
 
-                    - # It's Time!
+                    - # MOMENTO DE INSCRIBIRSE (It's Time!)
                     = render partial: '/grades/msg_its_time_to_enroll', locals: {grade: grade}
                     - # Incluir cuenta regresiva js
 
                     - enabled_to_enroll = true
                   - elsif (grade.enroll_is_in_future? and inscripcion.nil?)
-                    - # message future enrollment_day:
+                    - # MENSAJE DE PENDIENTE POR INSCRIBIRSE (message future enrollment_day):
                     = render partial: 'grades/msg_appointment_time', locals: {grade: grade}
                   - else
                     = render partial: 'enroll_academic_processes/msg_the_time_to_enroll_passed', locals: {grade: grade}

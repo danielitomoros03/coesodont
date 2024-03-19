@@ -4,16 +4,16 @@ class Course < ApplicationRecord
   # t.bigint "subject_id", null: false
   # t.boolean "offer_as_pci"
   # t.string "name"
-  # Course.all.map{|ap| ap.update(name: 'x')}  
+  # Course.all.map{|ap| ap.update(name: 'x')}
+  
   # HISTORY:
-
-  attr_accessor :session_academic_process_id
-
 	has_paper_trail on: [:create, :destroy, :update]
 
 	before_create :paper_trail_create
 	before_destroy :paper_trail_destroy
 	before_update :paper_trail_update
+
+  attr_accessor :session_academic_process_id
 
   # ASSOCIATIONS:
   # belongs_to

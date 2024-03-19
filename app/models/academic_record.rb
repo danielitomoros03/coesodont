@@ -5,7 +5,7 @@ class AcademicRecord < ApplicationRecord
   # t.integer "status"
 
   # ENUMERIZE:
-  enum status: [:sin_calificar, :aprobado, :aplazado, :retirado, :perdida_por_inasistencia, :equivalencia]
+  enum status: [:sin_calificar, :aprobado, :aplazado, :retirado, :perdida_por_inasistencia, :equivalencia, :no_presento]
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -84,6 +84,8 @@ class AcademicRecord < ApplicationRecord
 
   scope :qualified, -> {not_sin_calificar}
 
+  scope :by_level, -> (level) {joins(:subject).where('subjects.ordinal': level)}
+
   scope :coursing, -> {where "academic_records.status != 1 and academic_records.status != 2 and academic_records.status != 3"} # Excluye retiradas también
 
   scope :total_credits_coursed_on_process, -> (periods_ids) {coursed.joins(:academic_process).where('academic_processes.id': periods_ids).joins(:subject).sum('subjects.unit_credits')}
@@ -94,14 +96,19 @@ class AcademicRecord < ApplicationRecord
   scope :total_credits_approved_on_periods, lambda{|periods_ids| aprobado.joins(:academic_process).where('academic_processes.period_id IN (?)', periods_ids).joins(:subject).sum('subjects.unit_credits')}
 
   scope :total_credits, -> {joins(:subject).sum('subjects.unit_credits')}
+  scope :total_credits_by_level, -> (level){by_level(level).sum('subjects.unit_credits')}
   scope :total_subjects, -> {(joins(:subject).group('subjects.id').count).count}
 
   scope :total_subjects_coursed, -> {coursed.total_subjects}
   scope :total_subjects_approved, -> {aprobado.total_subjects}
+  scope :total_subjects_approved_by_level, -> (level){aprobado.by_level(level).total_subjects}
+  scope :total_subjects_approved_by_level_and_type, -> (level, tipo){aprobado.by_level(level).by_subject_types(tipo).total_subjects}
   scope :total_subjects_equivalence, -> {equivalencia.total_subjects}
 
   scope :total_credits_coursed, -> {coursed.total_credits}
   scope :total_credits_approved, -> {aprobado.total_credits}
+  scope :total_credits_approved_by_level, -> (level) {aprobado.total_credits_by_level(level)}
+  scope :total_credits_approved_by_level_and_type, -> (level, tipo) {aprobado.by_level(level).by_subject_types(tipo).total_credits}
   scope :total_credits_equivalence, -> {equivalencia.total_credits}
   
   scope :weighted_average, -> {joins(:subject).joins(:qualifications).definitives.coursed.sum('subjects.unit_credits * qualifications.value')}
@@ -172,7 +179,7 @@ class AcademicRecord < ApplicationRecord
     valor.strip!
     valor.upcase!
 
-    if (valor.eql? 'PI' or valor.eql? 'RT' or valor.eql? 'A' or valor.eql? 'AP' or valor.eql? 'EQ')
+    if (valor.eql? 'NP' or valor.eql? 'PI' or valor.eql? 'RT' or valor.eql? 'A' or valor.eql? 'AP' or valor.eql? 'EQ')
       self.status = I18n.t(valor)
       if valor.eql? 'PI' or (valor.eql? 'AP' and subject.numerica?)
         qua = self.qualifications.find_or_initialize_by(type_q: :final)
@@ -233,16 +240,21 @@ class AcademicRecord < ApplicationRecord
     subject&.absoluta?
   end
 
+  def absolute_pi_or_rt?
+    (absolute? or pi? or rt?)
+  end
+
   def cal_alfa
-    if absolute? or pi? or rt?
-      desc_conv_absolute
-    else
-      'NF'
-    end
+    value = absolute_pi_or_rt? ? self.status : qualifications.first.type_q
+    I18n.t(value)
   end
 
   def rt?
     retirado?
+  end
+
+  def desc_conv
+    I18n.t(self.status)
   end
 
   def desc_conv_absolute
@@ -385,16 +397,13 @@ class AcademicRecord < ApplicationRecord
 
 
   def conv_type
-
     type = definitive_type_q[0]
     type ||= 'F'
 
     modality_process = academic_process.modality[0]
-    modality_process ||= 'S'
+    modality_process ||= 'A'
 
-    aux = "#{type.upcase}#{modality_process.upcase}#{period.period_type.code.last}"
-
-    aux
+    "#{type.upcase}#{modality_process.upcase}#{period.period_type.code.last}"
   end  
 
   def conv_descrip force_final = false # convocados
@@ -662,9 +671,13 @@ class AcademicRecord < ApplicationRecord
 
     row[3] = fields[:nombre_periodo] if row[3].blank?
 
-    # IMPRIMIR PERIODO
-    period = Period.find_by(name: row[3]) 
-
+    # ENCONTRAR O CREAR PERIODO
+    if row[3]
+      year, type = row[3].split('-')
+      period_type = PeriodType.find_by_code(type[0..1])
+      modality = type[2]
+      period = Period.find_or_create_by(year: year, period_type_id: period_type.id)
+    end
 
     if period
       # LIMPIAR CI
@@ -681,7 +694,7 @@ class AcademicRecord < ApplicationRecord
         row[1] = row[1].to_s
         row[1].strip!
       else
-        return [0,0,1]
+        return [0,0,'1b']
       end
 
       subject = Subject.find_by(code: row[1])
@@ -694,114 +707,124 @@ class AcademicRecord < ApplicationRecord
           # p "     STUDY PLAN: #{study_plan.name}    ".center(300, "P")
 
           escuela = study_plan.school
+          
           # BUSCAR O CREAR PROCESO ACADEMICO:
-          academic_process = AcademicProcess.find_or_initialize_by(period_id: period.id, school_id: escuela.id)
-          academic_process.default_value_by_import if academic_process.new_record?
+          case modality
+          when 'S'
+            modality = :Semestral
+          when 'I'
+            modality = :Intensivo
+          else
+            modality = :Anual
+          end
+          
+          academic_process = AcademicProcess.where(period_id: period.id, modality: modality, school_id: escuela.id).first
 
-          if academic_process.save
-            # BUSCAR O CREAR EL CURSOS (PROGRAMACIÓN):
-            # p "     ACADEMIC PROCESS: #{academic_process.name}    ".center(300, "P")
+          if academic_process.nil?
+            academic_process = AcademicProcess.create(period_id: period.id, modality: modality, school_id: escuela.id, max_credits: 24, max_subjects: 5)
+          end
 
-            if curso = Course.find_or_create_by(subject_id: subject.id, academic_process_id: academic_process.id)
+          # BUSCAR O CREAR EL CURSOS (PROGRAMACIÓN):
+          # p "     ACADEMIC PROCESS: #{academic_process.name}    ".center(300, "P")
 
-              # BUSCAR O CREAR SECCIÓN
-              if row[2]
-                row[2] = row[2].to_s
-                row[2].strip!
-                row[2].upcase!
-              else
-                return [0,0,2]
-              end
+          if curso = Course.find_or_create_by(subject_id: subject.id, academic_process_id: academic_process.id)
 
-              s = Section.where(code: row[2], course_id: curso.id).first
-              s ||= Section.where(code: "0#{row[2]}", course_id: curso.id).first
-              if s.nil?
-                s = Section.new(code: row[2], course_id: curso.id)
-                s.set_default_values_by_import
-              end
+            # BUSCAR O CREAR SECCIÓN
+            if row[2]
+              row[2] = row[2].to_s
+              row[2].strip!
+              row[2].upcase!
+            else
+              return [0,0,2]
+            end
 
-              if s.save
-                # p "          SECTION: id:<#{s.id}> #{s.name}         ".center(1000, "S")
+            s = Section.where(code: row[2], course_id: curso.id).first
+            s ||= Section.where(code: "0#{row[2]}", course_id: curso.id).first
+            if s.nil?
+              s = Section.new(code: row[2], course_id: curso.id)
+              s.set_default_values_by_import
+            end
 
-                # BUSCAR USUARIO
-                user = User.find_by(ci: row[0])
-              
-                if user and user.student?
-                  if stu = user.student
-                    # p "     STUDENT: #{stu.user_ci}    ".center(300, "E")
+            if s.save
+              # p "          SECTION: id:<#{s.id}> #{s.name}         ".center(1000, "S")
 
-                    # BUSCAR O CREAR GRADO
-                    grade = Grade.find_by(study_plan_id: study_plan.id, student_id: stu.id)
-                    if !grade.nil?
-                      # p "     GRADE: #{grade.name}    ".center(300, "G")
+              # BUSCAR USUARIO
+              user = User.find_by(ci: row[0])
+            
+              if user and user.student?
+                if stu = user.student
+                  # p "     STUDENT: #{stu.user_ci}    ".center(300, "E")
 
-                      # BUSCAR O CREAR INSCRIPCIÓN PROCESO ACADEMICO:
-                      enroll_academic_process = EnrollAcademicProcess.find_or_initialize_by(academic_process_id: academic_process.id, grade_id: grade.id)
+                  # BUSCAR O CREAR GRADO
+                  grade = Grade.find_by(study_plan_id: study_plan.id, student_id: stu.id)
+                  if !grade.nil?
+                    # p "     GRADE: #{grade.name}    ".center(300, "G")
 
-                      enroll_academic_process.set_default_values_by_import if enroll_academic_process.new_record?
+                    # BUSCAR O CREAR INSCRIPCIÓN PROCESO ACADEMICO:
+                    enroll_academic_process = EnrollAcademicProcess.find_or_initialize_by(academic_process_id: academic_process.id, grade_id: grade.id)
 
-                      if enroll_academic_process.save
-                        # p "     ENROLL ACADEMIC PROCESS: #{enroll_academic_process.id} #{enroll_academic_process.name} section_id: #{s.id}   ".center(500, "E")
-                        # BUSCAR O CREAR REGISTRO ACADEMICO
-                        # academic_record = AcademicRecord.find_or_create_by(section_id: s.id, enroll_academic_process_id: enroll_academic_process.id)
-                        
-                        academic_record = AcademicRecord.where(section_id: s.id, enroll_academic_process_id: enroll_academic_process.id).first
-                        if academic_record.nil?
-                          academic_record = AcademicRecord.new(section_id: s.id, enroll_academic_process_id: enroll_academic_process.id)
-                          if academic_record.save
-                            total_newed = 1
-                            # p "     NUEVO REGISTRO ACADEMICO: #{academic_record.id}    ROW: #{row[0]} : #{row[1]} : #{row[2]}   ".center(1000, "N")
-                          else
-                            no_registred = "#{academic_record.errors.full_messages.to_sentence.truncate(15)}"
-                          end
+                    enroll_academic_process.set_default_values_by_import if enroll_academic_process.new_record?
+
+                    if enroll_academic_process.save
+                      # p "     ENROLL ACADEMIC PROCESS: #{enroll_academic_process.id} #{enroll_academic_process.name} section_id: #{s.id}   ".center(500, "E")
+                      # BUSCAR O CREAR REGISTRO ACADEMICO
+                      # academic_record = AcademicRecord.find_or_create_by(section_id: s.id, enroll_academic_process_id: enroll_academic_process.id)
+                      
+                      academic_record = AcademicRecord.where(section_id: s.id, enroll_academic_process_id: enroll_academic_process.id).first
+                      if academic_record.nil?
+                        academic_record = AcademicRecord.new(section_id: s.id, enroll_academic_process_id: enroll_academic_process.id)
+                        if academic_record.save
+                          total_newed = 1
+                          # p "     NUEVO REGISTRO ACADEMICO: #{academic_record.id}    ROW: #{row[0]} : #{row[1]} : #{row[2]}   ".center(1000, "N")
                         else
-                          total_updated = 1
-                          # p "     SIN CAMBIO REGISTRO ACADEMICO: #{academic_record.name}    ".center(1000, "A")
-                          
+                          no_registred = "#{academic_record.errors.full_messages.to_sentence.truncate(15)}"
                         end
-
-                        if row[4] and (total_newed.eql? 1 or total_updated.eql? 1)
-                          row[4] = row[4].to_s
-                          row[4].strip! 
-                          calificacion_correcta = academic_record.set_status row[4]
-                          unless (calificacion_correcta.eql? true and academic_record.save)
-                            no_registred = 'valor nota'
-                          end
-                        end
-
-                        # if academic_record.save
-                        #   p "     EXITO. GUARDADO EL REGISTRO ACADEMICO: #{academic_record.name}    ".center(500, "#")
-                        # else
-                        #   no_registred = "#{academic_record.errors.full_messages.to_sentence.truncate(15)}"
-                        # end
                       else
-                        no_registred = 'proceso academico'
+                        total_updated = 1
+                        # p "     SIN CAMBIO REGISTRO ACADEMICO: #{academic_record.name}    ".center(1000, "A")
+                        
                       end
+
+                      if row[4] and (total_newed.eql? 1 or total_updated.eql? 1)
+                        row[4] = row[4].to_s
+                        row[4].strip! 
+                        calificacion_correcta = academic_record.set_status row[4]
+                        unless (calificacion_correcta.eql? true and academic_record.save)
+                          no_registred = 'valor nota'
+                        end
+                      end
+
+                      # if academic_record.save
+                      #   p "     EXITO. GUARDADO EL REGISTRO ACADEMICO: #{academic_record.name}    ".center(500, "#")
+                      # else
+                      #   no_registred = "#{academic_record.errors.full_messages.to_sentence.truncate(15)}"
+                      # end
                     else
-                      no_registred = 'grado'
+                      no_registred = 'proceso academico'
                     end
                   else
-                    no_registred = 'estudiante'
+                    no_registred = 'grado'
                   end
-
                 else
-                  no_registred = 'error'
+                  no_registred = 'estudiante'
                 end
 
               else
-                no_registred = 2
+                no_registred = 'error'
               end
+
             else
-              no_registred = 1 
+              no_registred = 2
             end
           else
-            no_registred = 0 # Proceso Academico
+            no_registred = 1 
           end
+
         else
           no_registred = 1 # Study Plan
         end
       else
-        no_registred = 1
+        no_registred = row[1]
       end
     else
       no_registred = 3

@@ -409,6 +409,7 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   def calculate_efficiency
+
     cursados = self.total_subjects_coursed
     aprobados = self.total_subjects_approved
     if cursados < 0 or aprobados < 0
@@ -431,6 +432,30 @@ class EnrollAcademicProcess < ApplicationRecord
     (cursados > 0 and aux) ? (aux.to_f/cursados.to_f).round(4) : self.weighted_average
   end
 
+  def efficiency_desc
+    if efficiency.nil?
+      '--'
+    else
+      (efficiency).round(2)
+    end
+  end
+
+  def simple_average_desc
+    if simple_average.nil?
+      '--'
+    else
+      (simple_average).round(2)
+    end
+  end
+
+  def weighted_average_desc
+    if weighted_average.nil?
+      '--'
+    else
+      (weighted_average).round(2)
+    end
+  end
+  
   private
 
     def update_current_permanence_status_on_grade

@@ -1,7 +1,7 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
-  config.action_mailer.default_url_options = { host: "coesfau.com" }
+  config.action_mailer.default_url_options = { host: "coesodont.com" }
   
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -11,15 +11,16 @@ Rails.application.configure do
   # sudo apt install libvips
 
 
+  # Configuración para Envío de Correos
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address:                'smtp.mailersend.net',
-    port:                   587,
-    domain:                 ENV['PROVIDER_DOMAIN_ADRESS'],
-    user_name:              ENV['USERNAME'],
-    password:               ENV['PASSWORD'],
-    authentication:         'plain',
-    enable_starttls_auto:   true
+    address:            'smtp.elasticemail.com',
+    port:               2525,
+    domain:             ENV['PROVIDER_DOMAIN_ADRESS'],
+    user_name:          ENV['USERNAME'],
+    password:           ENV['PASSWORD'],
+    authentication:     'plain',
+    enable_starttls_auto: true
   }
 
   config.cache_classes = true
@@ -85,7 +86,7 @@ Rails.application.configure do
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   # config.active_job.queue_adapter     = :resque
-  # config.active_job.queue_name_prefix = "coesfau_production"
+  # config.active_job.queue_name_prefix = "coesodont_production"
 
   config.action_mailer.perform_caching = false
 
@@ -101,7 +102,7 @@ Rails.application.configure do
   #  authentication:     'plain',
   #  enable_starttls_auto: true
   #}
-  #config.action_mailer.default_url_options = { host: 'https://coesfau.com'}
+  #config.action_mailer.default_url_options = { host: 'https://coesodont.com'}
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.

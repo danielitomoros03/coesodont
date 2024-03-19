@@ -460,14 +460,17 @@ class Section < ApplicationRecord
       field :qualified do
         column_width 20
       end
-
-      field :acta do
-        label 'Acta'
+      
+      field :options do
+        label 'Opciones'
         pretty_value do
           current_user = bindings[:view]._current_user
+
+          display = ApplicationController.helpers.badge_toggle_section_qualified bindings[:object]
           if (current_user.admin? and bindings[:view].session[:rol] and bindings[:view].session[:rol].eql? 'admin' and current_user.admin.authorized_manage? 'Section' and bindings[:object].academic_records.any?) #and bindings[:object].qualified?
-            ApplicationController.helpers.btn_toggle_download 'btn-success', "/sections/#{bindings[:object].id}.pdf", 'Generar Acta', nil
+            display += ApplicationController.helpers.btn_toggle_download 'mx-3 btn-success', "/sections/#{bindings[:object].id}.pdf", 'Generar Acta', nil
           end
+          display
         end
       end
     end

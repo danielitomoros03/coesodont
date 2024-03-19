@@ -18,6 +18,8 @@ class Subject < ApplicationRecord
   before_update :paper_trail_update
 
   # ASSOCIATIONS:
+  has_and_belongs_to_many :mentions
+
   belongs_to :area
   has_one :school, through: :area
 
@@ -43,7 +45,7 @@ class Subject < ApplicationRecord
 
   # ENUMS:
   enum qualification_type: [:numerica, :absoluta]
-  enum modality: [:obligatoria, :electiva, :optativa] 
+  enum modality: [:obligatoria, :optativa, :electiva] 
 
   # VALIDATIONS:
   validates :code, presence: true, uniqueness: {case_sensitive: false}
@@ -80,7 +82,7 @@ class Subject < ApplicationRecord
     self.code.strip!
     self.name.upcase!
     self.code.upcase!
-    self.code = "0#{self.code}" if self.code[0] != '0' 
+    # self.code = "0#{self.code}" if self.code[0] != '0' 
   end
 
   # GENERALS FUNCTIONS: 
@@ -224,12 +226,8 @@ class Subject < ApplicationRecord
   def modality_initial_letter
     case modality
     when 'obligatoria'
-      'B'
-    when 'electiva'
       'O'
     when 'optativa'
-      'L'
-    when 'proyecto'
       'P'
     end      
   end

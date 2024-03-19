@@ -18,6 +18,8 @@ class Area < ApplicationRecord
   has_many :admins, as: :env_authorizable 
 
   has_many :subjects, dependent: :restrict_with_error
+  has_many :teachers, dependent: :restrict_with_error
+
   has_many :sections, through: :subjects
   # accepts_nested_attributes_for :subjects
 
@@ -63,15 +65,23 @@ class Area < ApplicationRecord
       field :total_subjects do
         label 'Total Asignaturas'
       end
+      field :teachers do
+        label 'Profesores'
+      end
     end
     show do
       field :name
       field :parent_area
+
+
       field :subjects do
         pretty_value do
           bindings[:view].render(template: '/subjects/index', locals: {subjects: bindings[:object].subjects.order(code: :asc)})
         end
       end
+      field :teachers do
+        label 'Profesores'
+      end      
     end 
 
     edit do

@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "FAU@coesfau.com"
+  default from: "SOPORTE COES-ODONT <soporte@coesodont.com>"
   layout "mailer"
 end

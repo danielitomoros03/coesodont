@@ -237,6 +237,77 @@ class Grade < ApplicationRecord
     academic_records.aprobado.any?
   end
 
+  def current_level
+    #OJO: DEBERÍA ESTAR ASOCIADO AL MAX ORDINAL DE LAS ASIGNATURAS DE LA ESCUELA
+    # OJO: CASO 5 AÑO, ES UNA SOLA MATERIA Y CUMPLE LA CONDICIÓN
+    begin
+      levels = study_plan.school.subjects.order(:ordinal).group(:ordinal).count.max.first
+    rescue Exception
+      levels = study_plan.levels 
+    end
+    levels_response = []
+    arrastre = 1
+    levels.times do |level|
+      level = level+1
+      apporved_level = true
+      
+      study_plan.requirement_by_levels.where(level: level).each do |requirement|
+        tipo = requirement.subject_type.name.downcase
+        total_required_subjects = requirement.required_subjects
+        total_approved_subjects = total_subjects_approved_by_type_subject_and_level level, tipo
+
+        # p " Level: #{level} de #{levels} | Tipo: #{tipo} |  Requirement: #{total_required_subjects}  Aprobados: #{total_approved_subjects}   ".center(500, "=")
+
+        if !total_required_subjects.nil? and total_required_subjects > total_approved_subjects 
+          apporved_level = false 
+          arrastre = 2 if ((total_required_subjects - total_approved_subjects).eql? 1 and !level.eql? levels) 
+        end
+      end
+      levels_response << level unless apporved_level
+    end
+    if levels_response.eql? []
+      return [1]
+    else
+      return levels_response.first(arrastre)
+    end
+  end
+
+  # def current_level
+  #   # OJO: REVISAR ALGORITMO, SIEMPRE SALE LEVEL 1 🤮
+  #   levels = study_plan.levels
+  #   levels.times do |level|
+  #     level = level+1
+  #     p "    level: #{level}    ".center(250, "#")
+  #     study_plan.requirement_by_levels.where(level: level).each do |requirement|
+  #       required_subjects = requirement.required_subjects
+  #        # ATENCIÓN: Condición especial para Odontología por el campo modality que fue sustituido por SubjectType
+  #        tipo = requirement.subject_type.name.downcase
+  #        # type = requirement.subject_type_id
+  #        # OJO: 👆🏽 Así debe ser en el Plus 
+
+  #        total_subjects_approved = total_subjects_approved_by_type_subject_and_level level, tipo
+
+
+  #        diference = (required_subjects - total_subjects_approved).abs
+  #        p " Level: #{level} de #{levels} | Tipo: #{tipo} |  Requirement: #{required_subjects}  Aprobados: #{total_subjects_approved}  Diference: #{diference}   ".center(500, "=")
+  #       if level.eql? levels or (required_subjects > 0 and required_subjects > total_subjects_approved and diference > 1) 
+  #         return [level]
+  #       elsif diference.eql? 1
+  #         return [level, level+1]
+  #       end
+  #     end
+  #   end
+    
+  #   return [levels]
+  # end
+
+  # OFERTA POR ASIGNATURAS
+  def subjects_offer_by_level_approved
+      # Buscamos los ids de las asignaturas aprobadas
+      asig_aprobadas_ids = self.subjects_approved_ids    
+    Subject.where(ordinal: current_level).where.not(id: asig_aprobadas_ids)
+  end
+
   def subjects_offer_by_dependent
 
     if is_new? or !any_approved?
@@ -344,6 +415,14 @@ class Grade < ApplicationRecord
   def total_credits_by_type_subject tipo
     academic_records.joins(:subject).by_type(tipo).total_credits
   end
+
+  def total_credits_approved_by_type_subject_and_level tipo, level
+    academic_records.total_credits_approved_by_level_and_type tipo, level
+  end
+
+  def total_subjects_approved_by_type_subject_and_level level, tipo
+    academic_records.total_subjects_approved_by_level_and_type level, tipo 
+  end  
 
   # def credits_approved_by_eq
     # Ojo: Esta función siempre arroja cero porque no pueden existir EI y A, porque son estados direrentes
@@ -503,6 +582,7 @@ class Grade < ApplicationRecord
   after_initialize do
     if new_record?
       self.study_plan_id ||= StudyPlan.first.id if StudyPlan.first
+      self.registration_status = :universidad
     end
   end  
 
