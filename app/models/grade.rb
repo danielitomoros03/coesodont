@@ -404,12 +404,24 @@ class Grade < ApplicationRecord
     end
   end
 
-  def total_credits_eq
-    self.academic_records.total_credits_equivalence
+  def total_credits_approved_equivalence
+    self.academic_records.total_credits_approved_equivalence
   end
 
-  def total_credits_approved_or_eq
-    academic_records.aprobado.or(academic_records.equivalencia).total_credits
+  def total_credits_approved_not_equivalence
+    self.academic_records.total_credits_approved_not_equivalence
+  end
+
+  def total_subjects_approved_equivalence
+    self.academic_records.total_subjects_approved_equivalence
+  end
+
+  def total_subjects_approved_not_equivalence
+    self.academic_records.total_subjects_approved_not_equivalence
+  end  
+
+  def total_credits_eq
+    self.academic_records.total_credits_equivalence
   end
 
   def total_credits_by_type_subject tipo

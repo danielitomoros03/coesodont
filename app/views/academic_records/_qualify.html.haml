@@ -17,8 +17,8 @@
         %th{style: 'width: 80px'} CI
         %th{style: 'width: 100px'} Estado Insc
         %th Estudiante
-        
-        - unless false #section.any_equivalencia?  
+
+        - unless section.any_equivalencia?
           - if section.subject.numerica?
             - if (admin_authorized_to_qualify or teacher_authorized_to_qualify)
               %th.text-center PI
@@ -55,7 +55,7 @@
               %a{href: "/admin/student/#{acre.student.id}"}= user.reverse_name 
             - else
               = user.reverse_name
-          - unless false #section.any_equivalencia?            
+          - unless section.any_equivalencia? 
             - if retirado
               %td{colspan: 2}
             - else

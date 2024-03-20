@@ -32,9 +32,14 @@ es:
   perdida_por_inasistencia: PI
   PI: perdida_por_inasistencia
 
-  equivalencia: EQ
-  EQ: equivalencia
-  
+  EQ: equivalencia_externa
+
+  equivalencia_externa: EE
+  EE: equivalencia_externa
+
+  equivalencia_interna: EI
+  EI: equivalencia_interna
+
   retirado: RT
   RT: retirado
   
@@ -718,7 +723,7 @@ es:
         course: 'Curso (Período/Asignatura)'
         teacher: 'Profesor'
         qualified: '¿Calificada?'
-        modality: 'Tipo'
+        modality: 'Modalidad'
         enabled: 'Activa'
         user: 'Profesor'
         subject: 'Asignatura'
@@ -815,6 +820,10 @@ es:
         profile_picture: 'Foto de Perfil'
         ci_image: 'Imagen de CI'
     scopes:
+      academic_process:
+        Semestral: S
+        Anual: A
+
       academic_record:
         sin_calificar: 'Sin Calificar'
         sc: 'Sin Calificar'
@@ -841,12 +850,10 @@ es:
         parcial: 'Parciales'
         par: 'Parciales'
       section:
-        nota_final: 'Final'
-        equivalencia: 'Equivalencia'
-        equivalencia: 'Equivalencia' 
-        diferido: 'Diferido' 
-        reparacion: 'Reparación'
-        suficiencia: 'Suficiencia'
+        nota_final: 'NF'
+        equivalencia_interna: 'EI'
+        equivalencia_externa: 'EE' 
+        suficiencia: 'NS'
       payment_report:
         transferencia: 'Transferencia'
         efectivo: 'Efectivo'

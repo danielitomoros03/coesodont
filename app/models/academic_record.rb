@@ -5,7 +5,9 @@ class AcademicRecord < ApplicationRecord
   # t.integer "status"
 
   # ENUMERIZE:
-  enum status: [:sin_calificar, :aprobado, :aplazado, :retirado, :perdida_por_inasistencia, :equivalencia, :no_presento]
+  enum status: {sin_calificar: 0, aprobado: 1, aplazado: 2, retirado: 3, perdida_por_inasistencia: 4, equivalencia: 5}
+
+  # enum special_condition: {pi: 0, equivalencia_interna: 1, equivalencia_externa: 2}
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -52,8 +54,9 @@ class AcademicRecord < ApplicationRecord
   validates_presence_of :qualifications, message: "Calificación no puede estar en blanco. Si desea eliminar la calificación, coloque el estado de calificación a 'Sin Calificar'", if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado?))}
 
   # CALLBACK
-  after_save :set_options_q
-  after_save :update_grade_numbers#, if: :will_save_change_to_status?
+  before_save :set_status_by_EQ_modality_section
+  after_save :update_status_q_and_grades
+  # after_save :update_grade_numbers#, if: :will_save_change_to_status?
 
   after_destroy :destroy_enroll_academic_process
 
@@ -100,16 +103,24 @@ class AcademicRecord < ApplicationRecord
   scope :total_subjects, -> {(joins(:subject).group('subjects.id').count).count}
 
   scope :total_subjects_coursed, -> {coursed.total_subjects}
-  scope :total_subjects_approved, -> {aprobado.total_subjects}
+  scope :section_not_equivalencias, -> {joins(:section).where('sections.modality': [:nota_final, :suficiencia])}
+  scope :section_equivalencias, -> {joins(:section).where('sections.modality': [:equivalencia_externa, :equivalencia_interna])}
   scope :total_subjects_approved_by_level, -> (level){aprobado.by_level(level).total_subjects}
   scope :total_subjects_approved_by_level_and_type, -> (level, tipo){aprobado.by_level(level).by_subject_types(tipo).total_subjects}
-  scope :total_subjects_equivalence, -> {equivalencia.total_subjects}
+  scope :total_subjects_equivalence, -> {section_equivalencias.total_subjects}
+  
+  scope :total_subjects_approved, -> {aprobado.total_subjects}
+  scope :total_subjects_approved_equivalence, -> {section_equivalencias.total_subjects_approved}
+  scope :total_subjects_approved_not_equivalence, -> {section_not_equivalencias.total_subjects_approved}
+  
+  scope :total_credits_approved, -> {aprobado.total_credits}
+  scope :total_credits_approved_equivalence, -> {section_equivalencias.total_credits_approved}
+  scope :total_credits_approved_not_equivalence, -> {section_not_equivalencias.total_credits_approved}  
 
   scope :total_credits_coursed, -> {coursed.total_credits}
-  scope :total_credits_approved, -> {aprobado.total_credits}
   scope :total_credits_approved_by_level, -> (level) {aprobado.total_credits_by_level(level)}
   scope :total_credits_approved_by_level_and_type, -> (level, tipo) {aprobado.by_level(level).by_subject_types(tipo).total_credits}
-  scope :total_credits_equivalence, -> {equivalencia.total_credits}
+  scope :total_credits_equivalence, -> {section_equivalencias.total_credits}
   
   scope :weighted_average, -> {joins(:subject).joins(:qualifications).definitives.coursed.sum('subjects.unit_credits * qualifications.value')}
 
@@ -168,7 +179,7 @@ class AcademicRecord < ApplicationRecord
   end
 
   def get_value_by_status
-    if absolute? or pi? or rt? or sin_calificar? or equivalencia?
+    if absolute? or pi? or rt? or sin_calificar? or self.section&.any_equivalencia?
       desc_conv_absolute
     else
       "#{self.q_value_to_02i}"
@@ -179,12 +190,15 @@ class AcademicRecord < ApplicationRecord
     valor.strip!
     valor.upcase!
 
-    if (valor.eql? 'NP' or valor.eql? 'PI' or valor.eql? 'RT' or valor.eql? 'A' or valor.eql? 'AP' or valor.eql? 'EQ')
+    if (valor.eql? 'EQ' or valor.eql? 'EE' or valor.eql? 'EI')
+      self.status = I18n.t('A')
+      self.section.update!(modality: I18n.t(valor))
+    elsif (valor.eql? 'NP' or valor.eql? 'PI' or valor.eql? 'RT' or valor.eql? 'A' or valor.eql? 'AP')
       self.status = I18n.t(valor)
       if valor.eql? 'PI' or (valor.eql? 'AP' and subject.numerica?)
         qua = self.qualifications.find_or_initialize_by(type_q: :final)
         qua.value = 0
-        return qua.save        
+        return qua.save
       else
         return true
       end
@@ -258,7 +272,7 @@ class AcademicRecord < ApplicationRecord
   end
 
   def desc_conv_absolute
-    I18n.t(self.status)
+    self.section&.any_equivalencia? ? self.section&.conv_initial_type : I18n.t(self.status)
   end
 
   def pi?
@@ -358,8 +372,8 @@ class AcademicRecord < ApplicationRecord
   def q_value_to_02i qualification=definitive_q
     if qualification
       qualification.value_to_02i
-    elsif equivalencia?
-      'EQ'
+    elsif self.section&.any_equivalencia?
+      self.section&.conv_initial_type
     else 
       '--'
     end
@@ -424,6 +438,16 @@ class AcademicRecord < ApplicationRecord
 
     return data
 
+  end
+
+  def self.update_academic_records_with_equivalence
+    AcademicRecord.equivalencia.each do |ar| 
+      coruse_aux = ar.course
+      section_eq = coruse_aux.sections.where(modality: :equivalencia_externa).first
+      section_eq ||= coruse_aux.sections.create(code: 'EE', modality: :equivalencia_externa, capacity: 10) 
+
+      ar.update!(section_id: section_eq.id)
+    end
   end
 
   # RAILS_ADMIN
@@ -841,6 +865,18 @@ class AcademicRecord < ApplicationRecord
       self.status = definitive_q.approved? ? :aprobado : :aplazado
     end
 
+  end
+
+  def set_status_by_EQ_modality_section
+    if self.section&.any_equivalencia?
+      self.status = :aprobado
+      self.qualifications.destroy_all  
+    end
+  end
+
+  def update_status_q_and_grades
+    set_options_q
+    update_grade_numbers
   end
 
   def set_options_q
