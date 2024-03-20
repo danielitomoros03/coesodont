@@ -381,7 +381,7 @@ class Grade < ApplicationRecord
   # TOTALS CREDITS:
 
   def credits_completed_by_type tipo
-    academic_records.aprobado.or(academic_records.equivalencia).by_subject_types(tipo).total_credits
+    academic_records.aprobado.by_subject_types(tipo).total_credits
   end
 
   def total_credits
