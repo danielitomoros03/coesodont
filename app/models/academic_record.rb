@@ -5,7 +5,7 @@ class AcademicRecord < ApplicationRecord
   # t.integer "status"
 
   # ENUMERIZE:
-  enum status: {sin_calificar: 0, aprobado: 1, aplazado: 2, retirado: 3, perdida_por_inasistencia: 4, equivalencia: 5}
+  enum status: {sin_calificar: 0, aprobado: 1, aplazado: 2, retirado: 3, perdida_por_inasistencia: 4}
 
   # enum special_condition: {pi: 0, equivalencia_interna: 1, equivalencia_externa: 2}
 
