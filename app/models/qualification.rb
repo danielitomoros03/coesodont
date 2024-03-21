@@ -99,7 +99,7 @@ class Qualification < ApplicationRecord
   def update_status
 
     if self.diferido? or self.reparacion?
-      self.academic_record.qualifications.final.first.update(definitive: false)
+      self.academic_record.qualifications.final.first&.update(definitive: false)
     end
 
     eap = self.enroll_academic_process

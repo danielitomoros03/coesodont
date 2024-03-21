@@ -697,9 +697,11 @@ class Section < ApplicationRecord
   end
 
   def update_academic_records
-    academic_records.each do |ar|
-      ar.update(status: :aprobado)
-      ar.qualifications.destroy_all  
+    if self.any_equivalencia?
+      academic_records.each do |ar|
+        ar.update(status: :aprobado)
+        ar.qualifications.destroy_all  
+      end
     end
   end
 

@@ -48,4 +48,5 @@
         - else
           .badge.bg-danger{title: 'Por calificar'}
             .fa.fa-remove
-        = badge_toggle_section_qualified section
+        - if (current_user.admin? and session[:rol] and session[:rol].eql? 'admin')
+          = badge_toggle_section_qualified section
