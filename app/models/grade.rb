@@ -483,8 +483,8 @@ class Grade < ApplicationRecord
   end
 
   def calculate_efficiency periods_ids = nil 
-    cursados = self.total_credits_coursed periods_ids
-    aprobados = self.total_credits_approved periods_ids
+    cursados = self.total_subjects_coursed periods_ids
+    aprobados = self.total_subjects_approved periods_ids
     if cursados < 0 or aprobados < 0
       0.0
     elsif cursados == 0 or (cursados > 0 and aprobados >= cursados)
