@@ -227,7 +227,7 @@ class AcademicRecord < ApplicationRecord
   end
 
   def badge_status
-    "<span class= 'badge bg-#{self.badge_status_class}'> #{self.status.titleize} </span>"
+    "<span class= 'badge bg-#{self.badge_status_class}'> #{self.status&.titleize} </span>"
   end
 
   def badge_status_class
