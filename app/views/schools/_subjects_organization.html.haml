@@ -1,10 +1,9 @@
-
-
-.input-group.input-group-sm    
-  = link_to 'javascript:void(0)', onclick: "$('.arbol').toggleClass('d-none'); $('.fa-chevron-right').toggleClass('fa-rotate-90');", class: 'btn btn-sm btn-info', style: 'margin-right: 15px' do
-    Desplegar Todo el Árbol de Asignaturas 
-    %i.fa.fa-chevron-right
-  %input.form-control{"aria-label": "", type: "text", placeholder: 'Buscar asignaturas por código', id: 'filterTable', name: 'filterSubject'}
+- if false
+  .input-group.input-group-sm    
+    = link_to 'javascript:void(0)', onclick: "$('.arbol').toggleClass('d-none'); $('.fa-chevron-right').toggleClass('fa-rotate-90');", class: 'btn btn-sm btn-info', style: 'margin-right: 15px' do
+      Desplegar Todo el Árbol de Asignaturas 
+      %i.fa.fa-chevron-right
+    %input.form-control{"aria-label": "", type: "text", placeholder: 'Buscar asignaturas por código', id: 'filterTable', name: 'filterSubject'}
 
 .table-responsive
   %table.table.table-bordered.table-sm.mt-3
@@ -15,7 +14,7 @@
             - title = "Sin Orden"
             - bg = 'bg-danger'
           - elsif k.eql? 0
-            - title = "Optativas"
+            - title = "Sin Orden"
             - bg = 'bg-info'
           - else
             - title = "#{Subject.ordinal_to_cardinal(k,'Año')}"
