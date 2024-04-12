@@ -38,6 +38,7 @@ class Course < ApplicationRecord
   scope :pcis, -> {where(offer_as_pci: true)}
   scope :order_by_subject_ordinal, -> {joins(:subject).order('subjects.ordinal': :asc)}
   scope :order_by_subject_code, -> {joins(:subject).order('subjects.code': :asc)}
+  scope :order_by_subject_ordinal_and_subject_code, -> {joins(:subject).order(['subjects.ordinal': :asc, 'subjects.code': :asc])}
 
   scope :custom_search, -> (keyword) {joins(:period, :subject).where("subjects.name ILIKE '%#{keyword}%' OR subjects.code ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'") }
   # default_scope {of_academic_process(@academic_process.id)}

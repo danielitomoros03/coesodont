@@ -85,12 +85,25 @@ class Subject < ApplicationRecord
     # self.code = "0#{self.code}" if self.code[0] != '0' 
   end
 
-  # GENERALS FUNCTIONS: 
-  def self.ordinal_to_cardinal numero, type_school
+  # GENERALS FUNCTIONS:
+  def ordinal_to_cardinal_short
+
+    case ordinal
+    when 0
+      modality[0..2]&.upcase
+    when 1..12
+      "#{ordinal}º"
+    else
+      '--'
+    end
+
+  end  
+  
+  def self.ordinal_to_cardinal numero, type_school=nil
 
     case numero
     when 0
-      0
+      '-'
     when 1..12
       "#{numero}º #{type_school&.titleize}"
     end

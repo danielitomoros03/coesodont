@@ -237,40 +237,80 @@ class Grade < ApplicationRecord
     academic_records.aprobado.any?
   end
 
-  def current_level
-    #OJO: DEBERÍA ESTAR ASOCIADO AL MAX ORDINAL DE LAS ASIGNATURAS DE LA ESCUELA
-    # OJO: CASO 5 AÑO, ES UNA SOLA MATERIA Y CUMPLE LA CONDICIÓN
-    begin
-      levels = study_plan.school.subjects.order(:ordinal).group(:ordinal).count.max.first
-    rescue Exception
-      levels = study_plan.levels 
-    end
-    levels_response = []
-    arrastre = 1
-    levels.times do |level|
-      level = level+1
-      apporved_level = true
+  # def current_level
+  #   #OJO: DEBERÍA ESTAR ASOCIADO AL MAX ORDINAL DE LAS ASIGNATURAS DE LA ESCUELA
+  #   # OJO: CASO 5 AÑO, ES UNA SOLA MATERIA Y CUMPLE LA CONDICIÓN
+  #   begin
+  #     levels = study_plan.school.subjects.order(:ordinal).group(:ordinal).count.max.first
+  #   rescue Exception
+  #     levels = study_plan.levels 
+  #   end
+  #   levels_response = []
+  #   arrastre = 1
+  #   levels.times do |level|
+  #     level = level+1
+  #     apporved_level = true
       
-      study_plan.requirement_by_levels.where(level: level).each do |requirement|
-        tipo = requirement.subject_type.name.downcase
-        total_required_subjects = requirement.required_subjects
-        total_approved_subjects = total_subjects_approved_by_type_subject_and_level level, tipo
+  #     study_plan.requirement_by_levels.where(level: level).each do |requirement|
+  #       tipo = requirement.subject_type.name.downcase
+  #       total_required_subjects = requirement.required_subjects
+  #       total_approved_subjects = total_subjects_approved_by_type_subject_and_level level, tipo
 
-        # p " Level: #{level} de #{levels} | Tipo: #{tipo} |  Requirement: #{total_required_subjects}  Aprobados: #{total_approved_subjects}   ".center(500, "=")
+  #       # p " Level: #{level} de #{levels} | Tipo: #{tipo} |  Requirement: #{total_required_subjects}  Aprobados: #{total_approved_subjects}   ".center(500, "=")
 
-        if !total_required_subjects.nil? and total_required_subjects > total_approved_subjects 
-          apporved_level = false 
-          arrastre = 2 if ((total_required_subjects - total_approved_subjects).eql? 1 and !level.eql? levels) 
+  #       if !total_required_subjects.nil? and total_required_subjects > total_approved_subjects 
+  #         apporved_level = false 
+  #         arrastre = 2 if ((total_required_subjects - total_approved_subjects).eql? 1 and !level.eql? levels) 
+  #       end
+  #     end
+  #     levels_response << level unless apporved_level
+  #   end
+  #   if levels_response.eql? []
+  #     return [1]
+  #   else
+  #     return levels_response.first(arrastre)
+  #   end
+  # end
+
+    def level_offer
+
+      total_approved_by_levels = self.academic_records.aprobado.joins(:subject).group('subjects.ordinal').count
+      total_approved_by_levels = total_approved_by_levels.to_a
+      
+      begin
+        if total_approved_by_levels.any?
+          last_approved_level = total_approved_by_levels.max.first
+          levels_not_approved = []
+          p "    ULTIMO NIVEL: #{last_approved_level}     ".center(2000, "=")
+          total_approved_by_levels.each do |approved_by_level|
+            level = approved_by_level.first
+            p "LEVEL: #{level}"
+            total_approved = approved_by_level.last
+            p "APROBADAS: #{total_approved}"
+            # Es solo para el tipo de asignatura obligatoria ya que las otras tienen otro comportamiento:
+            requirement_by_level = self.study_plan.requirement_by_levels.of_subject_type(SubjectType.obligatoria.id).of_level(level).first
+            required_subjects = requirement_by_level&.required_subjects
+            p "REQUERIMIENTOS: #{required_subjects}"
+          
+            if (total_approved < required_subjects)
+              # Nivel No Aprovado completamente, se incluye en la oferta
+              levels_not_approved << level 
+            end
+            # Si es el ultimo nivel con aprovadas y no es el 5to y la diferencia entre aprobadas y requeridas es uno:
+            if level.eql? last_approved_level and level < 5 and (total_approved+1) >= required_subjects
+              p "     EXTRA BALLL!!!     ".center(2000, "#")
+              # Último nivel aprovado
+              levels_not_approved << level+1
+            end
+          end
+        else
+          levels_not_approved << 1
         end
+        return levels_not_approved
+      rescue Exception
+        return []
       end
-      levels_response << level unless apporved_level
     end
-    if levels_response.eql? []
-      return [1]
-    else
-      return levels_response.first(arrastre)
-    end
-  end
 
   # def current_level
   #   # OJO: REVISAR ALGORITMO, SIEMPRE SALE LEVEL 1 🤮
@@ -304,8 +344,8 @@ class Grade < ApplicationRecord
   # OFERTA POR ASIGNATURAS
   def subjects_offer_by_level_approved
       # Buscamos los ids de las asignaturas aprobadas
-      asig_aprobadas_ids = self.subjects_approved_ids    
-    Subject.where(ordinal: current_level).where.not(id: asig_aprobadas_ids)
+      asig_aprobadas_ids = self.subjects_approved_ids
+    Subject.where(ordinal: level_offer).or(Subject.optativa).where.not(id: asig_aprobadas_ids)
   end
 
   def subjects_offer_by_dependent

@@ -24,7 +24,7 @@
         - if (current_user&.admin&.yo?)
           %td= academic_record.id
         %td{title: 'Ir al detalle de la asignatura'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Subject'), subject.code, "/admin/subject/#{subject.id}"
-        %td.text-center= "#{subject.ordinal}º"
+        %td.text-center= subject.ordinal_to_cardinal_short
         %td{title: subject.name}= subject.name
         %td.text-center= subject.unit_credits
         %td.text-center= subject.modality_initial_letter
