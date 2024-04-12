@@ -19,7 +19,7 @@
     .fas.fa-info-circle
 
 - if enabled_to_admin and (current_user&.admin&.authorized_delete? 'EnrollAcademicProcess')
-  - if enroll_academic_process.academic_records.any?
+  - if false #enroll_academic_process.academic_records.any?
     = link_to 'javascript:void(0)', class: 'btn btn-secondary btn-sm float-end mx-1 align-middle', disabled: true, 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: 'Eliminar Inscripción. Para activar esta opción elimine primero todos los registros académicos del período', rel: :tooltip do
       .fa.fa-remove
   - else
