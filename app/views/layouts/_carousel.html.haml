@@ -1,23 +1,37 @@
 / Carousel
-#mainCarousel.carousel.carousel-dark.slide(data-bs-ride="carousel")
-    / Indicators/dots
-    .carousel-indicators
-        %button.active(data-bs-slide-to="0" data-bs-target="#mainCarousel" type="button")
-        %button(data-bs-slide-to="1" data-bs-target="#mainCarousel" type="button")
-        %button(data-bs-slide-to="2" data-bs-target="#mainCarousel" type="button")
-    / The slideshow/carousel
-    .carousel-inner
+#mainCarousel.carousel.carousel-fade.slide(data-bs-ride="carousel")
+    - if billboards.any?
+        / Indicators/dots
+        .carousel-indicators
+            %button.active(data-bs-slide-to="0" data-bs-target="#mainCarousel" type="button")
+            %button(data-bs-slide-to="1" data-bs-target="#mainCarousel" type="button")
+            %button(data-bs-slide-to="2" data-bs-target="#mainCarousel" type="button")
+        / The slideshow/carousel
+        .carousel-inner
+        
+            - billboards.each_with_index do |c, i|
+                - active = (i.eql? 0) ? 'active' : ''
+
+                .carousel-item{style: 'max-height: 500px;overflow-y: scroll;', class: active}
+                    %div{style: 'text-align:center; margin: auto'}
+                        = raw c.content
+
+        / Left and right controls/icons
+        %button.carousel-control-prev(data-bs-slide="prev" data-bs-target="#mainCarousel" type = "button" style= "color:red")
+            %span.carousel-control-prev-icon(aria-hidden="true")
+            %span.visually-hidden Anterior
+        %button.carousel-control-next(data-bs-slide="next" data-bs-target="#mainCarousel" type="button")
+            %span.carousel-control-next-icon(aria-hidden="true")
+            %span.visually-hidden Próxima
+
+    - else 
         .carousel-item.active
             = image_tag 'banner_logo_odont.jpeg', class:'d-block w-100', alt: 'Vista ODONT'
-        - billboards.each do |c|
-            .carousel-item{style: 'width: 550px'}
-                %div{style: 'text-align:center; margin: auto'}
-                    = raw c.content
+- if false
+    :javascript
+        var els = document.getElementsByClassName('carousel-control-prev-icon');
 
-    / Left and right controls/icons
-    %button.carousel-control-prev(data-bs-slide="prev" data-bs-target="#mainCarousel" type="button")
-        %span.carousel-control-prev-icon(aria-hidden="true")
-        %span.visually-hidden Anterior
-    %button.carousel-control-next(data-bs-slide="next" data-bs-target="#mainCarousel" type="button")
-        %span.carousel-control-next-icon(aria-hidden="true")
-        %span.visually-hidden Próxima
+        [].forEach.call(els, function (el) {
+            el.style = 'background-color:yellow';
+        });
+        
