@@ -281,16 +281,16 @@ class Grade < ApplicationRecord
         if total_approved_by_levels.any?
           last_approved_level = total_approved_by_levels.max.first
           levels_not_approved = []
-          p "    ULTIMO NIVEL: #{last_approved_level}     ".center(2000, "=")
+          # p "    ULTIMO NIVEL: #{last_approved_level}     ".center(2000, "=")
           total_approved_by_levels.each do |approved_by_level|
             level = approved_by_level.first
-            p "LEVEL: #{level}"
+            # p "LEVEL: #{level}"
             total_approved = approved_by_level.last
-            p "APROBADAS: #{total_approved}"
+            # p "APROBADAS: #{total_approved}"
             # Es solo para el tipo de asignatura obligatoria ya que las otras tienen otro comportamiento:
             requirement_by_level = self.study_plan.requirement_by_levels.of_subject_type(SubjectType.obligatoria.id).of_level(level).first
             required_subjects = requirement_by_level&.required_subjects
-            p "REQUERIMIENTOS: #{required_subjects}"
+            # p "REQUERIMIENTOS: #{required_subjects}"
           
             if (total_approved < required_subjects)
               # Nivel No Aprovado completamente, se incluye en la oferta
@@ -298,7 +298,7 @@ class Grade < ApplicationRecord
             end
             # Si es el ultimo nivel con aprovadas y no es el 5to y la diferencia entre aprobadas y requeridas es uno:
             if level.eql? last_approved_level and level < 5 and (total_approved+1) >= required_subjects
-              p "     EXTRA BALLL!!!     ".center(2000, "#")
+              # p "     EXTRA BALLL!!!     ".center(2000, "#")
               # Último nivel aprovado
               levels_not_approved << level+1
             end
@@ -306,7 +306,7 @@ class Grade < ApplicationRecord
         else
           levels_not_approved << 1
         end
-        return levels_not_approved
+        return levels_not_approved#.last(2)
       rescue Exception
         return []
       end
