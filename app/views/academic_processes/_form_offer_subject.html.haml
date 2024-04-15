@@ -1,0 +1,5 @@
+- title = 'Ofertar u ocultar asignatura durante la inscripción de los estudiantes' 
+.form-switch{title: title}
+  = check_box_tag "offer_subject#{course.id}", course.id, (!course.nil? and course.offer?), class: "form-check-input switch", disabled: course.nil?, id: course.id, onclick: 'offerCoruse(this);'
+
+

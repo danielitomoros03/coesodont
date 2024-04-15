@@ -59,6 +59,40 @@
 
   });
 
+  function offerCoruse(ele){
+    let course_id = $(ele).attr('id');
+    let url = `/courses/${course_id}`;
+    let attrs = `{"course":{"offer": ${ele.checked == true}}}`;
+
+    $.ajax({
+      url: url,
+      type: 'PUT',
+      data: JSON.parse(attrs),
+      dataType: 'json',
+      beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+      },
+      success: function(json) {
+        let td = ele.parentElement.parentElement.nextElementSibling
+        if (json.type == `update`) {
+          // td.innerHTML = json.new_section;  
+          toastr.success(json.data);
+        }else {
+          td.textContent = "";
+          toastr.info(json.data);
+        }
+
+      },
+      error: function(json) {
+        toastr.error(json.data);
+      },
+      unprocessable_entity: function(json) {
+        toastr.error(json.data);
+      }
+    });
+
+  }  
+
   function updateElem(ele){
     let url;
     let type;
@@ -79,12 +113,16 @@
         xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
       },
       success: function(json) {
-        let td = ele.parentElement.parentElement.nextElementSibling
+        let td_offer_subject = ele.parentElement.parentElement.nextElementSibling
+        let td_section = td_offer_subject.nextElementSibling
+
         if (json.type == `create`) {
-          td.innerHTML = json.new_section;  
+          td_section.innerHTML = json.new_section;  
+          td_offer_subject.innerHTML = json.offer_subject;  
           toastr.success(json.data);
         }else {
-          td.textContent = "";
+          td_section.textContent = "";
+          td_offer_subject.innerHTML = '';  
           toastr.info(json.data);
         }
 

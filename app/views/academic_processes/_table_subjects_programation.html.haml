@@ -4,11 +4,13 @@
     %thead{style: "position: sticky;top: 0; background-color:#F4F4F4"}
       %tr
         %th.col-1{style: 'width:12px'} #
+        %th.col-1{style: 'width:12px'} Año
         %th.col-5{scope: :col}
           .input-group.input-group-sm{style: 'width: 100%;'}
             %input.form-control{"aria-describedby" => "inputGroup-sizing-sm", "aria-label" => "", type: "text", placeholder: 'Asignaturas', autofocus: true, id: 'filterSubject', name: 'filterSubject'}
 
-        %th.col-1.text-center Activa
+        %th.col-1.text-center Activar
+        %th.col-1.text-center Ofertar
         - if (current_user&.admin&.authorized_read? 'Section') or (current_user&.admin&.authorized_create? 'Section')
           %th Secciones
     %tbody.table-group-divider
@@ -23,7 +25,9 @@
         - has_sections = sections&.any?
         %tr.trFiltrable{style: 'overflow: scroll;'}
           %td= i+1
+          %td= subject.ordinal_to_cardinal_short
           %td{title: subj_desc}= link_to_if (current_user&.admin&.authorized_read? 'Subject'), subj_desc, "/admin/subject/#{subject.id}"
+          - # Activar Aig
           %td.text-center
             - if course
               - if (current_user&.admin&.authorized_delete? 'Course')
@@ -36,6 +40,14 @@
                 = render partial: 'academic_processes/form_active_subject', locals: {subject_id: subject.id, course: course, has_sections: has_sections}
               - else
                 %i.fas.fa-remove
+          - # Ofertar
+          %td.text-center
+            - if course
+              - if (current_user&.admin&.authorized_manage? 'Course')
+                = render partial: 'academic_processes/form_offer_subject', locals: {subject_id: subject.id, course: course}
+              - else
+                %i.fas.fa-check
+
           %td.overflow-scroll
             - if course
               %table
