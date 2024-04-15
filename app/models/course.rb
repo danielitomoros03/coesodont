@@ -142,6 +142,9 @@ class Course < ApplicationRecord
         end
       end
 
+      field :offer do
+      end
+
       field :sections do
         column_width '300'
         pretty_value do
@@ -211,7 +214,7 @@ class Course < ApplicationRecord
         inline_edit false
         inline_add false        
       end
-
+      field :offer
       field :subject do
         inline_edit false
         inline_add false        
@@ -220,7 +223,7 @@ class Course < ApplicationRecord
     end
 
     export do
-      fields :academic_process, :period, :subject, :area
+      fields :academic_process, :period, :subject, :area, :offer
       field :total_sections do
         label 'T. Sec'
       end

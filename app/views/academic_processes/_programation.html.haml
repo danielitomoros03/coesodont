@@ -33,9 +33,13 @@
   - if (current_user&.admin&.authorized_read? 'Course')
     .float-end= render partial: '/courses/quick_export', locals: {period_name: period_name, academic_process_id: academic_process_id}
 
-    = link_to "/admin/course?f%5Bacademic_process%5D%5B52520%5D%5Bo%5D=like&f%5Bacademic_process%5D%5B52520%5D%5Bv%5D=#{period_name}&academic_process_id=#{academic_process_id}", class: 'btn btn-primary mx-1', title: "Ver listado de cursos #{period_name}" do
+    = link_to "/admin/course?f%5Bacademic_process%5D%5B52520%5D%5Bo%5D=like&f%5Bacademic_process%5D%5B52520%5D%5Bv%5D=#{period_name}&academic_process_id=#{academic_process_id}", class: 'btn btn-sm btn-primary mx-1', title: "Ver listado de cursos #{period_name}" do
       .fa-solid.fa-shapes
-      ="Ver en Cursos"
+      Ver en Cursos
+
+    = link_to "/admin/course?f%5Bacademic_process%5D%5B52520%5D%5Bo%5D=like&f%5Bacademic_process%5D%5B52520%5D%5Bv%5D=#{period_name}&f%5Boffer%5D%5B12712%5D%5Bv%5D=true&query=", class: 'btn btn-sm btn-success mx-1', title: "Ver cursos ofertados #{period_name}" do
+      .fa-solid.fa-shapes
+      Ofertados en Cursos
 
 %br
 %br

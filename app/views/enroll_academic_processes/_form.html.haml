@@ -63,10 +63,7 @@
     - SubjectType.all.each do |subject_type|
       - subject_type_name = subject_type.name&.downcase.pluralize.titleize
       - courses = courses_offer.where('subjects.modality': subject_type.name&.downcase).order_by_subject_ordinal_and_subject_code
-      - if courses.any?
-        = render partial: 'enroll_academic_processes/courses_offer', locals: {courses: courses, pcis: false, grade: grade, tipo_name: subject_type_name}
-      - else
-        .alert.alert-info= "Sin Asignaturas #{subject_type_name.titleize}" 
+      = render partial: 'enroll_academic_processes/courses_offer', locals: {courses: courses, pcis: false, grade: grade, tipo_name: subject_type_name} if courses.any?
 
   = render partial: 'enroll_academic_processes/total_credits', locals: {limitCredits: limitCredits, limitSubjects: limitSubjects, totalCreditsReserved: totalCreditsReserved, totalSubjectsReserved: totalSubjectsReserved }
 

@@ -616,6 +616,7 @@ es:
         sections: Secciones
         academic_process: 'Período'
         subject: 'Asignatura'
+        offer: '¿Ofertada?'
         offer_as_pci: 'Ofertar cómo PCI'
       enroll_academic_process:
         grade: 'Grado'
