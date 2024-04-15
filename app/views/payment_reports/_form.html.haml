@@ -22,6 +22,9 @@
 
   = f.input :voucher, required: true, input_html: {accept: "image/jpeg,image/jpg,image/png"}
 
+  = f.input :depositor_name, required: true, input_html: {onInput: "$(this).val($(this).val().toUpperCase().replace(/[^A-Z| ]/g,''))"}
+  = f.input :depositor_ci, required: true, input_html: {onInput: "$(this).val($(this).val().replace(/[^0-9]/g,''))"}
+
   .form-actions
     = f.button :submit
 

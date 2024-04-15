@@ -75,10 +75,11 @@ class PaymentReport < ApplicationRecord
           end
         end
       end
+      fields :depositor_name, :depositor_ci
     end
 
     show do
-      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account, :voucher
+      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account, :voucher, :depositor_name, :depositor_ci
     end
 
     edit do
@@ -100,11 +101,11 @@ class PaymentReport < ApplicationRecord
         inline_edit false
         inline_add false
       end
-      field :voucher
+      fields :voucher, :depositor_name, :depositor_ci
     end
 
     export do
-      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :origin_bank
+      fields :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :origin_bank, :depositor_name, :depositor_ci
       field :payable_type do
         label 'Tipo'
       end
