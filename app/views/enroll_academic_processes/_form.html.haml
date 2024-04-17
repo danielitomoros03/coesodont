@@ -7,8 +7,8 @@
 
 - if current_user.student? and (session[:rol].eql? 'student')
   - if school.enable_by_level?
-    - subjects_offer_by_dependency = grade.subjects_offer_by_level_approved
-    - courses_offer = courses_offer.where(subject_id: subjects_offer_by_dependency.ids)
+    - subjects_offer_by_level_approved = grade.subjects_offer_by_level_approved
+    - courses_offer = courses_offer.where(subject_id: subjects_offer_by_level_approved.ids)
   - elsif school.enable_dependents?
     - subjects_offer_by_dependency = grade.subjects_offer_by_dependent
     - courses_offer = courses_offer.where(subject_id: subjects_offer_by_dependency.ids)
