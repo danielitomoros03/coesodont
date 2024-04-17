@@ -675,6 +675,9 @@ es:
 
       payment_report:
         amount: 'Monto'
+        status: Estado
+        student: Estudiante
+        payable: Pagable
         transaction_id: 'Número de Transacción'
         transaction_type: 'Tipo de Transacción'
         transaction_date: 'Fecha de la Transacción'

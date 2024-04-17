@@ -2,6 +2,8 @@
 - period = academic_process.period
 - academic_records = enroll_academic_process.academic_records
 - school = enroll_academic_process.school
+- enabled_to_admin = (current_user&.admin? and session[:rol].eql? 'admin') ? true : false
+= render partial: 'enroll_academic_processes/options', locals: {period: period, enroll_academic_process: enroll_academic_process, enabled_options: (enrolling_process or active_process)}
 .responsive-table
   %table.table.table-sm
     %thead
@@ -12,7 +14,9 @@
         %th.text-center Asig. Insc.
         %th.text-center Créd. Insc.
         %th.text-center.w-25 Números
-        %th.text-end{style: 'width:50%'} Opciones
+        - if (session[:rol].eql? 'student') or (enabled_to_admin and current_user&.admin&.authorized_read? 'PaymentReport')
+          %th.text-center.w-25 Reporte Pago
+
 
     %tbody
       %tr
@@ -35,8 +39,22 @@
           %i{title: "Promedio Ponderado del #{period.name}"}
             = ApplicationController.helpers.label_status("bg-info", enroll_academic_process.weighted_average.round(2))
 
-        %td.text-center
-          = render partial: 'enroll_academic_processes/options', locals: {period: period, enroll_academic_process: enroll_academic_process, enabled_options: (enrolling_process or active_process)}
+        - if (session[:rol].eql? 'student') or (enabled_to_admin and current_user&.admin&.authorized_read? 'PaymentReport')
+          %td.text-center
+            - if @payment_report = enroll_academic_process.payment_reports.first
+              - id = "showPaymentReportModal#{enroll_academic_process.id}"
+              - titlePayment = "Reporte de Pago de inscripción #{enroll_academic_process.academic_process.short_desc}"
+              = @payment_report.label_status
+              %a.btn.btn-success.btn-sm.float-end.mx-2{"data-bs-target": "##{id}", "data-bs-toggle": :modal, type: :button, title: titlePayment}
+                .fa.fa-receipt
+                .fa.fa-check
+              - content = render template: "/payment_reports/show"
+              = render partial: '/layouts/scaffold-modal', locals: {content: content, title: titlePayment, id: id}
+            - else
+              %b.btn.btn-secondary.btn-sm.float-end.mx-2{rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-original-title': 'Sin reporte de pago'}
+                .fa.fa-receipt
+
+
 
       %tr
         - enabled_delete = ((current_user&.admin&.authorized_delete? 'AcademicRecord') and session[:rol].eql? 'admin')

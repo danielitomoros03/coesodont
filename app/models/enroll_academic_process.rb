@@ -326,8 +326,15 @@ class EnrollAcademicProcess < ApplicationRecord
             scope = scope.joins(:payment_reports)
             scope = scope.limit(30)
           }
-        end        
+        end
       end
+      field :payment_report_status do
+        label 'Estado Reporte Pago'
+        formatted_value do
+          bindings[:object].payment_reports&.map{|pr| pr.label_status}.to_sentence.html_safe
+        end
+      end
+
       fields :efficiency, :simple_average, :weighted_average
     end
 

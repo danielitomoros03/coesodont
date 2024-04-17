@@ -24,7 +24,7 @@ class PaymentReportsController < ApplicationController
     @payment_report = PaymentReport.new(payment_report_params)
 
     if @payment_report.save
-      flash[:success] = "¡Reporte de pago realizado con éxito!"
+      flash[:success] = "¡Reporte de pago realizado con éxito! Por favor espere la confirmación por parte de Control de Estudio."
     else
       flash[:danger] = @payment_report.errors.full_messages.to_sentence
     end
