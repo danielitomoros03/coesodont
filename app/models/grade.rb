@@ -277,10 +277,10 @@ class Grade < ApplicationRecord
       total_approved_by_levels = self.academic_records.aprobado.joins(:subject).group('subjects.ordinal').count
       total_approved_by_levels = total_approved_by_levels.to_a
       
+      levels_not_approved = []
       begin
         if total_approved_by_levels.any?
           last_approved_level = total_approved_by_levels.max.first
-          levels_not_approved = []
           # p "    ULTIMO NIVEL: #{last_approved_level}     ".center(2000, "=")
           total_approved_by_levels.each do |approved_by_level|
             level = approved_by_level.first
@@ -308,7 +308,7 @@ class Grade < ApplicationRecord
         end
         return levels_not_approved#.last(2)
       rescue Exception
-        return []
+        return 1
       end
     end
 
