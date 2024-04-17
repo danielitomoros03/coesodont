@@ -685,8 +685,8 @@ es:
         payable: 'Pagable'
         receiving_bank_account: 'Cuenta Receptora'
         voucher: 'Imagen de Comprobante'
-        depositor_name: Nombre del Depositante
-        depositor_ci: CI del Depositante
+        depositor_name: Nombre del Titular Cuenta
+        depositor_ci: CI del Titular Cuenta
         created_at: 'Fecha Registro'
       period:
         year: 'Año'

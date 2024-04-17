@@ -69,6 +69,6 @@ class PaymentReportsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def payment_report_params
-      params.require(:payment_report).permit(:amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank_id, :payable_id, :payable_type, :receiving_bank_account_id, :voucher)
+      params.require(:payment_report).permit(:amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank_id, :payable_id, :payable_type, :receiving_bank_account_id, :voucher, :depositor_name, :depositor_ci )
     end
 end
