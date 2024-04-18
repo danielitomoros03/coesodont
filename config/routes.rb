@@ -94,7 +94,11 @@ Rails.application.routes.draw do
   resources :banks do
     resources :payment_reports
   end
-  resources :payment_reports
+  resources :payment_reports do
+    member do
+      get :quick_validation
+    end
+  end
   resources :schools, only: [:update] do
     member do
       get 'export_grades'

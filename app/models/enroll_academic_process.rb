@@ -72,7 +72,14 @@ class EnrollAcademicProcess < ApplicationRecord
   scope :custom_search, -> (keyword) { joins(:user, :period).where("users.ci ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'") }
 
   scope :with_payment_report, -> {joins(:payment_reports)}
+  #Alias
+  scope :con_reporte_de_pago, -> {with_payment_report}
+  scope :without_payment_report, -> {left_joins(:payment_reports).where('payment_reports.payable_id': nil)}
+  scope :sin_reporte_de_pago, -> {without_payment_report}
+
+
   scope :total_with_payment_report, -> {with_payment_report.count}
+  scope :total_without_payment_report, -> {without_payment_report.count}
 
   def total_retire?
     academic_records.any? and (academic_records.count.eql? academic_records.retirado.count)
@@ -268,7 +275,7 @@ class EnrollAcademicProcess < ApplicationRecord
     list do
       search_by :custom_search
       # filters [:period_name, :student]
-      scopes [:todos, :preinscrito, :reservado, :confirmado, :retirado]
+      scopes [:todos, :preinscrito, :reservado, :confirmado, :retirado, :con_reporte_de_pago, :sin_reporte_de_pago]
 
       field :enroll_status_label do
         label 'Estado'

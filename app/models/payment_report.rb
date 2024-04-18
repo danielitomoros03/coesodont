@@ -76,13 +76,14 @@ class PaymentReport < ApplicationRecord
   def label_status
     case status
     when "Invalidado"
-      aux = 'danger'
+      ApplicationController.helpers.label_status("bg-danger", self.status&.titleize)
     when "Validado"
-      aux =  'success'
+      ApplicationController.helpers.label_status("bg-success", self.status&.titleize)
     else
-      aux = 'warning'
+      aux = ApplicationController.helpers.label_status("bg-warning mx-2", self.status&.titleize)
+      aux += "<a href='/payment_reports/#{self.id}/quick_validation?payment_report[status]=Validado' class='label label-sm bg-success' data-bs-placement='right' data-bs-original-title='Validación rápida' rel='tooltip' data-bs-toggle='tooltip'><i class='fa fa-check'></i></a>".html_safe
+      aux.html_safe
     end    
-    ApplicationController.helpers.label_status("bg-#{aux}", self.status&.titleize)
   end
 
   rails_admin do

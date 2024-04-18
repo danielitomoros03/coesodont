@@ -144,8 +144,11 @@ class AcademicProcess < ApplicationRecord
     link = "/admin/enroll_academic_process?query=#{period_name}"
     total << ApplicationController.helpers.label_link_with_tooptip(link, 'bg-secondary', self.enroll_academic_processes.count, 'Total')
 
-    total << ApplicationController.helpers.label_link_with_tooptip('javascript:void(0)', 'bg-secondary', self.enroll_academic_processes.total_with_payment_report, 'Con Reportes de Pago')    
+    total << ApplicationController.helpers.label_link_with_tooptip("#{link}&model_name=enroll_academic_process&scope=con_reporte_de_pago", 'bg-success', self.enroll_academic_processes.total_with_payment_report, 'Con Reportes de Pago')    
+    total << ApplicationController.helpers.label_link_with_tooptip("#{link}&model_name=enroll_academic_process&scope=sin_reporte_de_pago", 'bg-warning', self.enroll_academic_processes.total_with_payment_report, 'Sin Reportes de Pago')    
 
+
+    
 
     EnrollAcademicProcess.enroll_statuses.map do |k,v|
       total_aux = self.enroll_academic_processes.where(enroll_status: v).count 
@@ -285,19 +288,10 @@ class AcademicProcess < ApplicationRecord
       end
 
       field :numbers_enrolled do
-        column_width 240
+        column_width 300
         label 'Estudiantes'
         formatted_value do
-          if (bindings[:view]._current_user&.admin&.authorized_read? 'EnrollAcademicProcess')
-            link_to_massive_confirmation = ''
-            if bindings[:object].enroll_academic_processes.not_confirmado.any?
-              link_to_massive_confirmation = bindings[:object].link_to_massive_confirmation
-            end
-            "#{bindings[:object].btn_total_enrolls_by_status} #{link_to_massive_confirmation}".html_safe
-
-          else
-            "#{bindings[:object].label_total_enrolls_by_status}".html_safe
-          end
+          bindings[:view].render(partial: '/academic_processes/numbers_labels', locals: {ap: bindings[:object], authorized: (bindings[:view]._current_user&.admin&.authorized_read? 'EnrollAcademicProcess')})
         end
       end
       field :total_academic_records do

@@ -1,5 +1,5 @@
 class PaymentReportsController < ApplicationController
-  before_action :set_payment_report, only: %i[ show edit update destroy ]
+  before_action :set_payment_report, only: %i[ show edit update destroy quick_validation ]
 
   # GET /payment_reports or /payment_reports.json
   def index
@@ -51,6 +51,22 @@ class PaymentReportsController < ApplicationController
 
   # end
 
+  def quick_validation
+    if @payment_report.update(payment_report_params)
+      flash[:success] = "¡Reporte de pago actualizado!"
+
+      # format.html { redirect_to payment_report_url(@payment_report), notice: "Payment report was successfully updated." }
+      # format.json { render :show, status: :ok, location: @payment_report }
+    else
+      flash[:danger] = @payment_report.errors.full_messages.to_sentence
+      # format.html { render :edit, status: :unprocessable_entity }
+      # format.json { render json: @payment_report.errors, status: :unprocessable_entity }
+    end
+
+    redirect_back fallback_location: root_path
+
+  end
+
   # DELETE /payment_reports/1 or /payment_reports/1.json
   def destroy
     @payment_report.destroy
@@ -69,6 +85,6 @@ class PaymentReportsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def payment_report_params
-      params.require(:payment_report).permit(:amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank_id, :payable_id, :payable_type, :receiving_bank_account_id, :voucher, :depositor_name, :depositor_ci )
+      params.require(:payment_report).permit(:amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank_id, :payable_id, :payable_type, :receiving_bank_account_id, :voucher, :depositor_name, :depositor_ci, :status )
     end
 end
