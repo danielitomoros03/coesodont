@@ -104,6 +104,12 @@ class PaymentReport < ApplicationRecord
       field :created_at do
         sticky true
       end
+      field :status do
+        sticky true
+        pretty_value do
+          bindings[:object].label_status
+        end
+      end
 
       field :amount
       field :academic_process do
@@ -125,11 +131,6 @@ class PaymentReport < ApplicationRecord
       end
 
       fields :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account
-      field :status do
-        pretty_value do
-          bindings[:object].label_status
-        end
-      end
       field :voucher do
         filterable false
 
