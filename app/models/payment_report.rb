@@ -73,16 +73,20 @@ class PaymentReport < ApplicationRecord
     ActionController::Base.helpers.number_to_currency(self.amount, unit: 'Bs.', separator: ",", delimiter: ".")
   end
 
-  def label_status
+  def label_status readonly=false
     case status
     when "Invalidado"
       ApplicationController.helpers.label_status("bg-danger", self.status&.titleize)
     when "Validado"
       ApplicationController.helpers.label_status("bg-success", self.status&.titleize)
     else
-      aux = ApplicationController.helpers.label_status("bg-warning mx-2", self.status&.titleize)
-      aux += "<a href='/payment_reports/#{self.id}/quick_validation?payment_report[status]=Validado' class='label label-sm bg-success' data-bs-placement='right' data-bs-original-title='Validación rápida' rel='tooltip' data-bs-toggle='tooltip'><i class='fa fa-check'></i></a>".html_safe
-      aux.html_safe
+      if readonly
+        ApplicationController.helpers.label_status("bg-warning mx-2", self.status&.titleize)
+      else
+        aux = ApplicationController.helpers.label_status("bg-warning mx-2", self.status&.titleize)
+        aux += "<a href='/payment_reports/#{self.id}/quick_validation?payment_report[status]=Validado' class='label label-sm bg-success' data-bs-placement='right' data-bs-original-title='Validación rápida' rel='tooltip' data-bs-toggle='tooltip'><i class='fa fa-check'></i></a>".html_safe
+        aux.html_safe
+      end
     end    
   end
 
