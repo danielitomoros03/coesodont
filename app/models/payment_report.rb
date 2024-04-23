@@ -97,6 +97,7 @@ class PaymentReport < ApplicationRecord
     list do
       search_by :custom_search
       scopes [:todos, :Pendiente, :Validado, :Invalidado]
+      field :id
       field :amount
       field :academic_process do
         label 'Period'
