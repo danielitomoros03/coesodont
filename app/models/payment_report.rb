@@ -50,6 +50,7 @@ class PaymentReport < ApplicationRecord
   validates :origin_bank, presence: true
   validates :receiving_bank_account, presence: true
   validates :voucher, presence: true
+  validates :status, presence: true
 
   enum transaction_type: [:transferencia, :efectivo, :punto_venta]
 
@@ -113,7 +114,7 @@ class PaymentReport < ApplicationRecord
 
       field :amount
       field :academic_process do
-        label 'Period'
+        label 'Periodo'
         formatted_value do
           bindings[:object].academic_process&.name
         end
@@ -123,12 +124,12 @@ class PaymentReport < ApplicationRecord
           "<a href='/admin/student/#{bindings[:object].student&.id}'>#{bindings[:object].student&.user&.ci_fullname}</a>".html_safe
         end
       end
-      field :payable_name do
-        label 'Descripción'
-        formatted_value do
-          bindings[:object].payable.name
-        end
-      end
+      # field :payable_name do
+      #   label 'Descripción'
+      #   formatted_value do
+      #     bindings[:object].payable.name
+      #   end
+      # end
 
       fields :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account
       field :voucher do
