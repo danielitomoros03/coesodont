@@ -91,7 +91,7 @@
           - elsif ['articulo3', 'articulo6', 'articulo7'].include? grade.current_permanence_status
             - # ROYER RABIT
             = render partial: '/grades/regulation', locals: {grado: grade}
-          - elsif ['nuevo', 'intercambio', 'egresado', 'egresado_doble_titulo'].include? grade.current_permanence_status
+          - elsif ['intercambio', 'egresado', 'egresado_doble_titulo'].include? grade.current_permanence_status
             .alert.alert-warning
               %b ATENCIÓN:
               Si desea inscribirse debe realizarlo directamente por Control de Estudio.

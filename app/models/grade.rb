@@ -144,7 +144,9 @@ class Grade < ApplicationRecord
       return true
     else
       academic_process_before = academic_process&.process_before
-      if (academic_process_before and self.enroll_academic_processes.of_academic_process(academic_process_before.id).any?) and (['regular', 'reincorporado', 'articulo3'].include? self.current_permanence_status)
+      if self.nuevo?
+        return true
+      elsif (academic_process_before and self.enroll_academic_processes.of_academic_process(academic_process_before.id).any?) and (['regular', 'reincorporado', 'articulo3'].include? self.current_permanence_status)
         return true
       end
     end
