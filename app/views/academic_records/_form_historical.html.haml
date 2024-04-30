@@ -113,14 +113,18 @@
 
     elem.prop('disabled', false);
     let qa = $(`.qualificable`);
-    if (elem.prop('id') != 'eq') {
-      
-      qa.prop('disabled', checked);
+    qa.prop('disabled', checked);
+    qa.prop('readonly', checked);
+    qa.prop('required', false);
+    
+    /* if (elem.prop('id') != 'eq') {
+    /  qa.prop('disabled', checked);
       qa.prop('readonly', checked);
       qa.prop('required', false);
+      
     } else {
       qa.prop('required', checked);
-    }
+    }*/
   }
 
   function showSections(value){
