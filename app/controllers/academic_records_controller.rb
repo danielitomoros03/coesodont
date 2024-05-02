@@ -37,7 +37,13 @@ class AcademicRecordsController < ApplicationController
 
           if section.new_record?
             section.capacity = 30
-            section.modality = params[:eq] ? :equivalencia : :nota_final
+            if params[:ee]
+              section.modality = :equivalencia_externa
+            elsif param[:ei]
+              section.modality = :equivalencia_interna
+            else    
+              section.modality = :nota_final
+            end
           end
 
           if section.save 
@@ -52,8 +58,6 @@ class AcademicRecordsController < ApplicationController
                   @academic_record.status = :perdida_por_inasistencia
                 elsif params[:rt]
                   @academic_record.status = :retirado
-                elsif params[:eq]
-                  @academic_record.status = :equivalencia
                 else
                   @academic_record.status = :aplazado
                 end

@@ -3,15 +3,15 @@
   .row.text-center.fw-bold
     .col-3{title: 'Descripción de la asigntura'} Asignatura
     .col-2{title: 'Identificador de la Sección'} Sección
-    .col-1.dual{style: 'display:none',title: 'Equivalencia'} EQ
-    
+    .col-1.dual{style: 'display:none',title: 'Equivalencia'} EE
+    .col-1.dual{style: 'display:none',title: 'Equivalencia'} EI
     .col-1.numerica{style: 'display:none', title: 'Pérdida por Inasistencia'} PI
     .col-1.dual.border-end{style: 'display:none', title: 'Retirada'} RT
     .col-3.absoluta{style: 'display:none'} ¿Aprobado?
     - if GeneralSetup.enabled_post_qualification?
       .col-1.numerica{style: 'display:none', title: 'Tipo de Calificación'} Tipo
     .col-1.numerica{style: 'display:none', title: 'Calificación'} Calif
-    .col-2 
+    .col-1 
 
   = form_tag "/academic_records" do
     = hidden_field_tag 'academic_record[enroll_academic_process_id]', enroll.id
@@ -44,8 +44,11 @@
           .radios
             .form-check.form-check-inline
               .mx-2 
-                = radio_button :options, nil, :eq, {class: 'form-check-input', checked: false}
-                EQ
+                = radio_button :options, nil, :ee, {class: 'form-check-input', checked: false}
+                EE
+              .mx-2 
+                = radio_button :options, nil, :ei, {class: 'form-check-input', checked: false}
+                EI                
               .mx-2
                 = radio_button :options, nil, :pi, {class: 'form-check-input', checked: false}
                 PI
@@ -54,11 +57,16 @@
                 RT
 
 
-      .col-1.text-center.dual{style: 'display:none', title: 'Marque esta casilla para indicar que la sección es de Equivalencia'}
-        =# EQUIVALENCIA
-        = check_box_tag :eq, nil, false, {class: 'checkeable btn-check', autocomplete: :off, onclick: "disabledByCheck(this);"}
-        %label.btn.btn-outline-primary{for: :eq}
-          .fa-regular.fa-check      
+      .col-1.text-center.dual{style: 'display:none', title: 'Marque esta casilla para indicar que la sección es de Equivalencia Externa'}
+        =# EQUIVALENCIA EXTERNA
+        = check_box_tag :ee, nil, false, {class: 'checkeable btn-check', autocomplete: :off, onclick: "disabledByCheck(this);"}
+        %label.btn.btn-outline-primary{for: :ee}
+          .fa-regular.fa-check
+      .col-1.text-center.dual{style: 'display:none', title: 'Marque esta casilla para indicar que la sección es de Equivalencia Interna'}
+        =# EQUIVALENCIA INTERNA
+        = check_box_tag :ei, nil, false, {class: 'checkeable btn-check', autocomplete: :off, onclick: "disabledByCheck(this);"}
+        %label.btn.btn-outline-primary{for: :ei}
+          .fa-regular.fa-check          
       = # CHECKS
       .col-1.text-center.numerica{style: 'display:none', title: 'Marque esta casilla para indicar Pérdida por Inasistencia'}
         =# PI'S
@@ -87,9 +95,9 @@
         =# QUALIFICATION VALUE
         =# text_field_tag '[qualifications]value', {}, {placeholder: 'Cal', class: "form-control qualificable", required: true, step: 1, in: 0...21, oninput: 'onlyValidQ(this);'}
         = select_tag '[qualifications]value', options_for_select( (1..20).map{|a| sprintf("%02i", a)}), {class: "form-control qualificable", include_blank: '--'}
-      .col-2
+      .col-1
         =# GUARDAR
-        %button.btn.bt.btn-primary.float-end{type: :submit}
+        %button.btn.btn-sm.btn-primary.float-end{type: :submit}
           %i.fa-regular.fa-check
           Guardar
 
