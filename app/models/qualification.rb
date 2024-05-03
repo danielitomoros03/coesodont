@@ -22,13 +22,15 @@ class Qualification < ApplicationRecord
   validates_uniqueness_of :academic_record, scope: [:type_q], message: 'Calificación ya existente', field_name: false
 
   after_save :update_academic_record_status
+  after_destroy :update_academic_record_status
 
   def name
     "#{type_q.titleize} #{value}" if (type_q and value)
   end
 
-  after_destroy :update_academic_record_status
-
+  def num_to_s
+    (academic_record.num_to_s value.to_i) if value
+  end
   def update_academic_record_status    
     definitive_q_value = self.academic_record.definitive_q_value
     if definitive_q_value and !self.academic_record.pi?
