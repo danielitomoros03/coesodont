@@ -359,7 +359,7 @@ class EnrollAcademicProcess < ApplicationRecord
       fields :student, :user
 
       field :efficiency do
-        label 'Edifiencia en el Período'
+        label 'Eficiencia en el Período'
       end
       
       field :simple_average do
