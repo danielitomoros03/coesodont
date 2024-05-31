@@ -55,6 +55,38 @@ class ExportCsvController < ActionController::Base
     end
   end
 
+  def enroll_academic_processes
+    begin
+      @object = params[:model_name].camelize.constantize.find (params[:id])
+      cod = @object.name
+      cod ||= @object.code
+      cod ||= @object.id
+      model = @object.class.name.underscore
+      model_titulo = "#{I18n.t("activerecord.models.#{model}.one")&.titleize}"
+      aux = "Reporte Coes - Inscritos - #{model_titulo} #{cod} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.csv"
+      response.headers.delete('Content-Length')
+      response.headers['Cache-Control'] = 'no-cache'
+      response.headers['Content-Type'] = "text/event-stream;charset='utf-8';header=present"
+      response.headers['X-Accel-Buffering'] = 'no'
+      response.headers['ETag'] = '0'
+      response.headers['Last-Modified'] = '0'
+      response.headers['Content-Disposition'] = "attachment; filename=#{aux}"    
+
+      a = ['#', 'CI', 'NOMBRES', 'APELLIDOS','ESCUELA','PERIODO','ESTADO INSCRIP','ESTADO PERMANENCIA','REPORTE PAGO']
+      
+      @object.enroll_academic_processes.includes(:user, :academic_process, :payment_reports).find_each(batch_size: 500).with_index do |enroll_academic_process, i|
+        response.stream.write "#{a.join(';')}\n" if (i.eql? 0) 
+        response.stream.write "#{i+1}; #{enroll_academic_process.values_for_report.join(';')}\n"
+      end
+
+    rescue Exception => e
+      flash[:success] = "No se pudo generar el archivo: #{e}" 
+      redirect_back fallback_location: '/admin'
+    ensure
+      response.stream.close
+    end
+  end
+
 
 
 end

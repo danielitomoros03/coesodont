@@ -86,6 +86,14 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   # FUNCTIONS:
+  def resume_payment_reports
+    payment_reports.map(&:name)
+  end
+  def values_for_report
+    # ['#', 'CI', 'NOMBRES', 'APELLIDOS','ESCUELA','PERIODO','ESTADO INSCRIP','ESTADO PERMANENCIA','REPORTE PAGO']
+    user_aux = user
+    [user_aux.ci, user_aux.first_name, user_aux.last_name, school.name, period.name, enroll_status&.titleize, permanence_status&.titleize, resume_payment_reports]
+  end
 
   def overlapped? schedule2
     # self.schedules.where(day: schedule2.day).each do |sh|

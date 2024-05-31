@@ -85,10 +85,21 @@ module ApplicationHelper
 		id = object.id
 		total = object.academic_records.count
 		cod = object.name
-		cod ||= cod.code
+		cod ||= object.code
+		cod ||= object.id
 		model_name = object.class.name
 		label_link_with_tooptip("/export_csv/academic_records/#{id}?model_name=#{model_name}", 'bg-success', "<i class='fa-solid fa-user-graduate'></i><i class='fa-solid fa-down-long'></i>", "Descargar #{total} Regisrtos Académicos del #{(translate_model model_name.underscore, 'one').titleize} #{cod}", placement='left') if total > 0
 	end
+
+	def link_enroll_academic_process_csv object 
+		id = object.id
+		total = object.enroll_academic_processes.count
+		cod = object.name
+		cod ||= object.code
+		cod ||= object.id
+		model_name = object.class.name
+		label_link_with_tooptip("/export_csv/enroll_academic_processes/#{id}?model_name=#{model_name}", 'bg-success', "<i class='fa-solid fa-user-graduate'></i><i class='fa-solid fa-down-long'></i>", "Descargar #{total} Inscritos del #{(translate_model model_name.underscore, 'one').titleize} #{cod}", placement='left') if total > 0
+	end	
 	
 	def label_link_with_tooptip(href, klazz, content, title, placement='top')
 

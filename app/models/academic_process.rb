@@ -297,7 +297,7 @@ class AcademicProcess < ApplicationRecord
       end
       field :total_academic_records do
         column_width 100
-        label 'En Asignaturas'
+        label 'Inscritos por Asignatura'
         pretty_value do
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')
@@ -308,6 +308,21 @@ class AcademicProcess < ApplicationRecord
           end
         end
       end
+
+      field :enroll_academic_processes do
+        column_width 100
+        label 'Inscritos por Período'
+        pretty_value do
+          user = bindings[:view]._current_user
+          total = bindings[:object].enroll_academic_processes.count
+          if (user&.admin&.authorized_read? 'EnrollAcademicProcess')
+            a = %{<a href='/admin/enroll_academic_process?query=#{bindings[:object].period.name}' title='Total Inscripciones En Periodo'><span class='badge bg-info'>#{total}</span></a>}.html_safe
+            "#{a} #{ApplicationController.helpers.link_enroll_academic_process_csv bindings[:object]}".html_safe
+          else
+            %{<span class='badge bg-info'>#{value}</span>}.html_safe
+          end
+        end
+      end      
 
     end
 
