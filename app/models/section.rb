@@ -95,6 +95,13 @@ class Section < ApplicationRecord
     self.equivalencia_externa? or  self.equivalencia_interna?
   end
 
+  def self.print_to_system_command
+    require 'benchmark'
+    memory_command = "ps -o rss= -p #{Process.pid}"
+    memory_before = %x(#{memory_command}).to_i
+    puts "Memory: #{((memory_before) / 1024.0).round(2)} MB"
+  end
+
   def label_qualified
     if self.qualified?
       bg = 'bg-success'

@@ -27,6 +27,7 @@ class AcademicRecord < ApplicationRecord
   has_one :academic_process, through: :enroll_academic_process
   has_one :grade, through: :enroll_academic_process
   has_one :study_plan, through: :grade
+  has_one :school, through: :study_plan
   has_one :student, through: :grade
   has_one :address, through: :student
   has_one :user, through: :student
@@ -154,6 +155,10 @@ class AcademicRecord < ApplicationRecord
 
 
   # FUNCTIONS:
+  def values_for_report
+    user_aux = user
+    [user_aux.ci, user_aux.first_name, user_aux.last_name, school.name, area.name, subject.code, subject.name, period.name, section.code, self.get_value_by_status]
+  end
 
   def student_name_with_retired
     aux = user.reverse_name

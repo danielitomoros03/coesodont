@@ -32,6 +32,7 @@ class AcademicProcess < ApplicationRecord
   has_many :enroll_academic_processes, dependent: :destroy
   has_many :grades, through: :enroll_academic_processes
   has_many :students, through: :grades
+  has_many :users, through: :students
   has_many :courses, dependent: :destroy
   has_many :sections, through: :courses
   has_many :schedules, through: :sections
@@ -299,8 +300,9 @@ class AcademicProcess < ApplicationRecord
         label 'En Asignaturas'
         pretty_value do
           user = bindings[:view]._current_user
-          if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')          
-            %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Total Inscripciones En Asignaturas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+          if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')
+            a = %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Total Inscripciones En Asignaturas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
+            "#{a} #{ApplicationController.helpers.link_academic_records_csv bindings[:object]}".html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end

@@ -80,7 +80,16 @@ module ApplicationHelper
 			capture_haml{"#{content}".html_safe }
 		end	
 	end
-
+	
+	def link_academic_records_csv object 
+		id = object.id
+		total = object.academic_records.count
+		cod = object.name
+		cod ||= cod.code
+		model_name = object.class.name
+		label_link_with_tooptip("/export_csv/academic_records/#{id}?model_name=#{model_name}", 'bg-success', "<i class='fa-solid fa-user-graduate'></i><i class='fa-solid fa-down-long'></i>", "Descargar #{total} Regisrtos Académicos del #{(translate_model model_name.underscore, 'one').titleize} #{cod}", placement='left') if total > 0
+	end
+	
 	def label_link_with_tooptip(href, klazz, content, title, placement='top')
 
 		content_tag :a, href: href, rel: :tooltip, 'data-bs-toggle': :tooltip, 'data-bs-placement': placement, 'data-bs-original-title': title do
@@ -102,8 +111,9 @@ module ApplicationHelper
 		end	
 	end
 
-	def translate_model model
-		I18n.t("activerecord.models.#{model}.other")
+	def translate_model model, singular=other
+		
+		I18n.t("activerecord.models.#{model}.#{singular}")
 	end
 
 	def checkbox_auth id, action, value, area_id, onclick=nil

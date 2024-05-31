@@ -11,6 +11,8 @@ Rails.application.routes.draw do
 
   match "/export/xls/:id" => "export#xls", via: :get
 
+  match "/export_csv/academic_records/:id" => "export_csv#academic_records", via: :get
+
   resources :validar, only: :index do
     member do
       get 'constancias'

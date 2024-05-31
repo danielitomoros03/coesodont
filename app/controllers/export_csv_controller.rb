@@ -1,24 +1,22 @@
-class ExportController < ApplicationController
+class ExportCsvController < ActionController::Base
   include ActionController::Live
-  before_action :logged_as_admin?
 
-  def xls
-    if params[:grades_others] and params[:id]
-      academic_process = AcademicProcess.find params[:id]
-      list = academic_process.invalid_grades_to_csv
-      title = "No Validos para Cita Horaria #{academic_process.name}"
-    end
-    respond_to do |format|
-      format.xls {send_data list, filename: "#{title}.xls"}
-    end
+  def stream
+    response.headers['Content-Type'] = 'text/event-stream'
+    5.times {
+      response.stream.write "Hola Mundo\n"
+      sleep 4
+    }
+  ensure
+    response.stream.close
   end
 
-  def general
+
+  def academic_records
     # require 'xlsxtream'
     begin
-      # @object = params[:model_name].camelize.constantize.find (params[:id])
-      @object = AcademicProcess.find 44 
-      
+      @object = params[:model_name].camelize.constantize.find (params[:id])
+
       model = @object.class.name.underscore
       model_titulo = "#{I18n.t("activerecord.models.#{model}.one")&.titleize}"
       aux = "Reporte Coes - Registros - #{model_titulo} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.csv"
@@ -30,7 +28,14 @@ class ExportController < ApplicationController
       response.headers['Last-Modified'] = '0'
       response.headers['Content-Disposition'] = "attachment; filename=#{aux}"    
 
+      a = ['#', 'CI', 'NOMBRES', 'APELLIDOS','ESCUELA','CATEDRA','CÓDIGO ASIG', 'NOMBRE ASIG','PERIODO','SECCIÓN','ESTADO']
+      
+      @object.academic_records.includes(:section, :user, :period, :subject, :area).find_each(batch_size: 500).with_index do |academic_record, i|
+        response.stream.write "#{a.join(';')}\n" if (i.eql? 0) 
+        response.stream.write "#{i+1}; #{academic_record.values_for_report.join(';')}\n"
+      end
 
+      # Ojo: Versión incompleta con xlsx
       # io = StringIO.new
       # xlsx = Xlsxtream::Workbook.new(io)
       
@@ -42,11 +47,6 @@ class ExportController < ApplicationController
       #   end
       # end
 
-      response.stream.write %w{CI NOMBRES APELLIDOS ESCUELA CATEDRA ASIGNATURA PERIODO SECCIÓN ESTADO}.join(";")+"\n"
-      @object.academic_records.includes(:section, :user, :period, :subject, :area).find_each(batch_size: 500) do |academic_record|
-        response.stream.write "#{academic_record.values_for_report.join(';')}\n"
-      end
-
     rescue Exception => e
       flash[:success] = "No se pudo generar el archivo: #{e}" 
       redirect_back fallback_location: '/admin'
@@ -54,5 +54,7 @@ class ExportController < ApplicationController
       response.stream.close
     end
   end
+
+
 
 end
