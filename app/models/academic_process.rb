@@ -236,6 +236,7 @@ class AcademicProcess < ApplicationRecord
       sort_by 'periods.name'
 
       field :school do
+        sticky true
         column_width 150
 
         pretty_value do
@@ -244,6 +245,7 @@ class AcademicProcess < ApplicationRecord
         
       end
       fields :period do
+        sticky true
         label 'Período'
         column_width 100
         pretty_value do
