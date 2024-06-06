@@ -39,7 +39,7 @@ class AcademicRecordsController < ApplicationController
             section.capacity = 30
             if params[:ee]
               section.modality = :equivalencia_externa
-            elsif param[:ei]
+            elsif params[:ei]
               section.modality = :equivalencia_interna
             else    
               section.modality = :nota_final
