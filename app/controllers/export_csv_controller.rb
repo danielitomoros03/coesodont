@@ -72,9 +72,9 @@ class ExportCsvController < ActionController::Base
       response.headers['Last-Modified'] = '0'
       response.headers['Content-Disposition'] = "attachment; filename=#{aux}"    
 
-      a = ['#', 'CI', 'NOMBRES', 'APELLIDOS','ESCUELA','PERIODO','ESTADO INSCRIP','ESTADO PERMANENCIA','REPORTE PAGO']
+      a = ['#', 'CI', 'NOMBRES', 'APELLIDOS','ESCUELA', 'NIVEL', 'PERIODO','ESTADO INSCRIP','ESTADO PERMANENCIA','REPORTE PAGO']
       
-      @object.enroll_academic_processes.includes(:user, :academic_process, :payment_reports).find_each(batch_size: 500).with_index do |enroll_academic_process, i|
+      @object.enroll_academic_processes.includes(:user, :grade, :academic_process, :payment_reports).find_each(batch_size: 500).with_index do |enroll_academic_process, i|
         response.stream.write "#{a.join(';')}\n" if (i.eql? 0) 
         response.stream.write "#{i+1}; #{enroll_academic_process.values_for_report.join(';')}\n"
       end
