@@ -28,7 +28,7 @@ class ExportCsvController < ActionController::Base
       response.headers['Last-Modified'] = '0'
       response.headers['Content-Disposition'] = "attachment; filename=#{aux}"    
 
-      a = ['#', 'CI', 'NOMBRES', 'APELLIDOS','ESCUELA','CATEDRA','CÓDIGO ASIG', 'NOMBRE ASIG','PERIODO','SECCIÓN','ESTADO']
+      a = ['#', 'CÉDULA', 'NOMBRES', 'APELLIDOS','ESCUELA','CATEDRA','CÓDIGO ASIG', 'NOMBRE ASIG', 'CRÉDITOS', 'NOTA_FINAL', 'NOTA_DEF', 'TIPO_EXAM', 'PER_LECTI', 'ANO_LECT','SECCIÓN', 'PLAN']
       
       @object.academic_records.includes(:section, :user, :period, :subject, :area).find_each(batch_size: 500).with_index do |academic_record, i|
         response.stream.write "#{a.join(';')}\n" if (i.eql? 0) 
@@ -49,6 +49,7 @@ class ExportCsvController < ActionController::Base
 
     rescue Exception => e
       flash[:success] = "No se pudo generar el archivo: #{e}" 
+      p "    <#{e}>     ".center(500, "#")
       redirect_back fallback_location: '/admin'
     ensure
       response.stream.close
