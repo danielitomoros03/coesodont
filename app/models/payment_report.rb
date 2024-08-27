@@ -178,9 +178,9 @@ class PaymentReport < ApplicationRecord
       field :payable_type do
         label 'Tipo'
       end
-      field :payable_id do
-        label 'Id'
-      end
+      # field :payable_id do
+      #   label 'Id'
+      # end
 
       field :payable_name do
         label 'Descripción'
