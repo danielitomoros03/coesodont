@@ -399,7 +399,7 @@ class AcademicRecord < ApplicationRecord
     if pi?
       'CERO'
     elsif retirado? or (subject and subject.absoluta?) or num.nil? or !(num.is_a? Integer or num.is_a? Float)
-      status.humanize.upcase
+      status&.humanize&.upcase
     else
       numeros = %W(CERO UNO DOS TRES CUATRO CINCO SEIS SIETE OCHO NUEVE DIEZ ONCE DOCE TRECE CATORCE QUINCE DIECISÉIS DIECISIETE DIECIOCHO DIE)
       # dieciséis, diecisiete, dieciocho y diecinueve
