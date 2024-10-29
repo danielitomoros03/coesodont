@@ -392,7 +392,7 @@ class AcademicRecord < ApplicationRecord
 
   def description_q force_final = false
     qualification = force_final ? final_q : definitive_q
-    qualification ? (num_to_s qualification) : self.status.to_s.humanize.upcase 
+    qualification ? (num_to_s qualification) : self.status&.to_s.humanize.upcase 
   end
 
   def num_to_s num = definitive_q_value 
