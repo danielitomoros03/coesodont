@@ -77,6 +77,7 @@ class EnrollAcademicProcess < ApplicationRecord
   scope :without_payment_report, -> {left_joins(:payment_reports).where('payment_reports.payable_id': nil)}
   scope :sin_reporte_de_pago, -> {without_payment_report}
 
+  scope :retirado, -> {joins(:academic_records).where('academic_records.status': :retirado)}
 
   scope :total_with_payment_report, -> {with_payment_report.count}
   scope :total_without_payment_report, -> {without_payment_report.count}
