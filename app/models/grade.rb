@@ -107,6 +107,43 @@ class Grade < ApplicationRecord
   scope :custom_search, -> (keyword) { joins(:user, :school).where("users.ci ILIKE '%#{keyword}%' OR schools.name ILIKE '%#{keyword}%'") }
 
   # FUNCTIONS:
+  def short_name
+    if (study_plan and user)
+      "#{study_plan&.code}_#{user.ci}"
+    else
+      "#{id}"
+    end
+  end
+
+	def csv_academic_records
+		require 'csv'
+		
+		csv_data =CSV.generate(headers: true, col_sep: ";") do |csv|
+
+			csv << %w(CEDULA ASIGNATURA DENOMINACION CREDITO NOTA_FINAL NOTA_DEFI TIPO_EXAM PER_LECTI ANO_LECTI SECCION PLAN1)
+      academic_records.each do |academic_record|
+
+        sec = academic_record.section
+        asig = academic_record.subject
+    
+        # ============ Mover a Inscripcionseccion =========== #
+        nota_def = academic_record.cal_alfa_to_csv
+        nota_final = academic_record.cal_alfa_to_csv 'final'
+        # ============ Mover a Inscripcionseccion =========== #
+    
+        csv << [user.ci, asig.code, asig.name, asig.unit_credits, nota_final, nota_def, 'F', academic_record.academic_process&.period_type&.code, academic_record.academic_process&.period&.year, sec&.code, academic_record.study_plan&.code]
+    
+        if academic_record.post_q?
+          nota_final = nota_def = academic_record.post_q&.value_to_02i
+          csv << [user.ci, asig.code, asig.name, asig.unit_credits, nota_final, nota_def, 'F', academic_record.academic_process&.period_type&.code, academic_record.academic_process&.period&.year, sec&.code, academic_record.study_plan&.code]
+        end
+
+      end
+		end
+
+		return csv_data
+	end
+
   def help_msg
     unless self.school.contact_email.blank?
       "Puede escribir al correo: #{self.school.contact_email} para solicitar ayuda."

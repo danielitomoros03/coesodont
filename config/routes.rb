@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   match "/importer/teachers" => "importer#teachers" , :as => "importer_teachers", :via => [:get, :post]
   match "/importer/subjects" => "importer#subjects" , :as => "importer_subjects", :via => [:get, :post]
   match "/importer/academic_records" => "importer#academic_records" , :as => "importer_academic_records", :via => [:get, :post]
-
+  match "/export/history_grade/:id" => "export#history_grade", via: :get
   match "/export/xls/:id" => "export#xls", via: :get
 
   match "/export_csv/academic_records/:id" => "export_csv#academic_records", via: :get

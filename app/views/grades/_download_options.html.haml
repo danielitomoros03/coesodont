@@ -1,3 +1,10 @@
 = link_to "/grades/#{grade.id}/kardex.pdf", class: 'btn btn-success float-end mb-3', target: '_blank', rel: "noopener noreferrer" do
 	.fa.fa-download.fa-list
 	Kardex PDF
+
+- admin = current_user&.admin
+- if session[:rol].eql? 'admin' and (admin&.authorized_read? 'Grade' or admin&.authorized_manage? 'Grade')
+	= link_to "/export/history_grade/#{grade.id}.xls", class: 'btn btn-success float-end mb-3 me-3', target: '_blank', rel: "noopener noreferrer" do
+		.fa.fa-download.fa-list
+		Registros Excel
+

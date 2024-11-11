@@ -2,6 +2,18 @@ class ExportController < ApplicationController
   include ActionController::Live
   before_action :logged_as_admin?
 
+  def history_grade
+    @grade = Grade.find params[:id]
+    data = @grade.csv_academic_records
+    title = "registro_academico_ #{@grade.short_name}"
+
+    respond_to do |format|
+      format.xls {send_data data, filename: "#{title}.xls"}
+    end
+
+  end
+
+
   def xls
     if params[:grades_others] and params[:id]
       academic_process = AcademicProcess.find params[:id]
