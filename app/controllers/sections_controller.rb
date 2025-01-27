@@ -32,7 +32,7 @@ class SectionsController < ApplicationController
         format.html
         format.pdf do
           top = 72
-          top += 5 if @section.subject&.name&.length > 30
+          top += 5 if @section.subject&.name&.length > 45
           render pdf: "acta_#{@section.number_acta}", template: "sections/acta", locals: {section: @section}, formats: [:html], page_size: 'letter', header: {html: {template: '/sections/acta_header', formats: [:html], layout: false, locals: {school: @section.school, section: @section}}}, footer: {html: {template: '/sections/signatures', formats: [:html]}}, margin: {top: top, bottom: 68}#, dpi: 150
         end
       end
