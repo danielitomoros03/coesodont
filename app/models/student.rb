@@ -266,7 +266,9 @@ class Student < ApplicationRecord
 
       field :admission_types do
         label 'Ingreso'
-        # filterable true
+        searchable :name
+        sortable :name
+        filterable :name
       end
 
       field :user_phone do
@@ -286,6 +288,11 @@ class Student < ApplicationRecord
 
     export do
       fields :user, :nacionality, :origin_country, :sede, :origin_city, :birth_date, :marital_status, :address, :created_at
+      field :admission_types do
+        label 'Ingreso'
+        sortable :name
+        filterable :name
+      end
     end
 
     import do
