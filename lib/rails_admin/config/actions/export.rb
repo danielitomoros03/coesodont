@@ -55,7 +55,7 @@ module RailsAdmin
                   params[:csv_options][:encoding_to] = 'utf-8' 
                   params[:csv_options][:generator][:col_sep] = ';' 
 
-
+                  @objects = @objects.joins(:admission_types).uniq if params[:model_name].eql? 'student'
                   unless @model_config.list.scopes.empty?
                     if params[:scope].blank?
                       @objects = @objects.send(@model_config.list.scopes.first) unless @model_config.list.scopes.first.nil?
