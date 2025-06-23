@@ -2,7 +2,7 @@
   %table#courses_offer.table.table-striped.table-sm.table-hover.table-bordered
     %thead{style: "position: sticky;top: 0"}
       %tr
-        %th.text-center.table-primary{colspan: 5}= "Asignaturas #{tipo_name} Ofertadas"
+        %th.text-center.table-primary{colspan: 5}= "Asignaturas #{tipo_name} Ofertadas <span class='badge bg-dark'>#{courses.count}</span>".html_safe
         
       %tr.table-primary
         %th.headers{style: 'width: 4%', scope: :col} #
