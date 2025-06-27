@@ -10,7 +10,7 @@
   = link_to "/academic_records/#{academic_record.id}", class: 'btn btn-danger btn-sm float-end align-middle mx-2', 'data-confirm': confirm, method: :delete, 'data-bs-toggle': :tooltip, 'data-bs-placement': :top, title: msg, rel: "tooltip" do
     .fa-solid.fa-remove
 
-- if !academic_record.pi? and (admin and admin.authorized_update? 'AcademicRecord')
+- if !academic_record.pi? and (admin&.authorized_update? 'AcademicRecord')
   - if enabled_change
     - if academic_record.retirado?
       - msg = 'Reinscribir Asignatura'

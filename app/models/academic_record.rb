@@ -46,7 +46,7 @@ class AcademicRecord < ApplicationRecord
 
   validates_with SamePeriodValidator, field_name: false  
   validates_with SameSchoolValidator, field_name: false
-  validates_with SameSubjectInPeriodValidator, field_name: false#, if: :new_record?
+  validates_with SameSubjectInPeriodValidator, field_name: false, if: :new_record?
   validates_with ApprovedAndEnrollingValidator, field_name: false
 
   # validates :qualifications, presence: true, if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado? or object.equivalencia? ))}
