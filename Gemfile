@@ -67,6 +67,9 @@ group :development, :production do
   # gem 'prawn', '~> 2.4'
   # gem 'prawn-table'
 
+  gem 'caxlsx'
+  gem 'caxlsx_rails'
+
   # Own Gems:
   gem "haml-rails", "~> 2.0"
 
