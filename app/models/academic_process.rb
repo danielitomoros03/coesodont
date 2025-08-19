@@ -1,4 +1,5 @@
 class AcademicProcess < ApplicationRecord
+  include Recording
   # SCHEMA:
     # t.bigint "school_id", null: false
     # t.bigint "period_id", null: false
@@ -304,7 +305,7 @@ class AcademicProcess < ApplicationRecord
           user = bindings[:view]._current_user
           if (user and user.admin and user.admin.authorized_read? 'AcademicRecord')
             a = %{<a href='/admin/academic_record?query=#{bindings[:object].period.name}' title='Total Inscripciones En Asignaturas'><span class='badge bg-info'>#{value}</span></a>}.html_safe
-            "#{a} #{ApplicationController.helpers.link_academic_records_csv bindings[:object]}".html_safe
+            "#{a} #{bindings[:object].link_to_academic_records_csv_report}".html_safe
           else
             %{<span class='badge bg-info'>#{value}</span>}.html_safe
           end

@@ -1,4 +1,5 @@
 class Section < ApplicationRecord
+  include Recording
   # SCHEMA:
   # t.string "code"
   # t.integer "capacity"
@@ -494,6 +495,9 @@ class Section < ApplicationRecord
           display = ApplicationController.helpers.badge_toggle_section_qualified bindings[:object]
           if (current_user.admin? and bindings[:view].session[:rol] and bindings[:view].session[:rol].eql? 'admin' and current_user.admin.authorized_manage? 'Section' and bindings[:object].academic_records.any?) #and bindings[:object].qualified?
             display += ApplicationController.helpers.btn_toggle_download 'mx-3 btn-success', "/sections/#{bindings[:object].id}.pdf", 'Generar Acta', nil
+          end
+          if bindings[:view].session[:rol]&.eql? 'admin' and current_user.admin&.authorized_read? 'Section'
+            display += bindings[:object].link_to_academic_records_csv_report
           end
           display
         end

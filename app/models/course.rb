@@ -1,4 +1,5 @@
 class Course < ApplicationRecord
+  include Recording
   # SCHEMA:
   # t.bigint "academic_process_id", null: false
   # t.bigint "subject_id", null: false
@@ -155,8 +156,9 @@ class Course < ApplicationRecord
         label 'Ins'
         pretty_value do
           # %{<a href='/admin/academic_record?query=#{bindings[:object].name}'><span class='badge bg-info'>#{ApplicationController.helpers.label_status('bg-info', value)}</span></a>}.html_safe
-          ApplicationController.helpers.label_status('bg-info', value)
-
+          current_user = bindings[:view]._current_user
+          aux = (bindings[:view].session[:rol]&.eql? 'admin' and current_user.admin&.authorized_read? 'Course') ? bindings[:object].link_to_academic_records_csv_report : nil
+          "#{ApplicationController.helpers.label_status('bg-info', value)} #{aux}".html_safe
         end
       end
       field :total_sc do
