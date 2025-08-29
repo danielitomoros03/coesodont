@@ -166,8 +166,12 @@ class Grade < ApplicationRecord
     end
   end
 
+  def first_academic_process
+    academic_processes.order(name: :asc).first
+  end
+
   def last_enrolled
-    enroll_academic_processes.joins(:academic_process).order('academic_processes.name': :desc).first
+    enroll_academic_processes.joins(:academic_process).order('academic_processes.name': :asc).last
   end
 
   def academic_processes_unenrolled
@@ -685,6 +689,8 @@ class Grade < ApplicationRecord
     if new_record?
       self.study_plan_id ||= StudyPlan.first.id if StudyPlan.first
       self.registration_status = :universidad
+      # Por defecto, un Grade recién creado se considera "nuevo"
+      self.current_permanence_status ||= :nuevo
     end
   end  
 

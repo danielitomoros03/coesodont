@@ -16,11 +16,11 @@
 
 		%tr
 			%td.text-center.fw-bold= grade.study_plan.desc
-			%td.text-center.fw-bold= grade.start_process&.period_name
+			%td.text-center.fw-bold= grade.first_academic_process&.period_name
 			%td.text-center.fw-bold= grade.admission_type.name
 			- if grade.registration_status
 				%td.text-center
-					%strong.badge.bg-info= grade.registration_status.titleize
+					%strong.badge.bg-info.text-dark= grade.registration_status.titleize
 			- if grade.graduate_status
 				%td.text-center
 					%strong.badge.bg-info= grade.graduate_status.titleize

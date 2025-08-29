@@ -32,7 +32,19 @@ class EnrollAcademicProcess < ApplicationRecord
   # ENUMERIZE:
   # IDEA CON ESTADO DE INSCRIPCIÓN EN GRADE Y ENROLL ACADEMIC PROCESS
   enum enroll_status: [:preinscrito, :reservado, :confirmado]
-  enum permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar]  
+  enum permanence_status: {
+    nuevo: 0,
+    regular: 1,
+    reincorporado: 2,
+    articulo3: 3,
+    articulo6: 4,
+    articulo7: 5,
+    intercambio: 6,
+    desertor: 7,
+    egresado: 8,
+    egresado_doble_titulo: 9,
+    permiso_para_no_cursar: 10
+  }
 
   # VALIDATIONS:
   validates :grade, presence: true
@@ -81,6 +93,20 @@ class EnrollAcademicProcess < ApplicationRecord
 
   scope :total_with_payment_report, -> {with_payment_report.count}
   scope :total_without_payment_report, -> {without_payment_report.count}
+
+
+  scope :nuevos_en_periodo, -> {
+    where(
+      "enroll_academic_processes.academic_process_id = (
+        SELECT ap2.id
+        FROM enroll_academic_processes eap2
+        INNER JOIN academic_processes ap2 ON ap2.id = eap2.academic_process_id
+        WHERE eap2.grade_id = enroll_academic_processes.grade_id
+        ORDER BY ap2.name ASC
+        LIMIT 1
+      )"
+    )
+  }
 
   def total_retire?
     academic_records.any? and (academic_records.count.eql? academic_records.retirado.count)
@@ -284,7 +310,7 @@ class EnrollAcademicProcess < ApplicationRecord
     list do
       search_by :custom_search
       # filters [:period_name, :student]
-      scopes [:todos, :preinscrito, :reservado, :confirmado, :retirado, :con_reporte_de_pago, :sin_reporte_de_pago]
+      scopes [:todos, :preinscrito, :reservado, :confirmado, :retirado, :con_reporte_de_pago, :sin_reporte_de_pago, :nuevos_en_periodo]
 
       field :enroll_status_label do
         label 'Estado'
@@ -311,6 +337,15 @@ class EnrollAcademicProcess < ApplicationRecord
         # filterable ['users.ci', 'users.first_name', 'users.last_name']
         # sortable ['users.ci', 'users.first_name', 'users.last_name']
       end
+
+      # field :nuevo do
+      #   label 'Nuevo'
+      #   pretty_value do
+      #     bindings[:object].nuevo? ? ApplicationController.helpers.label_status('bg-info', 'Sí') : ApplicationController.helpers.label_status('bg-secondary', 'No')
+      #   end
+      #   column_width 60
+      # end
+
       field :total_subjects do
         label 'Tot Asig'
         column_width 40
@@ -384,6 +419,10 @@ class EnrollAcademicProcess < ApplicationRecord
       field :total_subjects do
         label 'Total Asignaturas en Periodo'
       end
+      field :total_subjects_approved do
+        label 'Total Asignaturas Aprobadas en Periodo'
+      end
+
       field :total_credits do
         label 'Total Créditos en Periodo'
       end
@@ -398,6 +437,14 @@ class EnrollAcademicProcess < ApplicationRecord
 
   def is_the_last_enroll_of_grade?
     self.grade.last_enrolled.eql? self
+  end
+
+
+  def nuevo_en_periodo?
+    # Determina si este enroll_academic_process es el primero del historial del grade
+    # Ordena por período (año ascendente, tipo de período ascendente) y verifica si es el primero
+
+    self.grade.first_academic_process&.id.eql? self.academic_process_id
   end
 
 
