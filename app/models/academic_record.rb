@@ -153,6 +153,21 @@ class AcademicRecord < ApplicationRecord
 
   scope :sort_by_user_name, -> {joins(:user).order('users.last_name asc, users.first_name asc')}
 
+  scope :todos, -> {where('0=0')}
+
+  scope :nuevos_en_periodo, -> {
+    joins(:enroll_academic_process).where(
+      "enroll_academic_processes.academic_process_id = (
+        SELECT ap2.id
+        FROM enroll_academic_processes eap2
+        INNER JOIN academic_processes ap2 ON ap2.id = eap2.academic_process_id
+        WHERE eap2.grade_id = enroll_academic_processes.grade_id
+        ORDER BY ap2.name ASC
+        LIMIT 1
+      )"
+    )
+  }
+
 
   # FUNCTIONS:
 
@@ -513,6 +528,7 @@ class AcademicRecord < ApplicationRecord
     list do
       search_by :custom_search
       sort_by 'periods.name'
+      scopes [:todos, :nuevos_en_periodo]
       # filters [:period_name, :section_code, :subject_code, :student_desc]
 
       # field :period_name do
