@@ -8,7 +8,7 @@ module RailsAdmin
       class Export < RailsAdmin::Config::Actions::Base
         RailsAdmin::Config::Actions.register(self)
 
-        # include ActionController::Live
+        include ActionController::Live
         
         register_instance_option :collection do
           true
@@ -21,7 +21,7 @@ module RailsAdmin
 
         register_instance_option :controller do
           proc do
-            format = params[:json] && :json || params[:csv] && :csv || params[:xml] && :xml
+            # format = params[:json] && :json || params[:csv] && :csv || params[:xml] && :xml
             if request.post?
               request.format = :xlsx
 
@@ -29,7 +29,6 @@ module RailsAdmin
               @objects = list_entries(@model_config, :export)
               
               begin
-
                 unless @model_config.list.scopes.empty?
                   if params[:scope].blank?
                     @objects = @objects.send(@model_config.list.scopes.first) unless @model_config.list.scopes.first.nil?
@@ -38,31 +37,43 @@ module RailsAdmin
                   end
                 end
 
-                if false #@objects.count > 300 and @schema[:include]&.count > 3
-                  # POTENCIAL PROBLEMA:
-
-                  # The code enqueues a LargeExportJob background job with @objects as an argument. 
-                  # If @objects is an ActiveRecord relation or a large dataset, passing it directly to a background job can cause serialization issues or excessive memory usage. 
-                  # It is generally safer to pass only IDs or query parameters to background jobs and re-fetch the records within the job itself.
-
-                  # LargeExportJob.perform_later(_current_user.id, params[:model_name], @objects, @schema )
-                  flash[:notice] = "La exportación ha comenzado, sin embargo la generación de la solicitud es de alta complejidad y requiere de mayor tiempo. Su solicitud será enviada por correo cuando esté lista."
-                  redirect_to "/admin/#{params[:model_name]}"
-                else
-
-                  response.headers.delete('Content-Length')
-                  response.headers['Cache-Control'] = 'no-cache'
-                  response.headers['Content-Type'] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  response.headers['X-Accel-Buffering'] = 'no'
-                  response.headers['ETag'] = '0'
-                  response.headers['Last-Modified'] = '0'
-                  aux = "Reporte Coes - #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.xlsx"
-                  response.headers['Content-Disposition'] = "attachment; filename=#{aux}"
-
-                  response.stream.write ExcelConverter.new(@objects, @schema).to_xlsx
-                end
-                  
+                # Configurar headers para streaming y evitar timeouts
+                response.headers.delete('Content-Length')
+                response.headers['Cache-Control'] = 'no-cache'
                 
+                
+                # response.headers['Content-Type'] = "Content-Type: text/csv; charset=utf-8\n"
+                response.headers['Content-Type'] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+                response.headers['X-Accel-Buffering'] = 'no'
+                response.headers['ETag'] = '0'
+                response.headers['Last-Modified'] = '0'
+                response.headers['Connection'] = 'keep-alive'
+                
+                # aux = "Reporte Coes - #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.csv"
+                # response.headers['Content-Disposition'] = "attachment; filename=#{aux}"
+                
+                aux = "Reporte Coes - #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.xlsx"
+                response.headers['Content-Disposition'] = "attachment; filename=\"#{aux}\""
+
+                # Determinar el método de exportación basado en el tamaño del dataset
+                total_count = @objects.count
+                excel_converter = ExcelConverter.new(@objects, @schema)
+                
+                Rails.logger.info "Iniciando exportación de #{total_count} registros"
+                                
+                p "     Exportando dataset grande (#{total_count} registros) usando streaming SIMPLE ".center(1000, '#')
+                excel_converter.to_xlsx_streaming(response.stream)
+                
+                # p "     Exportando dataset grande (#{total_count} registros) usando streaming GENERAL".center(1000, '#')
+                # excel_converter.to_csv_streaming(response.stream)
+                
+                Rails.logger.info "Exportación completada"
+                
+              rescue => e
+                Rails.logger.error "Error en exportación: #{e.message}"
+                Rails.logger.error e.backtrace.join("\n")
+                response.stream.write("Error en la exportación: #{e.message}")
               ensure
                 response.stream.close
               end

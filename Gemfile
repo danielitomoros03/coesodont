@@ -64,6 +64,7 @@ group :development, :production do
 
   gem 'wicked_pdf'
 
+  gem 'xlsxtream'
   # gem 'prawn', '~> 2.4'
   # gem 'prawn-table'
 
