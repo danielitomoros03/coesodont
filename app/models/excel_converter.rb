@@ -1,6 +1,3 @@
-require 'caxlsx'
-
-
 class ExcelConverter
   def initialize(objects = [], schema = nil)
     @fields = []
@@ -34,22 +31,6 @@ class ExcelConverter
       }
       hash
     end
-  end
-
-  def to_xlsx
-    package = Axlsx::Package.new
-    workbook = package.workbook
-
-    workbook.add_worksheet(name: "Datos") do |sheet|
-      sheet.add_row generate_excel_header
-
-      method = @objects.respond_to?(:find_each) ? :find_each : :each
-      @objects.send(method) do |object|
-        sheet.add_row generate_excel_row(object)
-      end
-    end
-
-    package.to_stream.read
   end
 
   # Método específico para CSV streaming que evita conflictos de ordenamiento
@@ -89,7 +70,6 @@ class ExcelConverter
       xlsx.write_worksheet('Datos') do |sheet|
         sheet << headers
         scope.find_each(batch_size: 20) do |object|
-          p "  Exportando registro #{object.id} usando streaming XLSX".center(1000, '#')
           sheet << generate_excel_row(object)
         end
       end

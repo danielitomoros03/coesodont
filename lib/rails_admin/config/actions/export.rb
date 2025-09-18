@@ -21,13 +21,14 @@ module RailsAdmin
 
         register_instance_option :controller do
           proc do
-            # format = params[:json] && :json || params[:csv] && :csv || params[:xml] && :xml
+            format = params[:xlsx] && :xlsx || params[:csv] && :csv
+            export_method = format == :csv ? :to_csv_streaming : :to_xlsx_streaming
             if request.post?
-              request.format = :xlsx
+              request.format = format
 
-              @schema = HashHelper.symbolize(params[:schema].slice(:except, :include, :methods, :only).permit!.to_h) if params[:schema] # to_json and to_xml expect symbols for keys AND values.
+              @schema = HashHelper.symbolize(params[:schema].slice(:except, :include, :methods, :only).permit!.to_h) if params[:schema]
               @objects = list_entries(@model_config, :export)
-              
+
               begin
                 unless @model_config.list.scopes.empty?
                   if params[:scope].blank?
@@ -37,39 +38,31 @@ module RailsAdmin
                   end
                 end
 
-                # Configurar headers para streaming y evitar timeouts
                 response.headers.delete('Content-Length')
                 response.headers['Cache-Control'] = 'no-cache'
-                
-                
-                # response.headers['Content-Type'] = "Content-Type: text/csv; charset=utf-8\n"
-                response.headers['Content-Type'] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
                 response.headers['X-Accel-Buffering'] = 'no'
                 response.headers['ETag'] = '0'
                 response.headers['Last-Modified'] = '0'
                 response.headers['Connection'] = 'keep-alive'
-                
-                # aux = "Reporte Coes - #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.csv"
-                # response.headers['Content-Disposition'] = "attachment; filename=#{aux}"
-                
-                aux = "Reporte Coes - #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}.xlsx"
-                response.headers['Content-Disposition'] = "attachment; filename=\"#{aux}\""
 
-                # Determinar el método de exportación basado en el tamaño del dataset
-                total_count = @objects.count
+                aux = "Reporte Coes - #{I18n.t("activerecord.models.#{params[:model_name]}.other")&.titleize} #{DateTime.now.strftime('%d-%m-%Y_%I:%M%P')}"
                 excel_converter = ExcelConverter.new(@objects, @schema)
-                
+                total_count = @objects.count
+
                 Rails.logger.info "Iniciando exportación de #{total_count} registros"
-                                
-                p "     Exportando dataset grande (#{total_count} registros) usando streaming SIMPLE ".center(1000, '#')
-                excel_converter.to_xlsx_streaming(response.stream)
-                
-                # p "     Exportando dataset grande (#{total_count} registros) usando streaming GENERAL".center(1000, '#')
-                # excel_converter.to_csv_streaming(response.stream)
-                
+
+                if format == :csv
+                  response.headers['Content-Type'] = "text/csv; charset=utf-8"
+                  response.headers['Content-Disposition'] = "attachment; filename=\"#{aux}.csv\""
+                  excel_converter.to_csv_streaming(response.stream)
+                else
+                  response.headers['Content-Type'] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  response.headers['Content-Disposition'] = "attachment; filename=\"#{aux}.xlsx\""
+                  excel_converter.to_xlsx_streaming(response.stream)
+                end
+
                 Rails.logger.info "Exportación completada"
-                
+
               rescue => e
                 Rails.logger.error "Error en exportación: #{e.message}"
                 Rails.logger.error e.backtrace.join("\n")
@@ -77,7 +70,7 @@ module RailsAdmin
               ensure
                 response.stream.close
               end
-              
+
             else
               render @action.template_name
             end
