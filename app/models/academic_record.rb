@@ -214,7 +214,7 @@ class AcademicRecord < ApplicationRecord
 
   def values_for_report
     user_aux = user
-    [user_aux.ci, user_aux.first_name, user_aux.last_name, school.name, area.name, subject.code, subject.name, subject.unit_credits, self.final_q_to_02i, self.get_value_by_status, self.tipo_examen, period_type.code, period.year, section.code, study_plan&.code]
+    [user_aux.ci, user_aux.first_name, user_aux.last_name, school.name, area.name, subject.code, subject.name, subject.unit_credits, self.get_value_by_status, self.get_value_by_status, self.tipo_examen, period_type.code, period.year, section.code, study_plan&.code]
   end
 
   def student_name_with_retired
