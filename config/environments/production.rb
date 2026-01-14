@@ -14,12 +14,11 @@ Rails.application.configure do
   # Configuración para Envío de Correos
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address:            'smtp.gmail.com',
-    # port:               587, # Blocked SMTP Ports: Many hosting providers (e.g., Google Cloud, Digital Ocean, AWS) block standard SMTP ports (25, 465, 587) by default for security reasons to prevent spam. You might need to request for these ports to be opened or use an alternative port (e.g., 2525) if supported by your mail service.
-    port:               2525,
-    domain:             ENV['PROVIDER_DOMAIN_ADRESS'],
-    user_name:          ENV['USERNAME'],
-    password:           ENV['PASSWORD'],
+    address:            ENV['PROVIDER_EMAIL_SERVER'],
+    port:               ENV['PROVIDER_EMAIL_PORT'],
+    domain:             ENV['PROVIDER_EMAIL_ADDRESS'],
+    user_name:          ENV['PROVIDER_EMAIL_USERNAME'],
+    password:           ENV['PROVIDER_EMAIL_PASSWORD'],
     authentication:     'plain',
     enable_starttls_auto: true
   }
