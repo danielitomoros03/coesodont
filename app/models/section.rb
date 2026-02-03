@@ -68,7 +68,14 @@ class Section < ApplicationRecord
   scope :sort_by_period, -> {joins(:period).order('periods.name')}
   scope :sort_by_period_reverse, -> {joins(:period).order('periods.name DESC')}
 
-  scope :custom_search, -> (keyword) { joins(:period, :subject).where("sections.code ILIKE '%#{keyword}%' OR subjects.name ILIKE '%#{keyword}%' OR subjects.code ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'").sort_by_period }
+  scope :custom_search, -> (keyword) {
+    kw = "%#{keyword}%"
+    joins(:subject, period: :period_type).where(
+      "sections.code ILIKE :kw OR subjects.name ILIKE :kw OR subjects.code ILIKE :kw OR periods.name ILIKE :kw OR (subjects.code || sections.code || ' ' || period_types.code || periods.year::text) ILIKE :kw",
+      kw: kw
+    ).sort_by_period
+  }
+  
   
   scope :qualified, -> () {where(qualified: true)}
   
@@ -321,6 +328,13 @@ class Section < ApplicationRecord
       #     value.period.name
       #   end
       # end
+
+      field :number_acta do
+        sticky true
+        label 'Acta'
+        column_width 180
+      end
+
 
       field :period do
         sticky true
