@@ -90,7 +90,8 @@ class EnrollAcademicProcess < ApplicationRecord
   scope :sin_reporte_de_pago, -> {without_payment_report}
 
   scope :retirado, -> {joins(:academic_records).where('academic_records.status': :retirado)}
-
+  # Filtro activo: Son los confirmados no retirados
+  scope :activo, -> {confirmado.joins(:academic_records).where.not('academic_records.status': :retirado)}
   scope :total_with_payment_report, -> {with_payment_report.count}
   scope :total_without_payment_report, -> {without_payment_report.count}
 
@@ -310,7 +311,7 @@ class EnrollAcademicProcess < ApplicationRecord
     list do
       search_by :custom_search
       # filters [:period_name, :student]
-      scopes [:todos, :preinscrito, :reservado, :confirmado, :retirado, :con_reporte_de_pago, :sin_reporte_de_pago, :nuevos_en_periodo]
+      scopes [:todos, :preinscrito, :reservado, :confirmado, :retirado, :activo, :con_reporte_de_pago, :sin_reporte_de_pago, :nuevos_en_periodo]
 
       field :enroll_status_label do
         label 'Estado'
