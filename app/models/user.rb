@@ -53,7 +53,7 @@ class User < ApplicationRecord
   def profile_picture_as_thumb
     begin
       profile_picture.variant(resize_to_limit: [100, 100]).processed
-    rescue Exception => e
+    rescue StandardError => e
       
     end
   end
@@ -61,7 +61,7 @@ class User < ApplicationRecord
   def ci_image_as_thumb
     begin
       ci_image.variant(resize_to_limit: [100, 100]).processed
-    rescue Exception => e
+    rescue StandardError => e
     end
   end  
 
@@ -413,7 +413,7 @@ class User < ApplicationRecord
           UserMailer.welcome(self).deliver_now
           # UserMailer.welcome(self).deliver_later
         end
-      rescue Exception => e
+      rescue StandardError => e
         
       end
     end

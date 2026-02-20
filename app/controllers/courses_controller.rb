@@ -16,7 +16,7 @@ class CoursesController < ApplicationController
         end
       end
       
-    rescue Exception => e
+    rescue StandardError => e
       format.json { render json: {data: e, status: :unprocessable_entity} }
     end
   end
@@ -46,7 +46,7 @@ class CoursesController < ApplicationController
           format.json {render json: {data: "¡Error al intentar desactivar la asignatura para el período #{period_name}!", status: :unprocessable_entity} }
         end
       end
-    rescue Exception => e
+    rescue StandardError => e
       respond_to do |format|
         format.json {render json: {data: e, status: :unprocessable_entity} }
       end

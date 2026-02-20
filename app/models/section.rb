@@ -716,7 +716,7 @@ class Section < ApplicationRecord
     begin
       aux = sprintf("%02i", self.code)
       self.code = aux
-    rescue Exception => e
+    rescue StandardError => e
 
     end
   end

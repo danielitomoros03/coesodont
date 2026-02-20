@@ -1,7 +1,5 @@
 class UsersController < ApplicationController
-  skip_before_action :authenticate_user!, only: [ :edit ]
   before_action :set_user, only: [:edit, :update, :edit_images]
-  # before_action :authenticate_student_or_teacher!
 
   layout 'logged'
   def edit_images
@@ -15,9 +13,10 @@ class UsersController < ApplicationController
         flash[:danger] = "#{@user.errors.full_messages.to_sentence}"
       end
       
-    rescue Exception => e
-      e = 'Sin cambios realizados' if e.to_s.include? 'param is missing or the value is empty: user'
-      flash[:info] = e
+    rescue ActionController::ParameterMissing
+      flash[:info] = 'Sin cambios realizados'
+    rescue StandardError => e
+      flash[:danger] = e.message
     end
     # back = root_path
     # back = teacher_session_dashboard_path if logged_as_teacher?
