@@ -3,99 +3,96 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby "3.1.2"
 
-# group :production do
-#   gem 'wkhtmltopdf-heroku'
-# end
+# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
+gem "rails", "~> 7.0.4"
 
-group :development, :production do
+# Use postgresql as the database for Active Record
+gem "pg", "~> 1.1"
 
-  gem 'rqrcode'
+# Use the Puma web server [https://github.com/puma/puma]
+gem "puma", "~> 5.0"
 
-  gem 'wkhtmltopdf-binary'
-  # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-  gem 'image_processing', '~> 1.2'
-  gem 'mini_magick'
+# The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
+gem "sprockets-rails"
 
-  gem 'spreadsheet'
+# Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]
+gem "jsbundling-rails"
 
-  gem "aws-sdk-s3", require: false
+# Bundle and process CSS [https://github.com/rails/cssbundling-rails]
+gem "cssbundling-rails"
 
-  # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-  gem "rails", "~> 7.0.4"
+# Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
+gem "turbo-rails"
 
-  # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
-  gem "sprockets-rails"
+# Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
+gem "stimulus-rails"
 
-  # Use postgresql as the database for Active Record
-  gem "pg", "~> 1.1"
+# Build JSON APIs with ease [https://github.com/rails/jbuilder]
+gem "jbuilder"
 
-  # Use the Puma web server [https://github.com/puma/puma]
-  gem "puma", "~> 5.0"
+# Use Redis adapter to run Action Cable in production
+gem "redis", "~> 4.0"
 
-  # Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]
-  gem "jsbundling-rails"
+# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
+gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 
-  # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
-  gem "turbo-rails"
+# Reduces boot times through caching; required in config/boot.rb
+gem "bootsnap", require: false
 
-  # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
-  gem "stimulus-rails"
+# Use Sass to process CSS
+gem "sassc-rails"
 
-  # Build JSON APIs with ease [https://github.com/rails/jbuilder]
-  gem "jbuilder"
+# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
+gem 'image_processing', '~> 1.2'
+gem 'mini_magick'
 
-  # Use Redis adapter to run Action Cable in production
-  gem "redis", "~> 4.0"
+# Authentication
+gem "devise"
 
-  # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
-  # gem "kredis"
+# Authorization
+gem 'cancancan'
 
-  # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-  # gem "bcrypt", "~> 3.1.7"
+# Administration
+gem 'rails_admin', '~> 3.0'
+gem "rails_admin_import", "~> 3.0"
 
-  # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-  gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
+# Views
+gem "haml-rails", "~> 2.0"
+gem "simple_form", github: "heartcombo/simple_form"
+gem "autoprefixer-rails"
+gem "font-awesome-sass", "~> 6.1"
 
-  # Reduces boot times through caching; required in config/boot.rb
-  gem "bootsnap", require: false
+# PDF generation
+gem 'wicked_pdf'
+gem 'wkhtmltopdf-binary'
 
-  # Use Sass to process CSS
-  gem "sassc-rails"
+# Excel/Spreadsheet export
+gem 'caxlsx'
+gem 'caxlsx_rails'
+gem 'xlsxtream'
+gem 'spreadsheet'
 
-  gem 'wicked_pdf'
+# QR codes
+gem 'rqrcode'
 
-  gem 'xlsxtream'
-  # gem 'prawn', '~> 2.4'
-  # gem 'prawn-table'
+# Cloud storage
+gem "aws-sdk-s3", require: false
 
-  gem 'caxlsx'
-  gem 'caxlsx_rails'
+# Email
+gem 'mail'
 
-  # Own Gems:
-  gem "haml-rails", "~> 2.0"
+# Audit trail
+gem "paper_trail"
 
-  # Authentication
-  gem "devise"
+# Background jobs
+gem 'delayed_job_active_record'
+gem 'daemons'
 
-  # Autorization
-  gem 'cancancan'
-
-  # Administration
-  gem 'rails_admin', '~> 3.0'
-  gem "rails_admin_import", "~> 3.0"  
-
-  gem "autoprefixer-rails"
-  gem "font-awesome-sass", "~> 6.1"
-
-  gem "simple_form", github: "heartcombo/simple_form"
-
-end
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
-  gem "dotenv-rails" # Gema para Variables de Entorno
+  gem "dotenv-rails"
   gem "html2haml"
-
 end
 
 group :development do
@@ -115,14 +112,3 @@ group :test do
   gem "selenium-webdriver"
   gem "webdrivers"
 end
-gem "cssbundling-rails"
-
-# Gema del Gestor de Correos
-gem 'mail'
-
-# Bitácora
-gem "paper_trail"
-
-# Delayed Job
-gem 'delayed_job_active_record'
-gem 'daemons'
