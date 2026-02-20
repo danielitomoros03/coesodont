@@ -41,7 +41,7 @@ class Admin < ApplicationRecord
 
 
   def yo?
-    self.user.email.eql? 'moros.daniel@gmail.com' and self.user_id.eql? 1
+    desarrollador?
   end
 
   # CALLBACKS:

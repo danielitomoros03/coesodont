@@ -26,10 +26,8 @@ class ExportController < ApplicationController
   end
 
   def general
-    # require 'xlsxtream'
     begin
-      # @object = params[:model_name].camelize.constantize.find (params[:id])
-      @object = AcademicProcess.find 44 
+      @object = AcademicProcess.find(params[:id])
       
       model = @object.class.name.underscore
       model_titulo = "#{I18n.t("activerecord.models.#{model}.one")&.titleize}"
@@ -59,8 +57,8 @@ class ExportController < ApplicationController
         response.stream.write "#{academic_record.values_for_report.join(';')}\n"
       end
 
-    rescue Exception => e
-      flash[:success] = "No se pudo generar el archivo: #{e}" 
+    rescue StandardError => e
+      flash[:danger] = "No se pudo generar el archivo: #{e.message}"
       redirect_back fallback_location: '/admin'
     ensure
       response.stream.close

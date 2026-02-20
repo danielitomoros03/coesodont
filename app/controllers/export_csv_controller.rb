@@ -1,5 +1,8 @@
-class ExportCsvController < ActionController::Base
+class ExportCsvController < ApplicationController
   include ActionController::Live
+  before_action :logged_as_admin?
+
+  ALLOWED_MODELS = %w[AcademicProcess School].freeze
 
   def stream
     response.headers['Content-Type'] = 'text/event-stream'
@@ -15,7 +18,7 @@ class ExportCsvController < ActionController::Base
   def academic_records
     # require 'xlsxtream'
     begin
-      @object = params[:model_name].camelize.constantize.find (params[:id])
+      @object = find_allowed_model
 
       model = @object.class.name.underscore
       model_titulo = "#{I18n.t("activerecord.models.#{model}.one")&.titleize}"
@@ -49,8 +52,8 @@ class ExportCsvController < ActionController::Base
       #   end
       # end
 
-    rescue Exception => e
-      flash[:success] = "No se pudo generar el archivo: #{e}" 
+    rescue StandardError => e
+      flash[:danger] = "No se pudo generar el archivo: #{e.message}"
       redirect_back fallback_location: '/admin'
     ensure
       response.stream.close
@@ -59,7 +62,7 @@ class ExportCsvController < ActionController::Base
 
   def enroll_academic_processes
     begin
-      @object = params[:model_name].camelize.constantize.find (params[:id])
+      @object = find_allowed_model
       cod = @object.name
       cod ||= @object.code
       cod ||= @object.id
@@ -83,14 +86,21 @@ class ExportCsvController < ActionController::Base
         response.stream.write "#{i+1}; #{enroll_academic_process.values_for_report.join(';')}\n"
       end
 
-    rescue Exception => e
-      flash[:success] = "No se pudo generar el archivo: #{e}" 
+    rescue StandardError => e
+      flash[:danger] = "No se pudo generar el archivo: #{e.message}"
       redirect_back fallback_location: '/admin'
     ensure
       response.stream.close
     end
   end
 
+  private
 
+  def find_allowed_model
+    model_name = params[:model_name].to_s.camelize
+    raise "Modelo no permitido: #{params[:model_name]}" unless ALLOWED_MODELS.include?(model_name)
+
+    model_name.constantize.find(params[:id])
+  end
 
 end
