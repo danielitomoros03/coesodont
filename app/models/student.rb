@@ -64,7 +64,7 @@ class Student < ApplicationRecord
   # How to validate if student is not created for assosiation
 
   # SCOPES:
-  scope :custom_search, -> (keyword) { joins(:user).where("users.ci ILIKE '%#{keyword}%' OR users.email ILIKE '%#{keyword}%' OR users.first_name ILIKE '%#{keyword}%' OR users.last_name ILIKE '%#{keyword}%' OR users.number_phone ILIKE '%#{keyword}%'") }
+  scope :custom_search, -> (keyword) { joins(:user).where("users.ci ILIKE :k OR users.email ILIKE :k OR users.first_name ILIKE :k OR users.last_name ILIKE :k OR users.number_phone ILIKE :k", k: "%#{keyword}%") }
 
   scope :find_by_user_ci, -> (ci) {joins(:user).where('users.ci': ci).first}
 

@@ -22,7 +22,7 @@ class Teacher < ApplicationRecord
   # SCOPES:
   scope :find_by_user_ci, -> (ci) {joins(:user).where('users.ci': ci).first}
   # SCOPES:
-  scope :custom_search, -> (keyword) { joins(:user).where("users.ci ILIKE '%#{keyword}%' OR users.email ILIKE '%#{keyword}%' OR users.first_name ILIKE '%#{keyword}%' OR users.last_name ILIKE '%#{keyword}%'") }  
+  scope :custom_search, -> (keyword) { joins(:user).where("users.ci ILIKE :k OR users.email ILIKE :k OR users.first_name ILIKE :k OR users.last_name ILIKE :k", k: "%#{keyword}%") }
 
   # VALIDATIONS:
   validates :area, presence: true

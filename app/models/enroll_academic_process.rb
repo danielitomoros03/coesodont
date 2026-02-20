@@ -81,7 +81,7 @@ class EnrollAcademicProcess < ApplicationRecord
   
   scope :total_with_i_academic_records, -> (i){(joins(:academic_records).group(:"enroll_academic_processes.id").having('COUNT(*) = ?', i).count).count}
 
-  scope :custom_search, -> (keyword) { joins(:user, :period).where("users.ci ILIKE '%#{keyword}%' OR periods.name ILIKE '%#{keyword}%'") }
+  scope :custom_search, -> (keyword) { joins(:user, :period).where("users.ci ILIKE :k OR periods.name ILIKE :k", k: "%#{keyword}%") }
 
   scope :with_payment_report, -> {joins(:payment_reports)}
   #Alias

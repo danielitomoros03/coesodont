@@ -32,7 +32,7 @@ class PaymentReport < ApplicationRecord
   scope :grades, -> {where(payable_type: 'Grade')}  
   scope :enroll_academic_processes, -> {where(payable_type: 'EnrollAcademicProcess')}  
 
-  scope :custom_search, -> (keyword) {joins_enroll_academic_process.joins("INNER JOIN academic_processes ON enroll_academic_processes.academic_process_id = academic_processes.id").where("academic_processes.name ILIKE '%#{keyword}%'") }
+  scope :custom_search, -> (keyword) { joins_enroll_academic_process.joins("INNER JOIN academic_processes ON enroll_academic_processes.academic_process_id = academic_processes.id").where("academic_processes.name ILIKE ?", "%#{keyword}%") }
 
   scope :joins_enroll_academic_process, -> {joins("INNER JOIN enroll_academic_processes ON enroll_academic_processes.id = payment_reports.payable_id AND payment_reports.payable_type = 'EnrollAcademicProcess'")}
 
