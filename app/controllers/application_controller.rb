@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :set_paper_trail_whodunnit
   before_action :set_current_process
+  rescue_from CanCan::AccessDenied, with: :handle_access_denied
 
   # around_action :set_session_data
 
@@ -174,5 +175,12 @@ class ApplicationController < ActionController::Base
 			end
 		end
 	end
+
+  private
+
+  def handle_access_denied(_exception)
+    flash[:error] = 'No está autorizado para acceder a esta página.'
+    redirect_back fallback_location: root_path, allow_other_host: false
+  end
 
 end
