@@ -35,6 +35,17 @@ module RailsAdmin
           proc do
             @objects ||= list_entries
 
+            if params[:model_name].eql?('user') && params[:query].present?
+              users = @objects.to_a
+              if users.count.eql?(1)
+                user = users.first
+                if user.respond_to?(:student?) && user.student?
+                  redirect_to "/admin/student/#{user.student.id}"
+                  return
+                end
+              end
+            end
+
             unless @model_config.list.scopes.empty?
               if params[:scope].blank?
                 @objects = @objects.send(@model_config.list.scopes.first) unless @model_config.list.scopes.first.nil?
