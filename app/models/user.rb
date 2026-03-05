@@ -223,6 +223,10 @@ class User < ApplicationRecord
     return aux.to_sentence
   end
 
+  def roles_links
+    roles
+  end
+
   def reverse_name
     "#{last_name}, #{first_name}"
   end
@@ -369,11 +373,35 @@ class User < ApplicationRecord
 
     list do
       items_per_page 10
+      checkboxes false
       search_by :my_search #[:email, :first_name, :last_name, :ci]
       field :ci
       field :email
       field :first_name
       field :last_name
+      field :roles_links do
+        label 'Roles'
+        sortable false
+        searchable false
+
+        pretty_value do
+          user = bindings[:object]
+          view = bindings[:view]
+          links = []
+
+          if user.admin?
+            links << view.link_to(I18n.t('activerecord.models.admin.one'), "/admin/admin/#{user.admin.id}")
+          end
+          if user.student?
+            links << view.link_to(I18n.t('activerecord.models.student.one'), "/admin/student/#{user.student.id}")
+          end
+          if user.teacher?
+            links << view.link_to(I18n.t('activerecord.models.teacher.one'), "/admin/teacher/#{user.teacher.id}")
+          end
+
+          links.any? ? links.join(' | ').html_safe : '-'
+        end
+      end
       field :number_phone
       field :sex do
         formatted_value do # used in form views
