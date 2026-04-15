@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_04_16_164235) do
+ActiveRecord::Schema[7.0].define(version: 2026_04_15_230246) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -536,6 +536,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_16_164235) do
     t.text "object"
     t.datetime "created_at"
     t.text "object_changes"
+    t.string "ip"
+    t.string "user_agent"
+    t.index ["item_type", "item_id", "created_at"], name: "index_versions_on_item_type_item_id_created_at"
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 

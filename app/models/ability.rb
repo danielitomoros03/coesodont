@@ -66,6 +66,10 @@ class Ability
 
         end
 
+        # La bitácora de Sección expone calificaciones de terceros: sólo
+        # desarrollador y jefe_control_estudio (ramas superiores) pueden verla.
+        cannot :history, Section
+        cannot :section_bitacora, Section
 
         # cannot :manage, [User, Admin, Student, Teacher, Area, Subject, School, Bank, BankAccount, PaymentReport, Course, Grade, AcademicProcess, EnrollAcademicProcess, AcademicRecord, Section, AdmissionType, PeriodType, Address]
       end

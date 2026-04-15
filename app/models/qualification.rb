@@ -120,12 +120,15 @@ class Qualification < ApplicationRecord
 
   def paper_trail_update
     changed_fields = self.changes.keys - ['created_at', 'updated_at']
+    return if changed_fields.empty?
+
     object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")
-    changed_fields.each do |field|
+    parts = changed_fields.map do |field|
       old_value, new_value = self.changes[field]
-      self.paper_trail_event = "¡#{object} cambió #{field} de #{old_value.inspect} a #{new_value.inspect}!"
+      "#{field}: #{old_value.inspect} → #{new_value.inspect}"
     end
-  end  
+    self.paper_trail_event = "¡#{object} modificada! #{parts.join(' | ')}"
+  end
 
   def paper_trail_create
     object = I18n.t("activerecord.models.#{self.model_name.param_key}.one")

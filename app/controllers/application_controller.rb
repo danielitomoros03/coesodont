@@ -1,8 +1,17 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :set_paper_trail_whodunnit
+  before_action :set_paper_trail_request_info
   before_action :set_current_process
   rescue_from CanCan::AccessDenied, with: :handle_access_denied
+
+  def info_for_paper_trail
+    { ip: request.remote_ip, user_agent: request.user_agent }
+  end
+
+  def set_paper_trail_request_info
+    PaperTrail.request.controller_info = { ip: request.remote_ip, user_agent: request.user_agent }
+  end
 
   # around_action :set_session_data
 
