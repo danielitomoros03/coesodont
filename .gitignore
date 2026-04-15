@@ -44,3 +44,7 @@
 
 /config/credentials/development.key
 .qodo
+
+# Local tooling state (no debe subirse al repo)
+.claude/
+.playwright-mcp/
