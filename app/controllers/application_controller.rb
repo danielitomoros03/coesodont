@@ -10,7 +10,14 @@ class ApplicationController < ActionController::Base
   end
 
   def set_paper_trail_request_info
-    PaperTrail.request.controller_info = { ip: request.remote_ip, user_agent: request.user_agent }
+    return unless PaperTrail::Version.table_exists?
+    cols = PaperTrail::Version.column_names
+    info = {}
+    info[:ip]         = request.remote_ip  if cols.include?('ip')
+    info[:user_agent] = request.user_agent if cols.include?('user_agent')
+    PaperTrail.request.controller_info = info
+  rescue StandardError
+    PaperTrail.request.controller_info = {}
   end
 
   # around_action :set_session_data

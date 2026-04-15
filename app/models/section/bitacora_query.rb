@@ -17,8 +17,6 @@ class Section
     attr_reader :tab
 
     def call
-      return students_roster if @tab == 'students'
-
       versions = scope_for_tab(@tab)
       versions = versions.order(created_at: :desc, id: :desc)
 
@@ -35,13 +33,13 @@ class Section
     end
 
     def total_count
-      @tab == 'students' ? student_rows.size : scope_for_tab(@tab).count
+      scope_for_tab(@tab).count
     end
 
     def tab_counts
       {
         'general' => scope_for_tab('general').count,
-        'students' => student_rows.size
+        'students' => scope_for_tab('students').count
       }
     end
 
@@ -55,7 +53,8 @@ class Section
 
     def scope_for_tab(tab)
       case tab
-      when 'general' then general_scope
+      when 'general'  then general_scope
+      when 'students' then students_scope
       end
     end
 
@@ -63,61 +62,16 @@ class Section
       PaperTrail::Version.where(item_type: 'Section', item_id: @section.id)
     end
 
-    def students_roster
-      rows = student_rows
-      if @all
-        Kaminari.paginate_array(rows, total_count: rows.size)
-      else
-        Kaminari.paginate_array(rows, total_count: rows.size).page(@page).per(@per_page)
-      end
-    end
+    def students_scope
+      q_ids  = @student_ci ? student_qualification_ids : qualification_ids
+      ar_ids = @student_ci ? student_academic_record_ids : academic_record_ids
 
-    def student_rows
-      @student_rows ||= build_student_rows
-    end
+      q_scope  = PaperTrail::Version.where(item_type: 'Qualification', item_id: safe_ids(q_ids))
+      ar_scope = PaperTrail::Version.where(item_type: 'AcademicRecord', item_id: safe_ids(ar_ids))
+                                    .where(AR_RELEVANT_SQL)
 
-    def build_student_rows
-      ar_scope = AcademicRecord.unscoped.where(section_id: @section.id)
-                               .includes(:qualifications, student: :user)
-      ar_scope = ar_scope.joins(:user).where('users.ci = ?', @student_ci) if @student_ci
-
-      records = ar_scope.to_a
-      return [] if records.empty?
-
-      latest_by_ar = latest_version_per_ar(records)
-      user_lookup = build_user_lookup(latest_by_ar.values.compact)
-
-      rows = records.map do |ar|
-        Section::StudentRowProxy.new(ar, latest_version: latest_by_ar[ar.id], user_lookup: user_lookup)
-      end
-
-      rows.sort_by { |r| [-(r.created_at&.to_i || 0), r.student_name.to_s] }
-    end
-
-    def latest_version_per_ar(records)
-      ar_ids = records.map(&:id)
-      q_ids_by_ar = Qualification.where(academic_record_id: ar_ids).pluck(:academic_record_id, :id)
-                                 .group_by(&:first).transform_values { |v| v.map(&:last) }
-      all_q_ids = q_ids_by_ar.values.flatten
-
-      ar_versions = PaperTrail::Version.where(item_type: 'AcademicRecord', item_id: ar_ids)
-                                       .select(:item_id, :created_at, :whodunnit)
-                                       .order(created_at: :desc)
-                                       .group_by(&:item_id)
-                                       .transform_values(&:first)
-
-      q_versions = PaperTrail::Version.where(item_type: 'Qualification', item_id: all_q_ids)
-                                      .select(:item_id, :created_at, :whodunnit)
-                                      .order(created_at: :desc)
-                                      .group_by(&:item_id)
-                                      .transform_values(&:first)
-
-      records.each_with_object({}) do |ar, out|
-        candidates = [ar_versions[ar.id]]
-        candidates.concat((q_ids_by_ar[ar.id] || []).map { |qid| q_versions[qid] })
-        candidates.compact!
-        out[ar.id] = candidates.max_by(&:created_at)
-      end
+      PaperTrail::Version
+        .from(Arel.sql("(#{q_scope.to_sql} UNION ALL #{ar_scope.to_sql}) AS versions"))
     end
 
     def academic_record_ids
