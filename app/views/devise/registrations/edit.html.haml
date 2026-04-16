@@ -7,17 +7,9 @@
     - if devise_mapping.confirmable? && resource.pending_reconfirmation?
       %p
         Currently waiting confirmation for: #{resource.unconfirmed_email}
-    = f.input :password,                                     |
-      hint: "leave it blank if you don't want to change it", |
-      required: false,                                       |
-      input_html: { autocomplete: "new-password" }           |
-    = f.input :password_confirmation,              |
-      required: false,                             |
-      input_html: { autocomplete: "new-password" } |
-    = f.input :current_password,                                     |
-      hint: "we need your current password to confirm your changes", |
-      required: true,                                                |
-      input_html: { autocomplete: "current-password" }               |
+    = password_field_with_toggle name: :password, form_name: resource_name, label: 'Nueva contraseña (déjala vacía si no quieres cambiarla)', required: false, input_attrs: { autocomplete: 'new-password' }
+    = password_field_with_toggle name: :password_confirmation, form_name: resource_name, label: 'Confirmar nueva contraseña', required: false, input_attrs: { autocomplete: 'new-password' }
+    = password_field_with_toggle name: :current_password, form_name: resource_name, label: 'Contraseña actual (para confirmar los cambios)', input_attrs: { autocomplete: 'current-password' }
   .form-actions
     = f.button :submit, "Update"
 %h3 Cancel my account

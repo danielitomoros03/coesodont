@@ -21,12 +21,7 @@
       %input#inputCi.form-control.border-0.bg-light.rounded-end.ps-1{type: :text, name: "user[ci]", required: true, autofocus: true, oninput: "$(this).val($(this).val().replace(/[^0-9]/g, ''))"}
 
   / Password
-  .mb-4
-    %label.form-label{:for => "inputPassword5"} Contraseña *
-    .input-group.input-group-lg
-      %span.input-group-text.bg-light.rounded-start.border-0.text-secondary.px-3
-        %i.fas.fa-lock
-      %input#inputPassword5.form-control.border-0.bg-light.rounded-end.ps-1{placeholder: "Contraseña", type: :password, name: 'user[password]', required: true}
+  = password_field_with_toggle name: :password, label: 'Contraseña *', size: 'lg', wrapper_class: 'mb-4', input_id: 'inputPassword5', input_attrs: { placeholder: 'Contraseña', autocomplete: 'current-password' }
   / Check box
   .mb-4.d-flex.justify-content-between.mb-4
     - if devise_mapping.rememberable?

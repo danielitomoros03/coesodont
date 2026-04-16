@@ -5,17 +5,8 @@
   = f.input :reset_password_token, as: :hidden
   = f.full_error :reset_password_token
   .form-inputs
-    = f.input :password,                                                                    |
-      label: "Nueva Clave",                                                                 |
-      required: true,                                                                       |
-      autofocus: true,                                                                      |
-      hint: ("Mínimo #{@minimum_password_length} caracteres" if @minimum_password_length), |
-      input_html: { autocomplete: "new-password" }   
-
-    = f.input :password_confirmation,              |
-      label: "Confirme su nueva clave",            |
-      required: true,                              |
-      input_html: { autocomplete: "new-password" } |
+    = password_field_with_toggle name: :password, form_name: resource_name, label: 'Nueva Clave', input_attrs: { autocomplete: 'new-password', autofocus: true }
+    = password_field_with_toggle name: :password_confirmation, form_name: resource_name, label: 'Confirme su nueva clave', input_attrs: { autocomplete: 'new-password' }
   .align-items-center.mt-0
     .d-grid
       = f.button :submit, "Guargar mi clave", class: 'btn btn-primary'

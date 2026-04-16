@@ -3,6 +3,10 @@ module ApplicationHelper
 		Haml::Engine.new(haml.strip_heredoc, format: :html5).render(locals)
 	end
 
+	def password_field_with_toggle(name:, **options)
+		render 'shared/password_field_with_toggle', options.merge(name: name)
+	end
+
 	def to_bs value
 		ActionController::Base.helpers.number_to_currency(value, unit: 'Bs.', separator: ",", delimiter: ".")
 	end
