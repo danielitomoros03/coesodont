@@ -49,6 +49,21 @@ class Section
       @focused_student ||= User.find_by(ci: @student_ci)
     end
 
+    # true cuando la sección tiene Qualifications pero ninguna dejó rastro en
+    # PaperTrail — típicamente porque se registraron antes de que se activara
+    # `has_paper_trail` en el modelo Qualification.
+    def qualifications_without_audit?
+      return false if qualification_ids.empty?
+
+      PaperTrail::Version.where(item_type: 'Qualification', item_id: qualification_ids).none?
+    end
+
+    def qualification_audit_start
+      @qualification_audit_start ||= PaperTrail::Version
+        .where(item_type: 'Qualification')
+        .minimum(:created_at)
+    end
+
     private
 
     def scope_for_tab(tab)

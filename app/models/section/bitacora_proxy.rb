@@ -76,7 +76,7 @@ class Section
     end
 
     def username
-      user&.ci_fullname || fallback_username
+      user&.reverse_name || fallback_username
     end
 
     def user
