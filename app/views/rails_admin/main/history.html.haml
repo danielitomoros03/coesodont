@@ -1,0 +1,180 @@
+- params = request.params.except(:action, :controller, :model_name)
+- student_ci = params[:student_ci]
+- path_method = params[:id] ? "history_show_path" : "history_index_path"
+- is_section_bitacora = defined?(@bitacora_tab) && @bitacora_tab.present?
+
+- if is_section_bitacora
+  - section = @object
+  - teacher_name = (section.teacher&.user&.ci_fullname rescue nil)
+  - total_ar = section.total_academic_records rescue 0
+  - pending = (section.total_sc rescue 0)
+  - graded = total_ar - pending
+  - subject_name = (section.subject&.name rescue nil)
+
+  .card.mb-3
+    .card-body.py-2.px-3
+      .d-flex.flex-wrap.align-items-center.gap-3
+        %div
+          %span.text-muted.small Sección
+          %strong.font-monospace.ms-1= section.code
+        - if subject_name.present?
+          %div
+            %span.text-muted.small Asignatura
+            %strong.ms-1= subject_name
+        %div
+          %span.text-muted.small Profesor
+          - if teacher_name.present?
+            %strong.ms-1= teacher_name
+          - else
+            %span.badge.bg-warning.text-dark.ms-1 No asignado
+        .ms-auto.d-flex.gap-2
+          %span.badge.bg-success{ title: "Calificadas" }
+            %i.fas.fa-check
+            = " Calificadas: #{graded}"
+          %span.badge.bg-secondary{ title: "Faltan por calificar" }
+            %i.fas.fa-hourglass-half
+            = " Faltan: #{pending}"
+          %span.badge.bg-info.text-dark{ title: "Total inscritos" }
+            %i.fas.fa-users
+            = " Inscritos: #{total_ar}"
+
+  - tab_labels = { 'general' => { label: 'General', icon: 'fa-layer-group' }, 'students' => { label: 'Estudiantes', icon: 'fa-graduation-cap' } }
+
+  %ul.nav.nav-tabs.mb-3{ role: 'tablist' }
+    - tab_labels.each do |key, meta|
+      - count = (@bitacora_tab_counts || {})[key] || 0
+      - active = (@bitacora_tab == key)
+      - tab_url = send(path_method, params.merge(id: params[:id], tab: key).except(:page, :all))
+      %li.nav-item{ role: 'presentation' }
+        = link_to tab_url, class: "nav-link #{'active' if active}", role: 'tab' do
+          %i.fas{ class: meta[:icon] }
+          = meta[:label]
+          %span.badge.ms-1{ class: "bg-#{active ? 'primary' : 'secondary'}" }= count
+
+  - if student_ci.present?
+    .mb-3
+      %span.badge.bg-primary.fs-6.p-2
+        %i.fas.fa-filter
+        Filtro estudiante:
+        %span.font-monospace= student_ci
+        - if @bitacora_focused_student
+          = " — #{@bitacora_focused_student.reverse_name rescue "#{@bitacora_focused_student.last_name}, #{@bitacora_focused_student.first_name}"}"
+        = link_to send(path_method, params.except(:student_ci).merge(id: params[:id])), class: "text-white ms-2" do
+          %i.fas.fa-times-circle
+          Quitar filtro
+
+  - if @bitacora_tab == 'students' && @bitacora&.qualifications_without_audit?
+    - audit_start = @bitacora.qualification_audit_start
+    .alert.alert-warning.d-flex.align-items-start.gap-2.py-2{ role: 'alert' }
+      %i.fas.fa-triangle-exclamation.mt-1
+      .small
+        %strong Sin historial de notas para esta sección.
+        Las calificaciones se registraron antes del
+        - if audit_start
+          %strong= l(audit_start.in_time_zone('Caracas').to_date, format: :long)
+          \,
+        cuando se activó el rastro de auditoría sobre calificaciones.
+        Sólo se muestran los retiros y PI registrados sobre las inscripciones.
+
+  :css
+    #bitacora-table { width: 100%; table-layout: auto; }
+    #bitacora-table th, #bitacora-table td {
+      vertical-align: top;
+      overflow: hidden;
+      text-overflow: clip;
+    }
+    #bitacora-table th.col-fecha, #bitacora-table td.col-fecha { white-space: nowrap; min-width: 10.5rem; }
+    #bitacora-table th.col-usuario, #bitacora-table td.col-usuario { white-space: nowrap; min-width: 14rem; }
+    #bitacora-table th.col-estudiante, #bitacora-table td.col-estudiante { min-width: 16rem; }
+    #bitacora-table th.col-dispositivo, #bitacora-table td.col-dispositivo { white-space: nowrap; min-width: 12rem; }
+    #bitacora-table td.summary-cell { white-space: normal; min-width: 18rem; }
+    #bitacora-table td.summary-cell code { display: block; white-space: normal; }
+
+  - show_student_column = @bitacora_tab != 'general'
+  %table#bitacora-table.table.table-sm.table-striped.table-hover
+    %thead
+      %tr
+        %th.col-fecha Fecha
+        - if show_student_column
+          %th.col-estudiante Estudiante
+        %th Resumen
+        %th.col-usuario Usuario
+        %th.col-dispositivo Dispositivo
+    %tbody.table-group-divider
+      - if @history.empty?
+        %tr
+          %td.text-center.text-muted.py-4{ colspan: show_student_column ? 5 : 4 }
+            Sin eventos en esta pestaña
+      - else
+        - @history.each do |object|
+          %tr
+            %td.col-fecha
+              - if object.created_at
+                %span.small.font-monospace{ title: l(object.created_at, format: :long), data: { 'bs-toggle' => 'tooltip' } }
+                  = object.short_date
+
+            - if show_student_column
+              %td.col-estudiante
+                - if object.student_ci
+                  - filter_url = send(path_method, params.merge(id: params[:id], student_ci: object.student_ci).except(:page))
+                  = link_to filter_url, class: "text-decoration-none", title: "Filtrar por este estudiante" do
+                    .font-monospace.small.text-primary= object.student_ci
+                    .text-muted.small= object.student_name
+                - else
+                  %span.text-muted.small —
+
+            %td.summary-cell
+              %strong= object.summary_title
+              - if object.summary_detail.present?
+                .text-muted.small.mt-1{ title: object.summary_detail, data: { 'bs-toggle' => 'tooltip' } }
+                  %code.small.text-body= truncate(object.summary_detail, length: 140)
+
+            %td.small.col-usuario= object.username
+
+            %td.small.col-dispositivo
+              - device = object.try(:device_label)
+              - ip = object.try(:ip)
+              - if device.present? || ip.present?
+                %div{ title: object.try(:user_agent), data: { 'bs-toggle' => 'tooltip' } }
+                  - if device.present?
+                    .text-body= device
+                  - if ip.present?
+                    .text-muted.font-monospace.small= ip
+              - else
+                %span.text-muted —
+
+  :javascript
+    (function() {
+      if (window.bootstrap && bootstrap.Tooltip) {
+        document.querySelectorAll('#bitacora-table [data-bs-toggle="tooltip"]').forEach(function(el) {
+          new bootstrap.Tooltip(el);
+        });
+      }
+    })();
+- else
+  = form_tag("", method: "get", class: "search form-inline") do
+    .input-group.mb-3
+      %input.form-control{ name: "query", placeholder: t('admin.misc.filter'), type: "search", value: params[:query] }
+      %button.btn.btn-primary{ type: "submit" }
+        %i.fas.fa-sync
+        = " #{t('admin.misc.refresh')}"
+  %table#history.table.table-condensed.table-striped.table-hover
+    %thead
+      %tr
+        %th.header Fecha de Acción
+        %th.header Acción
+        %th.header Usuario
+    %tbody.table-group-divider
+      - @history.each do |object|
+        %tr
+          %td
+            - if object.created_at
+              %span{ title: l(object.created_at, format: :long) }
+                = (l(object.created_at.in_time_zone('Caracas'), format: :long) rescue l(object.created_at, format: :long))
+          %td= object.message.in?(['delete', 'new']) ? t("admin.actions.#{object.message}.done").capitalize : object.message
+          %td= object.username
+
+- unless params[:all] || !@history.respond_to?(:current_page)
+  = paginate(@history, theme: 'ra-twitter-bootstrap')
+  - unless (tc = @history.total_count) <= @history.size || tc > 500
+    = link_to(t("admin.misc.show_all"), send(path_method, params.merge(all: true)), class: "show-all btn btn-light")
