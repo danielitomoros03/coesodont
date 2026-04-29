@@ -44,6 +44,14 @@ class Admin < ApplicationRecord
     desarrollador?
   end
 
+  # Política de Control de Estudios: registrar asignaturas en la inscripción de
+  # un estudiante es atribución exclusiva del Jefe de Control de Estudios (y del
+  # desarrollador, por acceso total). Asistentes con permiso PARE quedan
+  # deliberadamente excluidos por requisito normativo.
+  def can_manage_academic_records?
+    desarrollador? || jefe_control_estudio?
+  end
+
   # CALLBACKS:
   after_destroy :check_user_for_destroy
   

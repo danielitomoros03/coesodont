@@ -290,9 +290,19 @@ class EnrollAcademicProcess < ApplicationRecord
           current_user = bindings[:view]._current_user
           (current_user and current_user.admin and current_user.admin.authorized_manage? 'EnrollAcademicProcess')
         end
-        formatted_value do          
-          grade = bindings[:object].grade          
-          if bindings[:object].enrolling?
+        formatted_value do
+          grade = bindings[:object].grade
+          current_admin = bindings[:view]._current_user&.admin
+
+          # El Jefe de Control de Estudios usa siempre el form ligero
+          # (_form_historical) para agregar asignaturas, sin importar si el
+          # periodo es el activo de inscripción o uno histórico. El form pesado
+          # de preinscripción (_form) está pensado para la autoinscripción del
+          # estudiante y aplica solo a los demás roles cuando el periodo está
+          # activo.
+          if current_admin&.can_manage_academic_records?
+            bindings[:view].render(partial: "/academic_records/making_historical", locals: {enroll: bindings[:object]})
+          elsif bindings[:object].enrolling?
             totalCreditsReserved = bindings[:object].total_credits_not_retired
             totalSubjectsReserved = bindings[:object].total_subjects_not_retired
 

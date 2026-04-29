@@ -1,5 +1,6 @@
 class AcademicRecordsController < ApplicationController
   before_action :set_academic_record, only: %i[ show edit update destroy ]
+  before_action :ensure_can_manage_academic_records!, only: %i[ create ]
 
   # GET /academic_records or /academic_records.json
   def index
@@ -138,5 +139,15 @@ class AcademicRecordsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def academic_record_params
       params.require(:academic_record).permit(:section_id, :enroll_academic_process_id, :status)
+    end
+
+    # Refuerzo server-side de la política de Control de Estudios. La vista
+    # esconde el formulario para roles no autorizados, pero esto blinda el
+    # endpoint contra POSTs directos (curl/Postman/devtools) que esquiven la UI.
+    def ensure_can_manage_academic_records!
+      return if current_user&.admin&.can_manage_academic_records?
+
+      flash[:danger] = 'No autorizado: solo el Jefe de Control de Estudios puede registrar asignaturas en una inscripción.'
+      redirect_back(fallback_location: root_path)
     end
 end
