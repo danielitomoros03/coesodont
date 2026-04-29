@@ -4,8 +4,10 @@
   = "Ir al detalle de #{enroll.user.first_name}"
 
 
-- admin = current_user.admin
-- active = admin and admin.authorized_manage? 'AcademicRecord'
+- admin = current_user&.admin
+-# Solo el Jefe de Control de Estudios (y desarrollador) puede registrar
+-# asignaturas en la inscripción de un estudiante. Ver Admin#can_manage_academic_records?.
+- active = admin&.can_manage_academic_records?
 = render partial: 'academic_records/form_historical', locals: {enroll: enroll} if active
 - if enroll.academic_records.any?
 
