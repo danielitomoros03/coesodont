@@ -26,27 +26,16 @@ class ImporterController < ApplicationController
 
 		begin
 			total_newed, total_updated, errors, skipped_blank = ImportXslx.general_import(params, require_fields)
-			errors ||= []
-			skipped_blank ||= 0
-
 			limit_hit = errors.delete('limit_records')
 
 			if errors.empty?
 				flash[:success] = build_summary(entity, total_newed, total_updated, skipped_blank)
-				flash[:warning]  = limit_warning if limit_hit
+				flash[:warning] = limit_warning if limit_hit
 				redirect_to "/admin/#{entity.singularize}"
 			else
 				processed = total_newed + total_updated
-				summary = build_summary(entity, total_newed, total_updated, skipped_blank, errors.size)
-				detail  = errors.map { |e| humanize_error(entity, e) }.to_sentence
-
-				message = "#{summary} Detalles: #{detail}."
-				message += " #{academic_records_hint}" if entity == 'academic_records'
-				message = truncation_warning + ' ' + message if errors.size > 50
-
-				flash[processed.zero? ? :danger : :warning] = message.html_safe
-				flash[:warning] = [flash[:warning], limit_warning].compact.join(' ').html_safe if limit_hit
-
+				severity  = processed.zero? ? :danger : :warning
+				flash[severity] = build_message(entity, total_newed, total_updated, skipped_blank, errors, limit_hit)
 				redirect_back(fallback_location: root_path)
 			end
 		rescue StandardError => e
@@ -57,13 +46,25 @@ class ImporterController < ApplicationController
 
 	private
 
+	def build_message(entity, newed, updated, skipped, errors, limit_hit)
+		summary = build_summary(entity, newed, updated, skipped, errors.size)
+		detail  = errors.map { |e| humanize_error(entity, e) }.to_sentence
+
+		parts = []
+		parts << truncation_warning if errors.size > 50
+		parts << summary
+		parts << "Detalles: #{detail}."
+		parts << academic_records_hint if entity == 'academic_records'
+		parts << limit_warning if limit_hit
+		parts.join(' ')
+	end
+
 	def humanize_error(entity, error)
 		return error unless error.is_a?(String)
 
 		if (match = error.match(/\A(\d+):([A-Z])\z/))
 			row_num, letter = match[1], match[2]
-			col = column_name(entity, letter)
-			"Fila #{row_num}: falta #{col}"
+			"Fila #{row_num}: falta #{column_name(entity, letter)}"
 		else
 			error
 		end
@@ -77,9 +78,9 @@ class ImporterController < ApplicationController
 	def build_summary(entity, newed, updated, skipped, error_count = 0)
 		noun = entity == 'students' ? 'estudiante' : 'registro'
 		parts = []
-		parts << "#{newed} #{noun.pluralize(newed)} #{newed == 1 ? 'creado' : 'creados'}" if newed.positive?
-		parts << "#{updated} actualizado#{updated == 1 ? '' : 's'}" if updated.positive?
-		parts << "#{skipped} fila#{skipped == 1 ? '' : 's'} vacía#{skipped == 1 ? '' : 's'} ignorada#{skipped == 1 ? '' : 's'}" if skipped.positive?
+		parts << "#{newed} #{noun.pluralize(newed)} #{'creado'.pluralize(newed)}" if newed.positive?
+		parts << "#{updated} #{'actualizado'.pluralize(updated)}" if updated.positive?
+		parts << "#{skipped} #{'fila'.pluralize(skipped)} #{'vacía'.pluralize(skipped)} #{'ignorada'.pluralize(skipped)}" if skipped.positive?
 		parts << "#{error_count} con problemas" if error_count.positive?
 		parts.empty? ? 'No se procesó ningún registro.' : (parts.to_sentence.capitalize + '.')
 	end

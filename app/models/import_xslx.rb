@@ -90,18 +90,19 @@ class ImportXslx
 			total_updated = 0
 			skipped_blank = 0
 			row_index = 0
+			klass = fields[:entity].singularize.camelize.constantize
 
 			begin
 				rows.each_with_index do |row, i|
 					row_index = i
 
-					# Filas vacías: ignorar silenciosamente (residuo de formato en XLSX).
-					if row.compact.all? { |v| v.to_s.strip.empty? }
+					# Residuo de formato del XLSX: filas sin datos reales no son errores del usuario.
+					if row.all? { |v| v.nil? || v.to_s.strip.empty? }
 						skipped_blank += 1
 						next
 					end
 
-					sum_newed, sum_updated, sum_errors = fields[:entity].singularize.camelize.constantize.import row, fields
+					sum_newed, sum_updated, sum_errors = klass.import row, fields
 					unless sum_errors.blank?
 						sum_errors = "#{(65+sum_errors).chr}" if sum_errors.is_a? Integer and sum_errors >= 0 and sum_errors < 6
 						errors << "#{i+1}:#{sum_errors}"
