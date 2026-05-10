@@ -1,55 +1,98 @@
 class ImporterController < ApplicationController
+	COLUMN_NAMES = {
+		'students'         => %w[cédula email nombres apellidos sexo teléfono periodo_ingreso tipo_admisión fecha_nacimiento],
+		'teachers'         => %w[cédula email nombres apellidos sexo teléfono],
+		'subjects'         => %w[código nombre créditos modalidad tipo_de_calificación],
+		'sections'         => %w[número_de_sección código capacidad cédula_del_profesor],
+		'academic_records' => %w[cédula código_de_asignatura número_de_sección período nota]
+	}.freeze
+
+	REQUIRED_FIELDS = {
+		'subjects'         => ['id', 'nombre'],
+		'students'         => ['ci', 'email', 'nombres', 'apellidos'],
+		'teachers'         => ['ci', 'email', 'nombres', 'apellidos'],
+		'sections'         => ['numero', 'codigo', 'capacidad', 'profesor_ci'],
+		'academic_records' => ['ci', 'codigo', 'numero']
+	}.freeze
+
 	def entities
-		case params[:entity]
-		when 'subjects'	
-			require_fields = ['id', 'nombre']
-		when 'students', 'teachers'
-			require_fields = ['ci', 'email', 'nombres', 'apellidos'] 
-		when 'sections'
-			require_fields = ['numero', 'codigo', 'capacidad', 'profesor_ci'] 
-		when 'academic_records'
-			require_fields = ['ci', 'codigo', 'numero'] 
-		end
-	
-		if require_fields and params[:entity]
-			begin			
-				result = ImportXslx.general_import params, require_fields
+		entity = params[:entity]
+		require_fields = REQUIRED_FIELDS[entity]
 
-
-				flash[:success] = "Registros Procesados: "
-				flash[:success] += "#{result[0]}"+ " Nuevo".pluralize(result[0]) + " | "
-				flash[:success] += "#{result[1]}"+ " Actualizado".pluralize(result[1])
-
-				if result[2].include? 'limit_records'
-					result[2].delete 'limit_records'
-					flash[:success] += " | 1 advertencia"
-
-					flash[:warning] = "¡El archivo contiene más de 500 registros! Se procesaron estos primeros 500 y quedaron pendientes el resto. Por favor, divida el archivo y realice una nueva carga. ".html_safe
-				end
-				
-				if result[2].any? 
-					flash[:success] += " | #{result[2].count}"+ " con errores."
-					flash[:danger] = ""
-					if result[2].count > 50
-						flash[:danger] += "Más de 50 registros tienen problemas, por lo que no se continuó el proceso de carga. ".html_safe
-					end
-					flash[:danger] += " A continuación la(s) fila(s):columna(s)  de datos que reportan algún error: #{result[2].to_sentence}."
-
-					if params[:entity].eql? 'academic_records'
-						flash[:danger] += " Corrobore en el sistema que tanto el código de la asignatura como la cédula del estudiante que desea migrar existen. De no encontrarse la sección se creará siempre y cuando la asignatura exista. Revise los valores de los datos en el archivo de carga e inténtelo nuevamente. "
-					end
-
-					redirect_back fallback_location: root_path
-				else
-					redirect_to "/admin/#{params[:entity].singularize}"
-				end
-			rescue StandardError => e
-				flash[:danger] = "Error General: #{e}"
-				redirect_back fallback_location: root_path
-			end
-		else
+		unless require_fields
 			flash[:danger] = 'Tipo de entidad no encontrada. Por favor inténtelo nuevamente.'
-			redirect_back fallback_location: root_path
+			return redirect_back(fallback_location: root_path)
 		end
+
+		begin
+			total_newed, total_updated, errors, skipped_blank = ImportXslx.general_import(params, require_fields)
+			errors ||= []
+			skipped_blank ||= 0
+
+			limit_hit = errors.delete('limit_records')
+
+			if errors.empty?
+				flash[:success] = build_summary(entity, total_newed, total_updated, skipped_blank)
+				flash[:warning]  = limit_warning if limit_hit
+				redirect_to "/admin/#{entity.singularize}"
+			else
+				processed = total_newed + total_updated
+				summary = build_summary(entity, total_newed, total_updated, skipped_blank, errors.size)
+				detail  = errors.map { |e| humanize_error(entity, e) }.to_sentence
+
+				message = "#{summary} Detalles: #{detail}."
+				message += " #{academic_records_hint}" if entity == 'academic_records'
+				message = truncation_warning + ' ' + message if errors.size > 50
+
+				flash[processed.zero? ? :danger : :warning] = message.html_safe
+				flash[:warning] = [flash[:warning], limit_warning].compact.join(' ').html_safe if limit_hit
+
+				redirect_back(fallback_location: root_path)
+			end
+		rescue StandardError => e
+			flash[:danger] = "Error General: #{e}"
+			redirect_back(fallback_location: root_path)
+		end
+	end
+
+	private
+
+	def humanize_error(entity, error)
+		return error unless error.is_a?(String)
+
+		if (match = error.match(/\A(\d+):([A-Z])\z/))
+			row_num, letter = match[1], match[2]
+			col = column_name(entity, letter)
+			"Fila #{row_num}: falta #{col}"
+		else
+			error
+		end
+	end
+
+	def column_name(entity, letter)
+		index = letter.ord - 'A'.ord
+		COLUMN_NAMES.dig(entity, index) || "columna #{letter}"
+	end
+
+	def build_summary(entity, newed, updated, skipped, error_count = 0)
+		noun = entity == 'students' ? 'estudiante' : 'registro'
+		parts = []
+		parts << "#{newed} #{noun.pluralize(newed)} #{newed == 1 ? 'creado' : 'creados'}" if newed.positive?
+		parts << "#{updated} actualizado#{updated == 1 ? '' : 's'}" if updated.positive?
+		parts << "#{skipped} fila#{skipped == 1 ? '' : 's'} vacía#{skipped == 1 ? '' : 's'} ignorada#{skipped == 1 ? '' : 's'}" if skipped.positive?
+		parts << "#{error_count} con problemas" if error_count.positive?
+		parts.empty? ? 'No se procesó ningún registro.' : (parts.to_sentence.capitalize + '.')
+	end
+
+	def limit_warning
+		'¡El archivo contiene más de 500 registros! Se procesaron los primeros 500 y quedaron pendientes el resto. Por favor, divida el archivo y realice una nueva carga.'
+	end
+
+	def truncation_warning
+		'Más de 50 registros tienen problemas, por lo que no se continuó el proceso de carga.'
+	end
+
+	def academic_records_hint
+		'Corrobore en el sistema que tanto el código de la asignatura como la cédula del estudiante existen. De no encontrarse la sección se creará siempre y cuando la asignatura exista. Revise los valores en el archivo de carga e inténtelo nuevamente.'
 	end
 end

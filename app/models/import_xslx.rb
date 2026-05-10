@@ -76,7 +76,7 @@ class ImportXslx
 			rows = hoja.data
 			headers.compact!
 
-		rescue Exception => e
+		rescue StandardError => e
 			errores_cabeceras << "Error al intentar abrir el archivo: #{e}"
 		end
 
@@ -84,19 +84,22 @@ class ImportXslx
 		if errores_cabeceras.any?
 			errores_cabeceras << headers
 			return [0,0, errores_cabeceras]
-		else		
+		else
 			errors = []
-			error_type = 1
 			total_newed = 0
 			total_updated = 0
-			resumen = ""
-			row_record = ''
+			skipped_blank = 0
 			row_index = 0
 
 			begin
 				rows.each_with_index do |row, i|
-					row_record = row
 					row_index = i
+
+					# Filas vacías: ignorar silenciosamente (residuo de formato en XLSX).
+					if row.compact.all? { |v| v.to_s.strip.empty? }
+						skipped_blank += 1
+						next
+					end
 
 					sum_newed, sum_updated, sum_errors = fields[:entity].singularize.camelize.constantize.import row, fields
 					unless sum_errors.blank?
@@ -105,7 +108,7 @@ class ImportXslx
 					end
 					total_newed += sum_newed
 					total_updated += sum_updated
-					
+
 					break if errors.count > 50
 					if i > 499
 						errors << 'limit_records'
@@ -113,11 +116,11 @@ class ImportXslx
 					end
 				end
 
-			rescue Exception => e
+			rescue StandardError => e
 				errors << "Fila #{row_index} #{e} "
 			end
 
-			return [total_newed, total_updated, errors.uniq]
+			return [total_newed, total_updated, errors.uniq, skipped_blank]
 		end
 
 	end

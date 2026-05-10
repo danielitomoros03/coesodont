@@ -118,51 +118,6 @@ class Student < ApplicationRecord
   # CALLBACKS:
   # HOOKS:
 
-  # IMPORT:
-
-  def self.before_import_find(record)
-    if (ci = record[:ci])
-      if (user = User.find_by_ci(ci))
-        user.update(first_name: record[:first_name], last_name: record[:last_name], email: record[:email])
-      else
-        user = User.create(ci: record[:ci], first_name: record[:first_name], last_name: record[:last_name], email: record[:email])
-      end
-      self.user_id = user.id
-    end 
-    p "ESTOY AQUI 01"
-
-
-    # if (study_plan = StudyPlan.find_by_code(record[:study_plan_code]) && admission_type = AdmissionType.find_by_code(record[:admission_type_name]))
-    #   p "ESTOY AQUIIIIIII"
-    #   self.grades.create(study_plan_id: study_plan.id, admission_type_id: admission_type.id)
-    # end      
-  end
-
-  def after_import_save(record)
-    if (study_plan = StudyPlan.find_by_code(record[:study_plan_code]) && admission_type = AdmissionType.find_by_code(record[:admission_type_name]))
-      self.grades.create(study_plan_id: study_plan.id, admission_type_id: admission_type.id)
-    end  
-  end
-
-  # def before_import_save(record)
-  #   if (ci = record[:ci])
-  #     if (user = User.find_by_ci(ci))
-  #       user.update(record[:user])
-  #     else
-  #       user = User.create(record[:user])
-  #     end
-  #     self.user_id = user.id
-  #   end
-  # end
-
-  # def before_import_save(record)
-  #     self.user_id = record[:user_id]
-  #     self.ci = record[:ci]
-  # end
-  # def before_import_save(row, map)
-  #   self.created_nested_items(row, map)
-  # end  
-  
   rails_admin do
     navigation_label 'Gestión de Usuarios'
     navigation_icon 'fa-regular fa-user-graduate'
@@ -382,17 +337,16 @@ class Student < ApplicationRecord
     # Numero Telefónico
     usuario.number_phone = row[5] if row[5]
 
-    if usuario.save!(validate: false)
+    if usuario.save
       estudiante = Student.find_or_initialize_by(user_id: usuario.id)
 
       estudiante.birth_date = row[8] if row[8]
-      # p "    Estudiante: #{estudiante.attributes.to_a.to_sentence}    ".center(600, "E")
 
       new_grade = !estudiante.grades.where(study_plan_id: fields[:study_plan_id]).any?
       grado = estudiante.grades.find_or_initialize_by(study_plan_id: fields[:study_plan_id])
       grado.admission_type_id = fields[:admission_type_id]
 
-      if estudiante.save!
+      if estudiante.save
         # grado = Grade.find_or_initialize_by(student_id: estudiante.id, study_plan_id: fields[:study_plan_id])
 
         if row[6]
