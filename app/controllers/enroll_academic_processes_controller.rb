@@ -58,6 +58,9 @@ class EnrollAcademicProcessesController < ApplicationController
 
   def reserve_space
     section = nil
+    msg = nil
+    estado = nil
+
     begin
       ActiveRecord::Base.transaction do
         # BUSCAR REGISTRO
@@ -127,6 +130,16 @@ class EnrollAcademicProcessesController < ApplicationController
     rescue StandardError => e
       estado = 'error'
       msg = "Error: #{e.message}"
+      Rails.logger.error "[reserve_space] #{e.class}: #{e.message}\n#{e.backtrace&.first(10)&.join("\n")}"
+    end
+
+    # Defensa: si ninguna rama setea msg/estado, asumimos éxito silencioso.
+    # Pasaba en producción: el JSON volvía como {status:null, data:null}, el JS lo tomaba
+    # como error y reseteaba el select, aunque el backend había guardado correctamente.
+    if estado.nil?
+      Rails.logger.warn "[reserve_space] estado nil - params: #{params.to_unsafe_h.slice(:section_id, :course_id, :grade_id, :pci).inspect}, section_set: #{!section.nil?}"
+      estado = 'success'
+      msg    = section ? 'Cupo reservado' : 'Sin cambios'
     end
 
     cupo = section ? section.description_with_quotes : 'Seleccione sección o libere cupo'
