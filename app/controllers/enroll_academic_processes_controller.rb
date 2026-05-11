@@ -133,13 +133,23 @@ class EnrollAcademicProcessesController < ApplicationController
       Rails.logger.error "[reserve_space] #{e.class}: #{e.message}\n#{e.backtrace&.first(10)&.join("\n")}"
     end
 
-    # Defensa: si ninguna rama setea msg/estado, asumimos éxito silencioso.
-    # Pasaba en producción: el JSON volvía como {status:null, data:null}, el JS lo tomaba
-    # como error y reseteaba el select, aunque el backend había guardado correctamente.
+    # Defensa: si ninguna rama setea msg/estado, verificamos el estado real en BD
+    # antes de declarar éxito. Evita enmascarar fallas (ej. validaciones que no
+    # entren al rescue) como si fueran éxito.
     if estado.nil?
-      Rails.logger.warn "[reserve_space] estado nil - params: #{params.to_unsafe_h.slice(:section_id, :course_id, :grade_id, :pci).inspect}, section_set: #{!section.nil?}"
-      estado = 'success'
-      msg    = section ? 'Cupo reservado' : 'Sin cambios'
+      persisted = section && AcademicRecord.joins(:enroll_academic_process).where(
+        section_id: section.id,
+        'enroll_academic_processes.grade_id': params[:grade_id]
+      ).exists?
+
+      if persisted
+        estado = 'success'
+        msg    = 'Cupo reservado'
+      else
+        estado = 'error'
+        msg    = 'No se pudo procesar la selección. Inténtelo nuevamente.'
+      end
+      Rails.logger.warn "[reserve_space] estado nil resuelto como #{estado} - params: #{params.to_unsafe_h.slice(:section_id, :course_id, :grade_id, :pci).inspect}, section_set: #{!section.nil?}, persisted: #{persisted}"
     end
 
     cupo = section ? section.description_with_quotes : 'Seleccione sección o libere cupo'
