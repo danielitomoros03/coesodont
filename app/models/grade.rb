@@ -180,18 +180,24 @@ class Grade < ApplicationRecord
 
   # ENROLLMENT
   def valid_to_enroll_in academic_process
-    
-    if self.enabled_enroll_process.eql?(academic_process)
+    return true if self.enabled_enroll_process.eql?(academic_process)
+    return true if self.nuevo?
+
+    # Si ya hay una inscripción en proceso (reservada) en este período, el estudiante
+    # debe poder retomarla al refrescar. Sin esto, el callback que mueve el
+    # current_permanence_status del grade a :regular tras la primera reserva deja al
+    # estudiante atrapado: ya no es :nuevo y aún no tiene período anterior que cuente.
+    current_enroll = self.enroll_academic_processes.of_academic_process(academic_process.id).first
+    return true if current_enroll&.reservado?
+
+    academic_process_before = academic_process&.process_before
+    if academic_process_before &&
+       self.enroll_academic_processes.of_academic_process(academic_process_before.id).any? &&
+       ['regular', 'reincorporado', 'articulo3'].include?(self.current_permanence_status)
       return true
-    else
-      academic_process_before = academic_process&.process_before
-      if self.nuevo?
-        return true
-      elsif (academic_process_before and self.enroll_academic_processes.of_academic_process(academic_process_before.id).any?) and (['regular', 'reincorporado', 'articulo3'].include? self.current_permanence_status)
-        return true
-      end
     end
-    return false
+
+    false
   end
 
   # APPOINTMENT_TIME:
