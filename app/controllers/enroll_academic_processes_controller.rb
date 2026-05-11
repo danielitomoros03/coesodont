@@ -58,6 +58,9 @@ class EnrollAcademicProcessesController < ApplicationController
 
   def reserve_space
     section = nil
+    msg = nil
+    estado = nil
+
     begin
       ActiveRecord::Base.transaction do
         # BUSCAR REGISTRO
@@ -127,6 +130,26 @@ class EnrollAcademicProcessesController < ApplicationController
     rescue StandardError => e
       estado = 'error'
       msg = "Error: #{e.message}"
+      Rails.logger.error "[reserve_space] #{e.class}: #{e.message}\n#{e.backtrace&.first(10)&.join("\n")}"
+    end
+
+    # Defensa: si ninguna rama setea msg/estado, verificamos el estado real en BD
+    # antes de declarar éxito. Evita enmascarar fallas (ej. validaciones que no
+    # entren al rescue) como si fueran éxito.
+    if estado.nil?
+      persisted = section && AcademicRecord.joins(:enroll_academic_process).where(
+        section_id: section.id,
+        'enroll_academic_processes.grade_id': params[:grade_id]
+      ).exists?
+
+      if persisted
+        estado = 'success'
+        msg    = 'Cupo reservado'
+      else
+        estado = 'error'
+        msg    = 'No se pudo procesar la selección. Inténtelo nuevamente.'
+      end
+      Rails.logger.warn "[reserve_space] estado nil resuelto como #{estado} - params: #{params.to_unsafe_h.slice(:section_id, :course_id, :grade_id, :pci).inspect}, section_set: #{!section.nil?}, persisted: #{persisted}"
     end
 
     cupo = section ? section.description_with_quotes : 'Seleccione sección o libere cupo'
