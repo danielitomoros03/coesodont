@@ -1,8 +1,9 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # :confirmable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable,
-         :recoverable, :rememberable, :validatable, :trackable, :timeoutable
+         :recoverable, :rememberable, :validatable, :trackable, :timeoutable,
+         :lockable
 
 
   # SCHEMA:
@@ -18,7 +19,9 @@ class User < ApplicationRecord
   # t.datetime "current_sign_in_at"
   # t.datetime "last_sign_in_at"
   # t.string "current_sign_in_ip"
-  # t.string "last_sign_in_ip"  
+  # t.string "last_sign_in_ip"
+  # t.integer "failed_attempts", default: 0, null: false
+  # t.datetime "locked_at"
 
   # ENUMERIZE:
   enum sex: [:Femenino, :Masculino]
