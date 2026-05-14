@@ -9,7 +9,8 @@ es:
       already_authenticated: "Ya iniciaste sesión."
       inactive: "Tu cuenta aún no ha sido activada."
       invalid: "Cédula y/o contraseña inválido."
-      locked: "Tu cuenta está bloqueada."
+      # failure.locked se construye dinámicamente en config/initializers/devise.rb
+      # para que el tiempo de espera siempre refleje Devise.unlock_in.
       last_attempt: "Tiene un intento más antes que su cuenta sea bloqueada."
       not_found_in_database: "%{authentication_keys} o contraseña inválidos."
       timeout: "Tu sesión ha expirado. Inicia sesión nuevamente."

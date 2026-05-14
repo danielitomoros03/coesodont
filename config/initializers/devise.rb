@@ -191,30 +191,14 @@ Devise.setup do |config|
   config.timeout_in = 2.hours
 
   # ==> Configuration for :lockable
-  # Defines which strategy will be used to lock an account.
-  # :failed_attempts = Locks an account after a number of failed attempts to sign in.
-  # :none            = No lock strategy. You should handle locking by yourself.
-  # config.lock_strategy = :failed_attempts
-
-  # Defines which key will be used when locking and unlocking an account
-  # config.unlock_keys = [:email]
-
-  # Defines which strategy will be used to unlock an account.
-  # :email = Sends an unlock link to the user email
-  # :time  = Re-enables login after a certain amount of time (see :unlock_in below)
-  # :both  = Enables both strategies
-  # :none  = No unlock strategy. You should handle unlocking by yourself.
-  # config.unlock_strategy = :both
-
-  # Number of authentication tries before locking an account if lock_strategy
-  # is failed attempts.
-  # config.maximum_attempts = 20
-
-  # Time interval to unlock the account if :time is enabled as unlock_strategy.
-  # config.unlock_in = 1.hour
-
-  # Warn on the last attempt before the account is locked.
-  # config.last_attempt_warning = true
+  config.lock_strategy = :failed_attempts
+  # Unlock por CI (login key) y por tiempo: estrategia :email no aplica porque
+  # muchos usuarios tienen email temp{ci}@mailinator.com (bandeja pública).
+  config.unlock_keys = [:ci]
+  config.unlock_strategy = :time
+  config.maximum_attempts = 5
+  config.unlock_in = 30.minutes
+  config.last_attempt_warning = true
 
   # ==> Configuration for :recoverable
   #
@@ -308,4 +292,14 @@ Devise.setup do |config|
   # When set to false, does not sign a user in automatically after their password is
   # changed. Defaults to true, so a user is signed in automatically after changing a password.
   config.sign_in_after_change_password = true
+end
+
+# Mensaje de bloqueo: se construye con Devise.unlock_in para que un cambio en
+# config.unlock_in (arriba) se refleje también en el texto mostrado al usuario.
+Rails.application.config.after_initialize do
+  minutes = (Devise.unlock_in / 60).to_i
+  I18n.backend.store_translations(
+    :es,
+    devise: { failure: { locked: "Su cuenta fue bloqueada. Espere #{minutes}min para desbloquearla." } }
+  )
 end
