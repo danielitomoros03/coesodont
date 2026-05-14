@@ -2,6 +2,7 @@ class EnhancedController < ActionController::Base
   include ActionController::Live
   before_action :set_paper_trail_whodunnit
   before_action :set_paper_trail_request_info
+  before_action :enforce_password_change!
   rescue_from CanCan::AccessDenied, with: :handle_access_denied
 
   def info_for_paper_trail
@@ -24,5 +25,12 @@ class EnhancedController < ActionController::Base
   def handle_access_denied(_exception)
     flash[:error] = 'No está autorizado para acceder a esta página.'
     redirect_back fallback_location: rails_admin_path, allow_other_host: false
+  end
+
+  def enforce_password_change!
+    return unless current_user && !current_user.updated_password?
+
+    flash[:warning] = 'Debe cambiar su contraseña antes de continuar usando el sistema.'
+    redirect_to main_app.edit_password_user_path(current_user)
   end
 end

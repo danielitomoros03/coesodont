@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   before_action :set_paper_trail_whodunnit
   before_action :set_paper_trail_request_info
   before_action :set_current_process
+  before_action :enforce_password_change!
   rescue_from CanCan::AccessDenied, with: :handle_access_denied
 
   def info_for_paper_trail
@@ -197,6 +198,17 @@ class ApplicationController < ActionController::Base
   def handle_access_denied(_exception)
     flash[:error] = 'No está autorizado para acceder a esta página.'
     redirect_back fallback_location: root_path, allow_other_host: false
+  end
+
+  # Mientras la contrasena siga siendo la cedula (User#updated_password = false),
+  # el usuario solo puede navegar al formulario de cambio o cerrar sesion.
+  def enforce_password_change!
+    return unless current_user && !current_user.updated_password?
+    return if controller_name == 'users' && %w[edit_password update].include?(action_name)
+    return if controller_name == 'sessions' && action_name == 'destroy'
+
+    flash[:warning] = 'Debe cambiar su contraseña antes de continuar usando el sistema.'
+    redirect_to edit_password_user_path(current_user)
   end
 
 end
