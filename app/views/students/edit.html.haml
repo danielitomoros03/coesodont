@@ -1,8 +1,8 @@
 -# frozen_string_literal: true
 = render partial: 'layouts/progress_wizard', locals: {active: 3}
 
-.vh-100.d-flex.justify-content-center
-  .col-md-10
+.d-flex.justify-content-center.py-3
+  .col-12.col-md-10
     .border.p-3
       = simple_form_for @student, html: {novalidate: false } do |f|
         %h5.text-center.bg-dark.text-info.p-1 REGISTRO DE DATOS
