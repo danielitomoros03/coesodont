@@ -303,3 +303,22 @@ Rails.application.config.after_initialize do
     devise: { failure: { locked: "Su cuenta fue bloqueada. Espere #{minutes}min para desbloquearla." } }
   )
 end
+
+# Notificacion de acceso: tras cada autenticacion exitosa se envia un correo
+# al usuario con IP, navegador y hora para que detecte accesos no reconocidos.
+# Se omite si el email es el placeholder temporal (mailinator) porque esa
+# bandeja es publica y enviar alli expone el aviso a cualquiera.
+Warden::Manager.after_authentication scope: :user do |user, auth, _opts|
+  begin
+    next if user.respond_to?(:false_email?) && user.false_email?
+    next if user.email.blank?
+
+    request    = auth.request
+    ip         = request.respond_to?(:remote_ip) ? request.remote_ip : nil
+    user_agent = request.respond_to?(:user_agent) ? request.user_agent : nil
+
+    UserMailer.security_login_notice(user.id, ip, user_agent, Time.current).deliver_later
+  rescue StandardError => e
+    Rails.logger.error("[security_login_notice] No se pudo encolar el aviso: #{e.class}: #{e.message}")
+  end
+end
