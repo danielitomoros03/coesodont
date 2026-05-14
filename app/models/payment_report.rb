@@ -51,6 +51,7 @@ class PaymentReport < ApplicationRecord
   validates :receiving_bank_account, presence: true
   validates :voucher, presence: true
   validates :status, presence: true
+  validate :voucher_size_within_limit
 
   enum transaction_type: [:transferencia, :efectivo, :punto_venta]
 
@@ -215,6 +216,12 @@ class PaymentReport < ApplicationRecord
 
   private
 
+    def voucher_size_within_limit
+      return unless voucher.attached?
+      return if voucher.byte_size <= 20.megabytes
+
+      errors.add(:voucher, "es muy grande (#{(voucher.byte_size / 1.megabyte.to_f).round(1)} MB). El máximo permitido es 20 MB. Comprime la imagen antes de subirla.")
+    end
 
     def paper_trail_update
       changed_fields = self.changes.keys - ['created_at', 'updated_at']
