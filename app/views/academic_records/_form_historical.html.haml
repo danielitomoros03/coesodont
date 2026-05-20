@@ -94,7 +94,7 @@
       .col-1.numerica{style: 'display:none'}
         =# QUALIFICATION VALUE
         =# text_field_tag '[qualifications]value', {}, {placeholder: 'Cal', class: "form-control qualificable", required: true, step: 1, in: 0...21, oninput: 'onlyValidQ(this);'}
-        = select_tag '[qualifications]value', options_for_select( (1..20).map{|a| sprintf("%02i", a)}), {class: "form-control qualificable", include_blank: '--'}
+        = select_tag '[qualifications]value', options_for_select( (0..20).map{|a| sprintf("%02i", a)}), {class: "form-control qualificable", include_blank: '--'}
       .col-1
         =# GUARDAR
         %button.btn.btn-sm.btn-primary.float-end{type: :submit}
