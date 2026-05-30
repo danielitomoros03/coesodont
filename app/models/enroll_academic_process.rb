@@ -310,8 +310,8 @@ class EnrollAcademicProcess < ApplicationRecord
 
     list do
       search_by :custom_search
-      # filters [:period_name, :student]
       scopes [:todos, :preinscrito, :reservado, :confirmado, :retirado, :activo, :con_reporte_de_pago, :sin_reporte_de_pago, :nuevos_en_periodo]
+      filters [:period, :enroll_status]
 
       field :enroll_status_label do
         label 'Estado'
@@ -324,12 +324,23 @@ class EnrollAcademicProcess < ApplicationRecord
         end
       end
 
-      field :period do
+      field :enroll_status do
+        visible false
+        label 'Estado'
+      end
+
+      field :period, :enum do
         label 'Período'
         column_width 100
-        searchable :name
-        # filterable 'periods.name'
+        searchable [{ AcademicProcess => :period_id }]
+        eager_load(:academic_process)
         sortable :name
+        enum do
+          Period.order(:name).pluck(:name, :id)
+        end
+        pretty_value do
+          bindings[:object].period&.name || ' - '
+        end
       end
 
       field :student do

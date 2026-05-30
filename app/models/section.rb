@@ -318,16 +318,7 @@ class Section < ApplicationRecord
     list do
       sort_by ['periods.name', 'areas.name', 'courses.name', 'subjects.code']
       search_by :custom_search
-      
-      # filters [:period, :code, :subject_code]
-      # sort_by 'courses.name'
-      # field :academic_process do
-      #   label 'Período'
-      #   column_width 120
-      #   pretty_value do
-      #     value.period.name
-      #   end
-      # end
+      filters [:period, :area, :modality]
 
       field :number_acta do
         sticky true
@@ -336,30 +327,32 @@ class Section < ApplicationRecord
       end
 
 
-      field :period do
+      field :period, :enum do
         sticky true
         label 'Período'
-        searchable :name
+        searchable [{ AcademicProcess => :period_id }]
+        eager_load(course: :academic_process)
         sortable :name
-        # associated_collection_cache_all false
-        # associated_collection_scope do
-        #   # bindings[:object] & bindings[:controller] are available, but not in scope's block!
-        #   Proc.new { |scope|
-        #     # scoping all Players currently, let's limit them to the team's league
-        #     # Be sure to limit if there are a lot of Players and order them by position
-        #     scope = scope.joins(:period)
-        #     scope = scope.limit(30) # 'order' does not work here
-        #   }
-        # end
+        enum do
+          Period.order(:name).pluck(:name, :id)
+        end
         pretty_value do
-          value.name
+          bindings[:object].period&.name || ' - '
         end
       end
 
-      field :area do
+      field :area, :enum do
         sticky true
+        label 'Área'
+        searchable [{ Subject => :area_id }]
+        eager_load(course: :subject)
         sortable :name
-        searchable :name
+        enum do
+          Area.order(:name).pluck(:name, :id)
+        end
+        pretty_value do
+          bindings[:object].area&.name || ' - '
+        end
       end
 
       # field :period_name do

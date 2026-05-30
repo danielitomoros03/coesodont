@@ -529,45 +529,33 @@ class AcademicRecord < ApplicationRecord
       search_by :custom_search
       sort_by 'periods.name'
       scopes [:todos, :nuevos_en_periodo]
-      # filters [:period_name, :section_code, :subject_code, :student_desc]
+      filters [:period, :area, :status]
 
-      # field :period_name do
-      #   label 'Período'
-      #   column_width 100
-      #   # searchable 'periods_academic_records.name'
-      #   # filterable 'periods_academic_records.name'
-      #   # sortable 'periods_academic_records.name'
-      #   formatted_value do
-      #     bindings[:object].period.name if bindings[:object].period
-      #   end
-      # end
-
-      field :period do
+      field :period, :enum do
         label 'Periodo'
         column_width 120
-
-        associated_collection_cache_all false
-        associated_collection_scope do
-          # bindings[:object] & bindings[:controller] are available, but not in scope's block!
-          Proc.new { |scope|
-            # scoping all Players currently, let's limit them to the team's league
-            # Be sure to limit if there are a lot of Players and order them by position
-            scope = scope.joins(:period)
-            scope = scope.limit(30) # 'order' does not work here
-          }
-        end
-
-        searchable :name
-        # filterable :name
+        searchable [{ AcademicProcess => :period_id }]
+        eager_load(enroll_academic_process: :academic_process)
         sortable :name
+        enum do
+          Period.order(:name).pluck(:name, :id)
+        end
         pretty_value do
-          value.name
+          bindings[:object].period&.name || ' - '
         end
       end
 
-      field :area do
-        searchable :name
+      field :area, :enum do
+        label 'Área'
+        searchable [{ Subject => :area_id }]
+        eager_load(section: { course: :subject })
         sortable :name
+        enum do
+          Area.order(:name).pluck(:name, :id)
+        end
+        pretty_value do
+          bindings[:object].area&.name || ' - '
+        end
       end
 
       field :section_code do
