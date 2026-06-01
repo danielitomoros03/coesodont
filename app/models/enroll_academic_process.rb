@@ -336,7 +336,8 @@ class EnrollAcademicProcess < ApplicationRecord
         eager_load(:academic_process)
         sortable :name
         enum do
-          Period.order(:name).pluck(:name, :id)
+          Period.joins(academic_processes: :enroll_academic_processes)
+                .distinct.order(name: :desc).pluck(:name, :id)
         end
         pretty_value do
           bindings[:object].period&.name || ' - '

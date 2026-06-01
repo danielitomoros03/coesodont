@@ -527,7 +527,7 @@ class AcademicRecord < ApplicationRecord
 
     list do
       search_by :custom_search
-      sort_by 'periods.name'
+      sort_by :id
       scopes [:todos, :nuevos_en_periodo]
       filters [:period, :area, :status]
 
@@ -538,7 +538,8 @@ class AcademicRecord < ApplicationRecord
         eager_load(enroll_academic_process: :academic_process)
         sortable :name
         enum do
-          Period.order(:name).pluck(:name, :id)
+          Period.joins(academic_processes: { enroll_academic_processes: :academic_records })
+                .distinct.order(name: :desc).pluck(:name, :id)
         end
         pretty_value do
           bindings[:object].period&.name || ' - '

@@ -121,17 +121,34 @@ class Course < ApplicationRecord
     list do
       sort_by ['courses.name']
       search_by :custom_search
-      field :academic_process do
-        queryable true
+      filters [:period, :area]
+
+      field :period, :enum do
         label 'Periodo'
         column_width 100
+        searchable [{ AcademicProcess => :period_id }]
+        eager_load(:academic_process)
+        sortable :name
+        enum do
+          Period.joins(academic_processes: :courses)
+                .distinct.order(name: :desc).pluck(:name, :id)
+        end
         pretty_value do
-          value.period.name
+          bindings[:object].period&.name || ' - '
         end
       end
-      field :area do
-        searchable :name
+
+      field :area, :enum do
+        label 'Área'
+        searchable [{ Subject => :area_id }]
+        eager_load(:subject)
         sortable :name
+        enum do
+          Area.order(:name).pluck(:name, :id)
+        end
+        pretty_value do
+          bindings[:object].area&.name || ' - '
+        end
       end
       field :subject do
         filterable false

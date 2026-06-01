@@ -334,7 +334,8 @@ class Section < ApplicationRecord
         eager_load(course: :academic_process)
         sortable :name
         enum do
-          Period.order(:name).pluck(:name, :id)
+          Period.joins(academic_processes: :sections)
+                .distinct.order(name: :desc).pluck(:name, :id)
         end
         pretty_value do
           bindings[:object].period&.name || ' - '
