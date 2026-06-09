@@ -38,6 +38,13 @@ class Period < ApplicationRecord
 		period_type.name if period_type
 	end
 
+	# Opciones para filtros enum de RailsAdmin: solo períodos con datos reales en la
+	# asociación dada, más recientes primero. `through` es el chain de joins bajo
+	# academic_processes (símbolo o hash anidado).
+	def self.options_with_data(through)
+		joins(academic_processes: through).distinct.order(name: :desc).pluck(:name, :id)
+	end
+
   rails_admin do
     navigation_label 'Config Específica'
     navigation_icon 'fa-solid fa-clock'

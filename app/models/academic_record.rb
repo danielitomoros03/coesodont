@@ -538,8 +538,7 @@ class AcademicRecord < ApplicationRecord
         eager_load(enroll_academic_process: :academic_process)
         sortable :name
         enum do
-          Period.joins(academic_processes: { enroll_academic_processes: :academic_records })
-                .distinct.order(name: :desc).pluck(:name, :id)
+          Period.options_with_data(enroll_academic_processes: :academic_records)
         end
         pretty_value do
           bindings[:object].period&.name || ' - '

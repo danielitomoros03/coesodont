@@ -130,8 +130,7 @@ class Course < ApplicationRecord
         eager_load(:academic_process)
         sortable :name
         enum do
-          Period.joins(academic_processes: :courses)
-                .distinct.order(name: :desc).pluck(:name, :id)
+          Period.options_with_data(:courses)
         end
         pretty_value do
           bindings[:object].period&.name || ' - '
