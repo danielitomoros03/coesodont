@@ -14,6 +14,16 @@ RailsAdmin::Config::Fields::Types::Enum.class_eval do
   end
 end
 
+# Filtros booleanos: "Todos / Sí / No" en vez de "... / Verdadero / Falso", sin
+# present/vacío. Los campos con etiquetas propias (p.ej. qualified) las conservan.
+RailsAdmin::Config::Fields::Types::Boolean.class_eval do
+  register_instance_option :filter_operators do
+    [{ label: 'Todos', value: '_discard' },
+     { label: 'Sí', value: 'true' },
+     { label: 'No', value: 'false' }]
+  end
+end
+
 # Enriquece /admin/section/:id/history con versiones de AcademicRecord y Qualification
 # además de las del propio Section. Mantiene el URL y la pestaña nativos de Rails Admin.
 Rails.application.config.to_prepare do

@@ -493,7 +493,7 @@ class Section < ApplicationRecord
       field :qualified do
         column_width 20
       end
-      
+
       field :options do
         label 'Opciones'
         pretty_value do
