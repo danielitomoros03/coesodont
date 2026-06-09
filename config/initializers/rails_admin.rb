@@ -4,6 +4,16 @@ Dir[Rails.root.join('app', 'rails_admin', '**/*.rb')].each { |file| require file
 
 # RailsAdmin::Config::Actions.register(:custom_export, RailsAdmin::Config::Actions::CustomExport)
 
+# Filtros enum más limpios: el "..." pasa a decir "Todos" y se eliminan las
+# opciones "Está presente"/"Está vacío" (ruido visual). El JS del gem ya sabe
+# renderizar operadores tipo objeto {label, value}, así que no hace falta tocarlo.
+RailsAdmin::Config::Fields::Types::Enum.class_eval do
+  register_instance_option :filter_operators do
+    [{ label: 'Todos', value: '_discard' }] +
+      enum.map { |label, value| { label: label, value: value || label } }
+  end
+end
+
 # Enriquece /admin/section/:id/history con versiones de AcademicRecord y Qualification
 # además de las del propio Section. Mantiene el URL y la pestaña nativos de Rails Admin.
 Rails.application.config.to_prepare do
