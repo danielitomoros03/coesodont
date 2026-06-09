@@ -24,6 +24,10 @@ class PaymentReport < ApplicationRecord
   belongs_to :payable, polymorphic: true
   belongs_to :receiving_bank_account, class_name: 'BankAccount'
 
+  # En la práctica todo payable es un EnrollAcademicProcess (Grade no tiene pagos).
+  # Esta asociación no-polimórfica permite joinear/filtrar por período en RailsAdmin.
+  belongs_to :enroll_academic_process, foreign_key: :payable_id, optional: true
+
   has_one_attached :voucher do |attachable|
     attachable.variant :thumb, resize_to_limit: [100,100]
   end
@@ -71,6 +75,10 @@ class PaymentReport < ApplicationRecord
     payable&.academic_process
   end
 
+  def period
+    academic_process&.period
+  end
+
   def amount_to_bs
     ActionController::Base.helpers.number_to_currency(self.amount, unit: 'Bs.', separator: ",", delimiter: ".")
   end
@@ -114,10 +122,16 @@ class PaymentReport < ApplicationRecord
       end
 
       field :amount
-      field :academic_process do
+      field :period, :enum do
         label 'Periodo'
-        formatted_value do
-          bindings[:object].academic_process&.name
+        searchable [{ AcademicProcess => :period_id }]
+        eager_load(enroll_academic_process: :academic_process)
+        sortable :name
+        enum do
+          Period.options_with_data(enroll_academic_processes: :payment_reports)
+        end
+        pretty_value do
+          bindings[:object].period&.name || ' - '
         end
       end
       field :student do

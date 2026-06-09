@@ -10,7 +10,7 @@ Rails.application.config.to_prepare do
   RailsAdmin::MainController.prepend(Module.new do
     # Listados que arrancan filtrados al período más reciente con datos, para no
     # escanear tablas enormes mostrando todos los períodos por defecto.
-    DEFAULT_PERIOD_FILTER_MODELS = %w[Section EnrollAcademicProcess Course AcademicRecord].freeze
+    DEFAULT_PERIOD_FILTER_MODELS = %w[Section EnrollAcademicProcess Course AcademicRecord PaymentReport].freeze
 
     def history_show(*args)
       action = RailsAdmin::Config::Actions.find(:history_show)
