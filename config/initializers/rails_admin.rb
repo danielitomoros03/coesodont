@@ -8,6 +8,10 @@ Dir[Rails.root.join('app', 'rails_admin', '**/*.rb')].each { |file| require file
 # además de las del propio Section. Mantiene el URL y la pestaña nativos de Rails Admin.
 Rails.application.config.to_prepare do
   RailsAdmin::MainController.prepend(Module.new do
+    # Listados que arrancan filtrados al período más reciente con datos, para no
+    # escanear tablas enormes mostrando todos los períodos por defecto.
+    DEFAULT_PERIOD_FILTER_MODELS = %w[Section EnrollAcademicProcess Course AcademicRecord].freeze
+
     def history_show(*args)
       action = RailsAdmin::Config::Actions.find(:history_show)
       get_model unless action.root?
@@ -29,6 +33,29 @@ Rails.application.config.to_prepare do
       else
         instance_eval(&@action.controller)
       end
+    end
+
+    # Preselecciona el período más reciente en el listado cuando el usuario entra
+    # sin filtros propios. `index` se despacha vía action_missing (no hay método
+    # concreto), así que ese es el punto de enganche.
+    def action_missing(name, *args, &block)
+      apply_default_period_filter if name.to_sym == :index
+      super
+    end
+
+    private
+
+    def apply_default_period_filter
+      return if params[:f].present? || params[:scope].present? || params[:query].present?
+
+      get_model
+      return unless DEFAULT_PERIOD_FILTER_MODELS.include?(@abstract_model&.model_name.to_s)
+
+      period_field = @model_config.list.fields.detect { |f| f.name == :period && f.filterable? }
+      most_recent_id = period_field&.with(controller: self)&.enum&.first&.last
+      return unless most_recent_id
+
+      params[:f] = ActionController::Parameters.new('period' => { '0' => { 'v' => most_recent_id.to_s } })
     end
   end)
 end
