@@ -25,7 +25,15 @@ class UserMailer < ApplicationMailer
     @nombre = user.nick_name
     @genero = user.genero
     mail(to: user.email_desc, subject: "¡Confirmación de inscripción en #{@escuela_name} para el Período #{@periodo_name} COES-ODONT!")
-    
+
+  end
+
+  def security_login_notice(user_id, ip, user_agent, signed_in_at)
+    @user = User.find(user_id)
+    @ip = ip.presence || 'desconocida'
+    @user_agent = user_agent.presence || 'desconocido'
+    @signed_in_at = signed_in_at.in_time_zone('Caracas')
+    mail(to: @user.email_desc, subject: 'Acceso reciente a su cuenta COES-ODONT')
   end
 
 end

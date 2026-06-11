@@ -1,8 +1,9 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # :confirmable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable,
-         :recoverable, :rememberable, :validatable, :trackable, :timeoutable
+         :recoverable, :rememberable, :validatable, :trackable, :timeoutable,
+         :lockable
 
 
   # SCHEMA:
@@ -18,13 +19,15 @@ class User < ApplicationRecord
   # t.datetime "current_sign_in_at"
   # t.datetime "last_sign_in_at"
   # t.string "current_sign_in_ip"
-  # t.string "last_sign_in_ip"  
+  # t.string "last_sign_in_ip"
+  # t.integer "failed_attempts", default: 0, null: false
+  # t.datetime "locked_at"
 
   # ENUMERIZE:
   enum sex: [:Femenino, :Masculino]
 
   # VALIDATION PASSWORD:
-  before_update :set_updated_password
+  before_save :set_updated_password
 
   # HISTORY:
   has_paper_trail on: [:create, :destroy, :update]
@@ -463,11 +466,13 @@ class User < ApplicationRecord
       self.paper_trail_event = "¡Usuario eliminado!"
     end
 
+    # updated_password = false significa "debe cambiar la clave en el proximo login":
+    # cuando el plaintext recien asignado coincide con la cedula (caso default o reset
+    # manual), forzamos el cambio igual que en el primer login.
     def set_updated_password
-      chagebles = self.changes.keys - ['updated_at']
-      if (chagebles.count.eql? 1 and chagebles.include? "encrypted_password")
-        self.updated_password = true
-      end
+      return unless encrypted_password_changed?
+      return if password.blank?
+      self.updated_password = (password != ci)
     end
 
 end
