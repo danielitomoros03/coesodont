@@ -32,6 +32,8 @@ class EnrollAcademicProcess < ApplicationRecord
   # ENUMERIZE:
   # IDEA CON ESTADO DE INSCRIPCIÓN EN GRADE Y ENROLL ACADEMIC PROCESS
   enum enroll_status: [:preinscrito, :reservado, :confirmado]
+  PERMANENCE_APPROVAL_THRESHOLD = 0.5
+
   enum permanence_status: {
     nuevo: 0,
     regular: 1,
@@ -157,13 +159,13 @@ class EnrollAcademicProcess < ApplicationRecord
       elsif total_retire?
         reglamento_aux = :desertor
       elsif self.academic_records.coursed.any?
-        if coursed_but_not_approved_any?
+        if exceeded_permanence_threshold?
           reglamento_aux = :articulo3
           iep_anterior = self.before_enrolled
-          if iep_anterior&.coursed_but_not_approved_any?
+          if iep_anterior&.exceeded_permanence_threshold?
             reglamento_aux = :articulo6
             iep_anterior2 = iep_anterior.before_enrolled
-            if iep_anterior2&.coursed_but_not_approved_any?
+            if iep_anterior2&.exceeded_permanence_threshold?
               reglamento_aux = :articulo7
             end
           end
@@ -174,8 +176,10 @@ class EnrollAcademicProcess < ApplicationRecord
     return reglamento_aux
   end
 
-  def coursed_but_not_approved_any?
-    self.academic_records.coursed.any? and !(self.academic_records.aprobado.any?)
+  def exceeded_permanence_threshold?
+    cursadas = academic_records.total_subjects_coursed
+    return false if cursadas == 0
+    academic_records.total_subjects_approved.to_f / cursadas < PERMANENCE_APPROVAL_THRESHOLD
   end
   def finished?
     academic_records.any? and (academic_records.count.eql? academic_records.qualified.count)
