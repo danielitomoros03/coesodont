@@ -45,7 +45,8 @@ class EnrollAcademicProcess < ApplicationRecord
     desertor: 7,
     egresado: 8,
     egresado_doble_titulo: 9,
-    permiso_para_no_cursar: 10
+    permiso_para_no_cursar: 10,
+    via_de_gracia: 11
   }
 
   # VALIDATIONS:
@@ -70,7 +71,7 @@ class EnrollAcademicProcess < ApplicationRecord
   scope :sort_by_period_reverse, -> {joins(period: :period_type).order('periods.year': :asc, 'period_types.name': :asc)}
 
 
-  scope :valid_to_enroll_in, -> () {joins(:grade).where("grades.current_permanence_status": [:regular, :reincorporado, :articulo3], "grades.appointment_time": nil)}
+  scope :valid_to_enroll_in, -> () {joins(:grade).where("grades.current_permanence_status": [:regular, :reincorporado, :articulo3, :via_de_gracia], "grades.appointment_time": nil)}
 
 
   scope :sort_by_numbers_of_this_process, -> () {order(['enroll_academic_processes.efficiency': :desc, 'enroll_academic_processes.simple_average': :desc, 'enroll_academic_processes.weighted_average': :desc])}
@@ -266,17 +267,14 @@ class EnrollAcademicProcess < ApplicationRecord
   end
 
   def label_permanence_status
-    # [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]  
-    label_color = 'info'
-    case self.permanence_status
-    when 'articulo3'
-      label_color = 'warning'
-    when 'articulo6'
-      label_color = 'danger'
-    when 'articulo7'
-      label_color = 'dark'
+    label_color = case self.permanence_status
+    when 'articulo3'       then 'warning'
+    when 'articulo6'       then 'danger'
+    when 'articulo7'       then 'dark'
+    when 'via_de_gracia'   then 'success'
+    else                        'info'
     end
-    return ApplicationController.helpers.label_status("bg-#{label_color}", self.permanence_status&.titleize)
+    ApplicationController.helpers.label_status("bg-#{label_color}", self.permanence_status&.titleize)
   end
 
 

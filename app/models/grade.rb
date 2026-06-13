@@ -16,6 +16,8 @@ class Grade < ApplicationRecord
 
   NORMATIVE_TITLE = "NORMAS SOBRE EL RENDIMIENTO MÍNIMO Y CONDICIONES DE PERMANENCIA DE LOS ALUMNOS EN LA U.C.V"
 
+  ARTICULO8 = "Artículo 8°. (Vía de Gracia) Los alumnos que se encuentren en la condición establecida en el Artículo 7° podrán solicitar al Consejo de Facultad la autorización para continuar sus estudios en carácter excepcional. El Consejo de Facultad, previo estudio del caso, podrá autorizar dicha reincorporación. </br></br> Usted ha sido autorizado por el Consejo de Facultad para reincorporarse excepcionalmente a sus estudios a través de la Vía de Gracia. Deberá cumplir con los requisitos y condiciones establecidos por dicho Consejo."
+
   ARTICULO7 = 'Artículo 7°. El alumno que, habiéndose reincorporado conforme al artículo anterior, dejare nuevamente de aprobar el 50% de la carga que curse, o en todo caso, el que no apruebe ninguna asignatura durante dos períodos consecutivos, no podrá incorporarse más a la misma Escuela o Facultad, a menos que el Consejo de Facultad, previo estudio del caso, autorice su reincorporación.'
 
   ARTICULO6 = "Artículo 6°. El alumno que al final del período de recuperación no alcance nuevamente a aprobar el 50% de la carga académica que cursa o en todo caso a aprobar por lo menos una asignatura, no podrá reinscribirse en la Universidad Central de Venezuela, en los dos semestres siguientes. Pasados éstos, tendrá el derecho de reincorporarse en la Escuela en la que cursaba sin que puedan exigírsele otros requisitos que los trámites administrativos usuales. Igualmente, podrá inscribirse en otra Escuela diferente con el Informe favorable del Profesor Consejero y de la Unidad de Asesoramiento Académico de la Escuela a la cual pertenecía, y la aprobación por parte del Consejo de Facultad a la cual solicita el traslado. </br></br> Usted ha sido suspendido por dos semestres (un año) y deberá solicitar la reincorporación, según las fechas y los procedimientos establecidos por el Dpto. de Control de Estudios de la Facultad."
@@ -43,7 +45,7 @@ class Grade < ApplicationRecord
   enum registration_status: [:universidad, :facultad, :escuela]
   enum enrollment_status: [:preinscrito, :asignado, :confirmado]
   enum graduate_status: [:no_graduable, :tesista, :posible_graduando, :graduando, :graduado]
-  enum current_permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar]
+  enum current_permanence_status: [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar, :via_de_gracia]
 
   # VALIDATIONS:
   # validates :student, presence: true
@@ -83,7 +85,7 @@ class Grade < ApplicationRecord
 
   scope :valid_to_enrolls_pre, -> (process_before_id) {without_appointment_time.current_permanence_valid_to_enroll.enrolled_in_academic_process(process_before_id)}
 
-  scope :current_permanence_valid_to_enroll, -> {where('grades.current_permanence_status': [:regular, :reincorporado, :articulo3])}
+  scope :current_permanence_valid_to_enroll, -> {where('grades.current_permanence_status': [:regular, :reincorporado, :articulo3, :via_de_gracia])}
 
   scope :others_permanence_invalid_to_enroll, -> {where(current_permanence_status: [:nuevo, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo, :permiso_para_no_cursar])}
 
@@ -161,6 +163,8 @@ class Grade < ApplicationRecord
       ARTICULO6
     elsif self.articulo3?
       ARTICULO3
+    elsif self.via_de_gracia?
+      ARTICULO8
     else
       ""
     end
@@ -193,7 +197,7 @@ class Grade < ApplicationRecord
     academic_process_before = academic_process&.process_before
     if academic_process_before &&
        self.enroll_academic_processes.of_academic_process(academic_process_before.id).any? &&
-       ['regular', 'reincorporado', 'articulo3'].include?(self.current_permanence_status)
+       ['regular', 'reincorporado', 'articulo3', 'via_de_gracia'].include?(self.current_permanence_status)
       return true
     end
 
@@ -261,13 +265,14 @@ class Grade < ApplicationRecord
   end
 
   def label_current_permanence_status
-    # [:nuevo, :regular, :reincorporado, :articulo3, :articulo6, :articulo7, :intercambio, :desertor, :egresado, :egresado_doble_titulo]
-    if self.nuevo? or self.regular? or self.reincorporado? or self.intercambio? or self.egresado? or self.egresado_doble_titulo?
-      label = 'bg-info'
-    elsif self.articulo3?
+    if self.articulo3?
       label = 'bg-warning'
-    else 
+    elsif self.via_de_gracia?
+      label = 'bg-success'
+    elsif self.articulo6? or self.articulo7?
       label = 'bg-danger'
+    else
+      label = 'bg-info'
     end
 
     ApplicationController.helpers.label_status(label, current_permanence_status.titleize)
