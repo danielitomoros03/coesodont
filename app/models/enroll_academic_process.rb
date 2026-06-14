@@ -500,7 +500,9 @@ class EnrollAcademicProcess < ApplicationRecord
     aprobados = self.total_subjects_approved
     if cursados < 0 or aprobados < 0
       0.0
-    elsif cursados == 0 or (cursados > 0 and aprobados >= cursados)
+    elsif cursados == 0
+      nil
+    elsif aprobados >= cursados
       1.0
     else
       (aprobados.to_f/cursados.to_f).round(4)
