@@ -352,9 +352,8 @@ class Grade < ApplicationRecord
             end
             # Si es el ultimo nivel con aprovadas y no es el 5to y la diferencia entre aprobadas y requeridas es uno:
             if level.eql? last_approved_level and level < 5 and (total_approved+1) >= required_subjects
-              # p "     EXTRA BALLL!!!     ".center(2000, "#")
-              # Último nivel aprovado
-              levels_not_approved << level+1
+              # Art. reglamento UCV: 2+ aplazadas en el último período bloquean el avance de nivel
+              levels_not_approved << level+1 unless aplazadas_in_last_period >= 2
             end
           end
         else
@@ -555,6 +554,14 @@ class Grade < ApplicationRecord
 
   def total_subjects_retiradas
     academic_records.retirado.total_subjects
+  end
+
+  def aplazadas_in_last_period
+    last = enroll_academic_processes.confirmado
+                                    .joins(:academic_process)
+                                    .order('academic_processes.name': :asc)
+                                    .last
+    last&.academic_records&.aplazado&.count.to_i
   end
 
   def update_all_efficiency
