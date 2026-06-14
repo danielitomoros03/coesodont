@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_04_15_230246) do
+ActiveRecord::Schema[7.0].define(version: 2026_06_14_184622) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -36,6 +36,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_04_15_230246) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status", default: 0
+    t.bigint "course_id", null: false
+    t.index ["enroll_academic_process_id", "course_id"], name: "index_academic_records_on_enroll_and_course", unique: true
     t.index ["enroll_academic_process_id"], name: "index_academic_records_on_enroll_academic_process_id"
     t.index ["section_id"], name: "index_academic_records_on_section_id"
   end
@@ -523,8 +525,11 @@ ActiveRecord::Schema[7.0].define(version: 2026_04_15_230246) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.boolean "updated_password", default: false, null: false
+    t.integer "failed_attempts", default: 0, null: false
+    t.datetime "locked_at"
     t.index ["ci"], name: "index_users_on_ci", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["locked_at"], name: "index_users_on_locked_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
@@ -545,6 +550,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_04_15_230246) do
   add_foreign_key "academic_processes", "academic_processes", column: "process_before_id"
   add_foreign_key "academic_processes", "periods"
   add_foreign_key "academic_processes", "schools"
+  add_foreign_key "academic_records", "courses"
   add_foreign_key "academic_records", "enroll_academic_processes"
   add_foreign_key "academic_records", "sections"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

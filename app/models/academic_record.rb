@@ -2,6 +2,7 @@ class AcademicRecord < ApplicationRecord
   # SCHEMA:
   # t.bigint "section_id", null: false
   # t.bigint "enroll_academic_process_id", null: false
+  # t.bigint "course_id", null: false
   # t.integer "status"
 
   # ENUMERIZE:
@@ -43,8 +44,9 @@ class AcademicRecord < ApplicationRecord
   validates :enroll_academic_process, presence: true
   validates :status, presence: true
   validates_uniqueness_of :enroll_academic_process, scope: [:section], message: 'Ya inscrito en la sección', field_name: false
+  validates :course_id, uniqueness: { scope: :enroll_academic_process_id, message: 'Ya inscrito en una sección de esta asignatura en el período' }
 
-  validates_with SamePeriodValidator, field_name: false  
+  validates_with SamePeriodValidator, field_name: false
   validates_with SameSchoolValidator, field_name: false
   validates_with SameSubjectInPeriodValidator, field_name: false, if: :new_record?
   validates_with ApprovedAndEnrollingValidator, field_name: false
@@ -55,6 +57,7 @@ class AcademicRecord < ApplicationRecord
   validates_presence_of :qualifications, message: "Calificación no puede estar en blanco. Si desea eliminar la calificación, coloque el estado de calificación a 'Sin Calificar'", if: lambda{ |object| (object.subject.present? and object.subject.numerica? and (object.aprobado? or object.aplazado?))}
 
   # CALLBACK
+  before_validation :set_course_from_section
   before_save :set_status_by_EQ_modality_section
   after_save :update_status_q_and_grades
   # after_save :update_grade_numbers#, if: :will_save_change_to_status?
@@ -927,6 +930,10 @@ class AcademicRecord < ApplicationRecord
       self.status = definitive_q.approved? ? :aprobado : :aplazado
     end
 
+  end
+
+  def set_course_from_section
+    self.course_id ||= section&.course_id
   end
 
   def set_status_by_EQ_modality_section
