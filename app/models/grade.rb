@@ -556,6 +556,10 @@ class Grade < ApplicationRecord
     academic_records.retirado.total_subjects
   end
 
+  def total_subjects_aplazadas
+    academic_records.aplazado.total_subjects
+  end
+
   def aplazadas_in_last_period
     last = enroll_academic_processes.confirmado
                                     .joins(:academic_process)
