@@ -19,6 +19,9 @@
 		%td.text-end Créditos Equivalencia:
 		%td.text-start.fw-bold= grade.total_credits_approved_equivalence
 	%tr
-		%td.text-end Total Créditos Aprobados con Equivalencias:
-		%td.text-start.fw-bold= grade.total_credits_approved
-
+		%td.text-end Total Créditos Aprobados:
+		%td.text-start.fw-bold
+			= grade.total_credits_approved
+			- if grade.total_credits_approved_equivalence.to_i > 0
+				%small.text-muted.ms-1
+					= "(incl. #{grade.total_credits_approved_equivalence} por equivalencias)"
