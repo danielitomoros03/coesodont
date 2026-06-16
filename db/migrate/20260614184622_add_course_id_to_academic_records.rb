@@ -9,6 +9,27 @@ class AddCourseIdToAcademicRecords < ActiveRecord::Migration[7.0]
       WHERE academic_records.section_id = sections.id
     SQL
 
+    # Saneamiento previo al índice único: el import histórico de 2024 dejó academic_records
+    # duplicados (misma inscripción + misma asignatura en secciones distintas). Se conserva
+    # el más reciente por (enroll, course) y se eliminan el resto, junto con sus qualifications
+    # (única FK dependiente), para que add_index unique no aborte el deploy.
+    dup_ids = select_values(<<~SQL)
+      SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (
+                 PARTITION BY enroll_academic_process_id, course_id
+                 ORDER BY updated_at DESC, id DESC) AS rn
+        FROM academic_records
+        WHERE course_id IS NOT NULL
+      ) t WHERE rn > 1
+    SQL
+
+    if dup_ids.any?
+      list = dup_ids.join(",")
+      say "Eliminando #{dup_ids.size} academic_records duplicados (enroll+course): #{list}"
+      execute "DELETE FROM qualifications WHERE academic_record_id IN (#{list})"
+      execute "DELETE FROM academic_records WHERE id IN (#{list})"
+    end
+
     change_column_null :academic_records, :course_id, false
     add_foreign_key :academic_records, :courses
     add_index :academic_records, [:enroll_academic_process_id, :course_id],
