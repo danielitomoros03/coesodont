@@ -7,6 +7,12 @@
 		%td.text-end Asignaturas Aprobadas:
 		%td.text-start.fw-bold= grade.total_subjects_approved
 	%tr
+		%td.text-end Asignaturas Aplazadas:
+		%td.text-start.fw-bold= grade.total_subjects_aplazadas
+	%tr
+		%td.text-end Asignaturas Retiradas:
+		%td.text-start.fw-bold= grade.total_subjects_retiradas
+	%tr
 		%td.text-end Créditos Inscritos:
 		%td.text-start.fw-bold= grade.total_credits
 	%tr
@@ -19,6 +25,11 @@
 		%td.text-end Créditos Equivalencia:
 		%td.text-start.fw-bold= grade.total_credits_approved_equivalence
 	%tr
-		%td.text-end Total Créditos Aprobados con Equivalencias:
-		%td.text-start.fw-bold= grade.total_credits_approved
-
+		%td.text-end Total Créditos Aprobados:
+		%td.text-start.fw-bold
+			= grade.total_credits_approved
+			- if grade.total_credits_approved_equivalence.to_i > 0
+				%i.bi.bi-info-circle.text-muted.ms-1{"data-bs-toggle": "tooltip", title: "Incluye #{grade.total_credits_approved_equivalence} créditos por equivalencias"}
+	%tr
+		%td.text-end Promedio Ponderado:
+		%td.text-start.fw-bold= number_with_precision(grade.calculate_weighted_average, precision: 2)

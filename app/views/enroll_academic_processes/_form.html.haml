@@ -109,6 +109,10 @@
 
   function reserve(url, el) {
     let elem = $(el);
+    // Guard contra doble-submit: bloquea el select mientras la reserva está en vuelo para no disparar requests concurrentes que dupliquen la inscripción
+    if (elem.data('reserving')) return;
+    elem.data('reserving', true);
+    elem.prop('disabled', true);
     let opcion = elem.children("option:selected");
     $.ajax({
       url: url,
@@ -121,6 +125,8 @@
       //   $('#loading').modal({keyboard: false, show: true, backdrop: 'static'})
       // },
       complete: function(json){
+        elem.data('reserving', false);
+        elem.prop('disabled', false);
         if (json["responseJSON"].status == 'success'){
           toastr.success(json["responseJSON"].data);
 
