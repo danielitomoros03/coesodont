@@ -137,6 +137,15 @@ class Course < ApplicationRecord
         end
       end
 
+      # Campo oculto: el filtro visible es :period, pero enlaces/bookmarks antiguos
+      # apuntan a f[academic_process][..][o]=like&v=<periodo>. Sin este campo el filtro
+      # no existe y RailsAdmin revienta con `parse_value' for nil. Busca por nombre de período.
+      field :academic_process do
+        visible false
+        searchable [{ Period => :name }]
+        eager_load(academic_process: :period)
+      end
+
       field :area, :enum do
         label 'Área'
         searchable [{ Subject => :area_id }]
