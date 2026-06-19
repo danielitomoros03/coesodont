@@ -8,11 +8,68 @@
   - if @object.process_before
     .alert.alert-danger
       %b Atención
-      Si está planificando una nueva jornada de inscripción por Cita Horaria, es importante que corra la función 'Actualizar Estados Estudiantes' indicada con el enlace abajo para que COES actualice tanto el estado de permanecia como los valores de eficiencia y promedios de cada estudiante antes de agregar la nueva cita. 
-      .text-center
-        = link_to "/academic_processes/#{@object.process_before.id}/run_regulation?id_return=#{@object.id}", class: 'btn m-3 btn-lg btn-primary', title: "Actualiza tanto el estado de permanecia como la eficiencia y los promedios de los estudiantes basado en los períodos anteriores al actual #{@object.period_name}. Incluye eliminación de Citas", data: {confirm: "Esta acción actualizará el estado de permanencia y los promedios de notas de cada estudiante que cursó materias en el periodo anterior #{@object.process_before.period_name} ¿Está completamente seguro?"} do
-          %i.fa-regular.fa-refresh
-          Actualizar Estados Estudiantes
+      Si está planificando una nueva jornada de inscripción por Cita Horaria, es importante que corra la función 'Actualizar Estados Estudiantes' con el botón de abajo para que COES actualice tanto el estado de permanencia como los valores de eficiencia y promedios de cada estudiante antes de agregar la nueva cita.
+      #regulation-runner{data: {stream_url: "/academic_processes/#{@object.process_before.id}/run_regulation_stream?id_return=#{@object.id}", confirm: "Esta acción actualizará el estado de permanencia y los promedios de notas de cada estudiante que cursó materias en el periodo anterior #{@object.process_before.period_name}. Incluye la eliminación de las Citas existentes. ¿Estás completamente seguro?"}}
+        .text-center
+          %button.btn.m-3.btn-lg.btn-primary#regulation-run-btn{type: 'button', title: "Recalcula el estado de permanencia (art. 3/6/7, desertor) y la eficiencia/promedios de cada estudiante según el periodo anterior #{@object.process_before.period_name}. Incluye eliminación de Citas"}
+            %i.fa-regular.fa-refresh
+            Actualizar Estados Estudiantes
+
+        #regulation-progress.d-none.my-3
+          .alert.alert-warning.text-start
+            %i.fa-solid.fa-triangle-exclamation.me-1
+            %b No cierres ni recargues esta ventana.
+            La actualización está corriendo y puede tardar varios minutos. Si sales de la página, el cálculo se interrumpe y deberás volver a comenzar.
+          .progress{style: 'height: 30px;'}
+            #regulation-bar.progress-bar.progress-bar-striped.progress-bar-animated.bg-primary{style: 'width: 0%;'} 0%
+          %p.text-center.text-muted.mt-2#regulation-status Iniciando…
+
+      :javascript
+        (function() {
+          var root = document.getElementById('regulation-runner');
+          if (!root || root.dataset.bound) return;
+          root.dataset.bound = '1';
+          var btn = document.getElementById('regulation-run-btn');
+          var box = document.getElementById('regulation-progress');
+          var bar = document.getElementById('regulation-bar');
+          var statusEl = document.getElementById('regulation-status');
+          var finished = false;
+          function warn(e) { if (finished) return; e.preventDefault(); e.returnValue = ''; return ''; }
+
+          btn.addEventListener('click', function() {
+            if (!confirm(root.dataset.confirm)) return;
+            btn.classList.add('d-none');
+            box.classList.remove('d-none');
+            window.addEventListener('beforeunload', warn);
+
+            var src = new EventSource(root.dataset.streamUrl);
+            src.addEventListener('progress', function(e) {
+              var d = JSON.parse(e.data);
+              bar.style.width = d.percent + '%';
+              bar.textContent = d.percent + '%';
+              statusEl.textContent = 'Procesados ' + d.procesados + ' de ' + d.total + ' — ' + d.actualizados + ' actualizados' + (d.errores > 0 ? (', ' + d.errores + ' con error') : '');
+            });
+            src.addEventListener('done', function(e) {
+              var d = JSON.parse(e.data);
+              finished = true; src.close();
+              bar.style.width = '100%'; bar.textContent = '100%';
+              bar.classList.remove('progress-bar-animated', 'progress-bar-striped', 'bg-primary');
+              bar.classList.add('bg-success');
+              statusEl.innerHTML = 'Listo. Se actualizaron <b>' + d.actualizados + '</b> inscripciones' + (d.errores > 0 ? (' (' + d.errores + ' con error)') : '') + '. Recargando…';
+              setTimeout(function() { window.location.reload(); }, 2500);
+            });
+            src.addEventListener('fail', function(e) {
+              finished = true; src.close();
+              var d = JSON.parse(e.data);
+              statusEl.innerHTML = '<span class="text-danger">Ocurrió un error: ' + d.message + '. Recarga la página para reintentar.</span>';
+            });
+            src.addEventListener('error', function() {
+              if (finished) return;
+              src.close();
+              statusEl.innerHTML = '<span class="text-danger">Se perdió la conexión con el servidor. Recarga la página para reintentar.</span>';
+            });
+          });
+        })();
 
     .text-center.alert.alert-warning.p-2.mb-3= "Sólo se permitirá la inscripción a estudiantes: Regulares, Reincorporados, en Artículo 3 o con un Permiso Especial.".html_safe
 
