@@ -65,7 +65,7 @@ Rails.application.routes.draw do
     member do
       get 'massive_confirmation'
       get 'clean_courses'
-      get 'run_regulation'
+      get 'run_regulation_stream', to: 'regulation_streams#show'
     end
     collection do
       post :change_process_session
