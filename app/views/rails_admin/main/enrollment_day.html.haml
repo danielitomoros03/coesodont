@@ -6,14 +6,15 @@
       Limpiar Citas
 
   - if @object.process_before
-    .alert.alert-danger
-      %b Atención
-      Si está planificando una nueva jornada de inscripción por Cita Horaria, es importante que corra la función 'Actualizar Estados Estudiantes' con el botón de abajo para que COES actualice tanto el estado de permanencia como los valores de eficiencia y promedios de cada estudiante antes de agregar la nueva cita.
-      #regulation-runner{data: {stream_url: "/academic_processes/#{@object.process_before.id}/run_regulation_stream?id_return=#{@object.id}", confirm: "Esta acción actualizará el estado de permanencia y los promedios de notas de cada estudiante que cursó materias en el periodo anterior #{@object.process_before.period_name}. Incluye la eliminación de las Citas existentes. ¿Estás completamente seguro?"}}
+    .alert.alert-info
+      %b Reglamento
+      Recalcula el estado de permanencia (Art. 3 / 6, desertor) de cada estudiante del periodo #{@object.process_before.period_name} según sus calificaciones. No modifica eficiencia ni promedios (esos se actualizan al calificar) ni las Citas. Úsalo como purga para dejar consistente el estado de permanencia.
+      #regulation-runner{data: {stream_url: "/academic_processes/#{@object.process_before.id}/run_regulation_stream?id_return=#{@object.id}"}}
         .text-center
-          %button.btn.m-3.btn-lg.btn-primary#regulation-run-btn{type: 'button', title: "Recalcula el estado de permanencia (art. 3/6/7, desertor) y la eficiencia/promedios de cada estudiante según el periodo anterior #{@object.process_before.period_name}. Incluye eliminación de Citas"}
-            %i.fa-regular.fa-refresh
-            Actualizar Estados Estudiantes
+          -# Nota: NO usar data-confirm (lo intercepta @rails/ujs y saldría un confirm extra). Usamos data-confirm-text leído por nuestro JS.
+          %button.btn.m-3.btn-lg.btn-primary.regulation-run-btn{type: 'button', data: {mode: 'regulation', confirm_text: "Esta acción recalcula el estado de permanencia (reglamento) de cada estudiante del periodo #{@object.process_before.period_name} según sus calificaciones. No toca eficiencia/promedios ni Citas. ¿Continuar?"}, title: "Recalcula solo el estado de permanencia (art. 3/6, desertor). No toca eficiencia/promedios ni Citas"}
+            %i.fa-regular.fa-scale-balanced
+            Correr Reglamento
 
         #regulation-progress.d-none.my-3
           .alert.alert-warning.text-start
@@ -26,31 +27,37 @@
 
       :javascript
         (function() {
-          var root = document.getElementById('regulation-runner');
-          if (!root || root.dataset.bound) return;
-          root.dataset.bound = '1';
-          var btn = document.getElementById('regulation-run-btn');
-          var box = document.getElementById('regulation-progress');
-          var bar = document.getElementById('regulation-bar');
-          var statusEl = document.getElementById('regulation-status');
+          if (window.__regulationRunnerBound) return;  // registrar el handler una sola vez (inmune a re-ejecución por Turbo)
+          window.__regulationRunnerBound = true;
+
           var finished = false;
           function warn(e) { if (finished) return; e.preventDefault(); e.returnValue = ''; return ''; }
 
-          btn.addEventListener('click', function() {
-            if (!confirm(root.dataset.confirm)) return;
-            btn.classList.add('d-none');
+          document.addEventListener('click', function(e) {
+            var btn = e.target.closest ? e.target.closest('.regulation-run-btn') : null;
+            if (!btn) return;
+            var root = document.getElementById('regulation-runner');
+            if (!root || root.dataset.running) return;
+            if (!confirm(btn.dataset.confirmText)) return;
+            root.dataset.running = '1';
+            finished = false;
+
+            var box = document.getElementById('regulation-progress');
+            var bar = document.getElementById('regulation-bar');
+            var statusEl = document.getElementById('regulation-status');
+            root.querySelectorAll('.regulation-run-btn').forEach(function(b) { b.classList.add('d-none'); });
             box.classList.remove('d-none');
             window.addEventListener('beforeunload', warn);
 
-            var src = new EventSource(root.dataset.streamUrl);
-            src.addEventListener('progress', function(e) {
-              var d = JSON.parse(e.data);
+            var src = new EventSource(root.dataset.streamUrl + '&mode=' + btn.dataset.mode);
+            src.addEventListener('progress', function(ev) {
+              var d = JSON.parse(ev.data);
               bar.style.width = d.percent + '%';
               bar.textContent = d.percent + '%';
               statusEl.textContent = 'Procesados ' + d.procesados + ' de ' + d.total + ' — ' + d.actualizados + ' actualizados' + (d.errores > 0 ? (', ' + d.errores + ' con error') : '');
             });
-            src.addEventListener('done', function(e) {
-              var d = JSON.parse(e.data);
+            src.addEventListener('done', function(ev) {
+              var d = JSON.parse(ev.data);
               finished = true; src.close();
               bar.style.width = '100%'; bar.textContent = '100%';
               bar.classList.remove('progress-bar-animated', 'progress-bar-striped', 'bg-primary');
@@ -58,14 +65,15 @@
               statusEl.innerHTML = 'Listo. Se actualizaron <b>' + d.actualizados + '</b> inscripciones' + (d.errores > 0 ? (' (' + d.errores + ' con error)') : '') + '. Recargando…';
               setTimeout(function() { window.location.reload(); }, 2500);
             });
-            src.addEventListener('fail', function(e) {
+            src.addEventListener('fail', function(ev) {
               finished = true; src.close();
-              var d = JSON.parse(e.data);
+              var d = JSON.parse(ev.data);
               statusEl.innerHTML = '<span class="text-danger">Ocurrió un error: ' + d.message + '. Recarga la página para reintentar.</span>';
             });
             src.addEventListener('error', function() {
               if (finished) return;
               src.close();
+              root.dataset.running = '';
               statusEl.innerHTML = '<span class="text-danger">Se perdió la conexión con el servidor. Recarga la página para reintentar.</span>';
             });
           });

@@ -1,15 +1,17 @@
 class RegulationStreamsController < ApplicationController
   include ActionController::Live
 
-  # GET /academic_processes/:id/run_regulation_stream?id_return=:id_return
-  # Recalcula el reglamento (art. 3/6/7, desertor, etc.) + eficiencia y promedios de cada
-  # inscripción del proceso, emitiendo el avance por Server-Sent Events para alimentar la
-  # barra de progreso. Es el mismo trabajo que antes hacía run_regulation, ahora con streaming.
+  # GET /academic_processes/:id/run_regulation_stream?id_return=:id_return&mode=full|regulation
+  # Recalcula por inscripción del proceso, emitiendo el avance por Server-Sent Events:
+  #   - mode=full (default): reglamento (art. 3/6/7, desertor) + eficiencia + promedios + borra citas.
+  #   - mode=regulation: SOLO el reglamento (permanence_status). Más rápido y no toca citas;
+  #     eficiencia/promedios ya se mantienen al calificar (Qualification#update_status).
   def show
     # Evita que el middleware de sesión reescriba/rote la cookie durante el streaming
     # (de lo contrario ActionController::Live + Devise deslogue al usuario).
     request.session_options[:skip] = true
 
+    only_regulation = params[:mode].to_s == 'regulation'
     academic_process = AcademicProcess.find(params[:id])
 
     # Mismo patrón anti-buffering que el export xlsx (ETag/Last-Modified/Content-Length),
@@ -29,16 +31,22 @@ class RegulationStreamsController < ApplicationController
     errores = 0
     last_percent = -1
 
-    EnrollmentDay.destroy_all
+    EnrollmentDay.destroy_all unless only_regulation
 
     scope.find_each do |iep|
       grade = iep.grade
       # Recalcular el reglamento, no copiar el valor viejo almacenado
       nuevo_status = iep.get_regulation
 
-      ok = iep.update(permanence_status: nuevo_status, efficiency: iep.calculate_efficiency, simple_average: iep.calculate_average, weighted_average: iep.calculate_weighted_average)
+      ok = if only_regulation
+             iep.update(permanence_status: nuevo_status)
+           else
+             iep.update(permanence_status: nuevo_status, efficiency: iep.calculate_efficiency, simple_average: iep.calculate_average, weighted_average: iep.calculate_weighted_average)
+           end
 
-      ok &&= if iep.is_the_last_enroll_of_grade?
+      ok &&= if only_regulation
+               iep.is_the_last_enroll_of_grade? ? grade.update(current_permanence_status: nuevo_status) : true
+             elsif iep.is_the_last_enroll_of_grade?
                grade.update(current_permanence_status: nuevo_status, efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)
              else
                grade.update(efficiency: grade.calculate_efficiency, weighted_average: grade.calculate_weighted_average, simple_average: grade.calculate_average)

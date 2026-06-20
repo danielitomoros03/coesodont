@@ -162,14 +162,11 @@ class EnrollAcademicProcess < ApplicationRecord
       elsif self.academic_records.coursed.any?
         if exceeded_permanence_threshold?
           reglamento_aux = :articulo3
+          # Tope en Artículo 6: dos periodos consecutivos reprobados. NO se asigna Art. 7
+          # automáticamente por 3 reprobaciones — el Art. 7 ("no podrá incorporarse más")
+          # exige reincorporación previa (post suspensión Art. 6) y se asigna manualmente.
           iep_anterior = self.before_enrolled
-          if iep_anterior&.exceeded_permanence_threshold?
-            reglamento_aux = :articulo6
-            iep_anterior2 = iep_anterior.before_enrolled
-            if iep_anterior2&.exceeded_permanence_threshold?
-              reglamento_aux = :articulo7
-            end
-          end
+          reglamento_aux = :articulo6 if iep_anterior&.exceeded_permanence_threshold?
         end
       end
     end
