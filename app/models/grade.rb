@@ -326,44 +326,40 @@ class Grade < ApplicationRecord
   #   end
   # end
 
-    def level_offer
+  def level_offer
+    oblig = Subject.modalities[:obligatoria]
+    # Obligatorias distintas aprobadas, agrupadas por año del plan (subjects.ordinal)
+    approved_by_level = academic_records.aprobado.joins(:subject).where('subjects.modality': oblig)
+                          .distinct.group('subjects.ordinal').count('subjects.id')
+    return [1] if approved_by_level.empty?
 
-      total_approved_by_levels = self.academic_records.aprobado.joins(:subject).group('subjects.ordinal').count
-      total_approved_by_levels = total_approved_by_levels.to_a
-      
-      levels_not_approved = []
-      begin
-        if total_approved_by_levels.any?
-          last_approved_level = total_approved_by_levels.max.first
-          # p "    ULTIMO NIVEL: #{last_approved_level}     ".center(2000, "=")
-          total_approved_by_levels.each do |approved_by_level|
-            level = approved_by_level.first
-            # p "LEVEL: #{level}"
-            total_approved = approved_by_level.last
-            # p "APROBADAS: #{total_approved}"
-            # Es solo para el tipo de asignatura obligatoria ya que las otras tienen otro comportamiento:
-            requirement_by_level = self.study_plan.requirement_by_levels.of_subject_type(SubjectType.obligatoria.id).of_level(level).first
-            required_subjects = requirement_by_level&.required_subjects
-            # p "REQUERIMIENTOS: #{required_subjects}"
-          
-            if (total_approved < required_subjects)
-              # Nivel No Aprovado completamente, se incluye en la oferta
-              levels_not_approved << level 
-            end
-            # Si es el ultimo nivel con aprovadas y no es el 5to y la diferencia entre aprobadas y requeridas es uno:
-            if level.eql? last_approved_level and level < 5 and (total_approved+1) >= required_subjects
-              # Art. reglamento UCV: 2+ aplazadas en el último período bloquean el avance de nivel
-              levels_not_approved << level+1 unless aplazadas_in_last_period >= 2
-            end
-          end
-        else
-          levels_not_approved << 1
-        end
-        return levels_not_approved#.last(2)
-      rescue Exception
-        return 1
+    # Obligatorias distintas CURSADAS (aprobadas + raspadas) para medir cuántas raspó de lo que inscribió
+    coursed_by_level = academic_records.coursed.joins(:subject).where('subjects.modality': oblig)
+                         .distinct.group('subjects.ordinal').count('subjects.id')
+    required_by_level = study_plan.requirement_by_levels
+                          .of_subject_type(SubjectType.obligatoria.id)
+                          .pluck(:level, :required_subjects).to_h
+
+    last_level = approved_by_level.keys.max
+    levels = []
+    approved_by_level.each do |level, approved|
+      required = required_by_level[level]
+      next if required.nil? || required.zero?
+      # Año sin completar: sigue en la oferta (materias pendientes de ese año)
+      levels << level if approved < required
+      # Reglamento de arrastre: del último año cursado se libera el año siguiente si de lo que
+      # inscribió le quedó <=1 raspada y no raspó 2+ en el último período (Art. reglamento UCV).
+      # Las obligatorias que nunca cursó no bloquean el avance.
+      if level == last_level && level < 5
+        reprobadas_pendientes = (coursed_by_level[level] || approved) - approved
+        levels << (level + 1) if reprobadas_pendientes <= 1 && aplazadas_in_last_period < 2
       end
     end
+    levels.uniq.sort
+  rescue => e
+    Rails.logger.warn("level_offer falló para grade #{id}: #{e.message}")
+    [1]
+  end
 
   # def current_level
   #   # OJO: REVISAR ALGORITMO, SIEMPRE SALE LEVEL 1 🤮
