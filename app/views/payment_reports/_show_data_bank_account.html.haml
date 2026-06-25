@@ -1,18 +1,19 @@
 
 .p-2
-  %table.table.table-striped.table-hover.table-responsive
-    %thead
-      %tr
-        %th Titular
-        %th Banco
-        %th Código Cuenta
-        %th Tipo de Cuenta
-        %th Arancel
-    - bank_accounts.each do |bank_account|
-      %tbody
+  .table-responsive
+    %table.table.table-striped.table-hover
+      %thead
         %tr
-          %td= bank_account.holder
-          %td= bank_account.bank.name
-          %td= bank_account.code
-          %td= bank_account.account_type&.titleize
-          %td= ActionController::Base.helpers.number_to_currency(amount, unit: 'Bs.', separator: ",", delimiter: ".")
+          %th Titular
+          %th Banco
+          %th Código Cuenta
+          %th Tipo de Cuenta
+          %th Arancel
+      - bank_accounts.each do |bank_account|
+        %tbody
+          %tr
+            %td= bank_account.holder
+            %td= bank_account.bank.name
+            %td= bank_account.code
+            %td= bank_account.account_type&.titleize
+            %td= ActionController::Base.helpers.number_to_currency(amount, unit: 'Bs.', separator: ",", delimiter: ".")
