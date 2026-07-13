@@ -769,6 +769,7 @@ es:
         origin_country: 'País de origen'
         origin_city: 'Ciudad de origen'
         birth_date: 'Fecha de nacimiento'
+        edad: 'Edad'
         address: 'Dirección'
         created_at: 'Fecha de Registro'
         user: 'Usuario'

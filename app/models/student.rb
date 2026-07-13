@@ -99,6 +99,15 @@ class Student < ApplicationRecord
     [origin_city, origin_country].join(" - ")
   end
 
+  # Edad cumplida a la fecha de hoy (nil si no hay fecha de nacimiento cargada).
+  def edad
+    return unless birth_date
+
+    hoy = Time.zone.today
+    cumplio = (hoy.month > birth_date.month) || (hoy.month == birth_date.month && hoy.day >= birth_date.day)
+    hoy.year - birth_date.year - (cumplio ? 0 : 1)
+  end
+
   def self.countries
     require 'json'
 
@@ -242,7 +251,16 @@ class Student < ApplicationRecord
     end
 
     export do
-      fields :user, :nacionality, :origin_country, :sede, :origin_city, :birth_date, :marital_status, :address, :created_at
+      field :user
+      field :nacionality
+      field :origin_country
+      field :sede
+      field :origin_city
+      field :birth_date
+      field :edad, :integer
+      field :marital_status
+      field :address
+      field :created_at
       field :admission_types do
         label 'Ingreso'
         sortable :name
