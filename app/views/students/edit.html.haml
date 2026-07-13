@@ -11,7 +11,7 @@
         = render partial: 'form_origins', locals: {f: f}
 
         - # Birth Date
-        = f.input :birth_date, as: :date, start_year: Date.today.year - 16,
+        = f.input :birth_date, as: :date, start_year: Date.today.year - GeneralSetup.edad_minima_estudiante,
                               end_year: Date.today.year - 100
 
         - # Nacionality:

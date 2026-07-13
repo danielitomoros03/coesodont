@@ -58,6 +58,12 @@ class Student < ApplicationRecord
   # validates :origin_country, presence: true, unless: :new_record?
   # validates :origin_city, presence: true, unless: :new_record?
   # validates :birth_date, presence: true, unless: :new_record?
+  # Solo al asignar/cambiar la fecha, para no bloquear guardados no relacionados
+  # sobre registros históricos con fecha inválida (p. ej. reimportaciones). El
+  # import queda exento (importando): carga igual y el estudiante corrige la
+  # fecha en el formulario al ingresar (queda pendiente vía empty_info?).
+  attr_accessor :importando
+  validate :edad_minima, if: -> { birth_date.present? && birth_date_changed? && !importando }
 
 
   # validates :grades, presence: true
@@ -92,7 +98,21 @@ class Student < ApplicationRecord
   end
 
   def empty_info?
-    nacionality.blank? or marital_status.blank? or origin_country.blank? or origin_city.blank? or birth_date.blank?
+    nacionality.blank? or marital_status.blank? or origin_country.blank? or origin_city.blank? or !birth_date_valida?
+  end
+
+  # La fecha de nacimiento es válida si arroja una edad de al menos la edad mínima
+  # configurada (GeneralSetup). Una fecha en blanco o implausible (p. ej. año mal
+  # cargado) cuenta como no válida.
+  def birth_date_valida?
+    birth_date.present? && edad >= GeneralSetup.edad_minima_estudiante
+  end
+
+  def edad_minima
+    minima = GeneralSetup.edad_minima_estudiante
+    return if edad.nil? || edad >= minima
+
+    errors.add(:birth_date, "corresponde a una edad de #{edad} años; debe ser de al menos #{minima} años (verifique el año de nacimiento)")
   end
 
   def origin_location
@@ -357,6 +377,7 @@ class Student < ApplicationRecord
 
     if usuario.save
       estudiante = Student.find_or_initialize_by(user_id: usuario.id)
+      estudiante.importando = true
 
       estudiante.birth_date = row[8] if row[8]
 
