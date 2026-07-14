@@ -280,6 +280,7 @@ class Student < ApplicationRecord
       field :edad, :integer
       field :marital_status
       field :address
+      field :address_short
       field :created_at
       field :admission_types do
         label 'Ingreso'

@@ -692,6 +692,7 @@ es:
         amount: 'Monto'
         status: Estado
         student: Estudiante
+        user: Usuario
         payable: Pagable
         transaction_id: 'Número de Transacción'
         transaction_type: 'Tipo de Transacción'
@@ -771,6 +772,7 @@ es:
         birth_date: 'Fecha de nacimiento'
         edad: 'Edad'
         address: 'Dirección'
+        address_short: 'Dirección Corta'
         created_at: 'Fecha de Registro'
         user: 'Usuario'
         grades: Grados

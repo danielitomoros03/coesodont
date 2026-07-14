@@ -25,8 +25,11 @@ class PaymentReport < ApplicationRecord
   belongs_to :receiving_bank_account, class_name: 'BankAccount'
 
   # En la práctica todo payable es un EnrollAcademicProcess (Grade no tiene pagos).
-  # Esta asociación no-polimórfica permite joinear/filtrar por período en RailsAdmin.
+  # Esta asociación no-polimórfica permite joinear/filtrar por período en RailsAdmin
+  # y exponer student/user como asociaciones (secciones propias en el export).
   belongs_to :enroll_academic_process, foreign_key: :payable_id, optional: true
+  has_one :student, through: :enroll_academic_process
+  has_one :user, through: :enroll_academic_process
 
   has_one_attached :voucher do |attachable|
     attachable.variant :thumb, resize_to_limit: [100,100]
@@ -61,14 +64,6 @@ class PaymentReport < ApplicationRecord
 
   def name
     "#{transaction_id} - #{amount_to_bs}"
-  end
-
-  def student
-    payable&.student
-  end
-
-  def user
-    student&.user
   end
 
   def academic_process
@@ -199,32 +194,23 @@ class PaymentReport < ApplicationRecord
 
       field :payable_name do
         label 'Descripción'
+        # El filtro de período (definido en la sección :list) referencia
+        # academic_processes; en export su JOIN sólo existe si algún campo lo
+        # eager-loadea. Lo cargamos aquí para no romper el export al filtrar por período.
+        eager_load(enroll_academic_process: :academic_process)
         formatted_value do
           bindings[:object].payable.name
         end
       end
 
-      field :user_name do
-        label 'Nombre Usuario'
-        formatted_value do
-          bindings[:object].student.user.first_name
-        end
+      # Cada asociación se exporta como su propia sección ("Campos asociados de …"),
+      # usando el bloque export de Student/User. Labels vía activerecord.attributes en es.yml.
+      field :student do
+        eager_load true
       end
-
-      field :user_last_name do
-        label 'Apellido Usuario'
-        formatted_value do
-          bindings[:object].student.user.last_name
-        end
+      field :user do
+        eager_load true
       end
-      
-      field :user_ci do
-        label 'Ci Usuario'
-        formatted_value do
-          bindings[:object].student.user.ci
-        end
-      end    
-
     end
   end  
 
