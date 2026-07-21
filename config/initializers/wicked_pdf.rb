@@ -8,12 +8,22 @@
 #
 # https://github.com/mileszs/wicked_pdf/blob/master/README.md
 
+module WickedPdfExePath
+  # wkhtmltopdf-binary's wrapper solo reconoce SO hasta Ubuntu 22.04; en hosts
+  # más nuevos (ej. Ubuntu 24.04 en dev) revienta con "Invalid platform" aunque
+  # el binario funcione igual (es estático). Si existe el extraído local, se usa.
+  def self.path
+    local = Gem.bin_path('wkhtmltopdf-binary', 'wkhtmltopdf').sub(/wkhtmltopdf\z/, 'wkhtmltopdf_local')
+    (Rails.env.development? && File.exist?(local)) ? local : Gem.bin_path('wkhtmltopdf-binary', 'wkhtmltopdf')
+  end
+end
+
 WickedPdf.config = {
   # Path to the wkhtmltopdf executable: This usually isn't needed if using
   # one of the wkhtmltopdf-binary family of gems.
   # exe_path: '/usr/local/bin/wkhtmltopdf',
   #   or
-  exe_path: Gem.bin_path('wkhtmltopdf-binary', 'wkhtmltopdf'),
+  exe_path: WickedPdfExePath.path,
 
   # Needed for wkhtmltopdf 0.12.6+ to use many wicked_pdf asset helpers
   enable_local_file_access: true
