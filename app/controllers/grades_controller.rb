@@ -12,9 +12,11 @@ class GradesController < ApplicationController
     respond_to do |format|
       format.pdf do
         title = 'Historia Académica'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, private'
+        response.headers['Pragma'] = 'no-cache'
         render pdf: "kardex-#{school.code}-#{user.ci}", locals: {grade: @grade}, formats: [:html], page_size: 'letter', header: {html: {template: '/grades/kardex_title', formats: [:html], layout: false, locals: {title: title, school: school, user: user}}}, footer: {center: "Página: [page] de [topage]", font_size: '10'}, margin: {top: 30}
       end
-    end      
+    end
   end
 
   # GET /grades/1 or /grades/1.json
