@@ -12,7 +12,8 @@ class GradesController < ApplicationController
     respond_to do |format|
       format.pdf do
         title = 'Historia Académica'
-        render pdf: "kardex-#{school.code}-#{user.ci}", locals: {grade: @grade}, formats: [:html], page_size: 'letter', header: {html: {template: '/grades/kardex_title', formats: [:html], layout: false, locals: {title: title, school: school, user: user}}}, footer: {center: "Página: [page] de [topage]", font_size: '10'}, margin: {top: 30}
+        no_browser_cache
+        render pdf: "kardex-#{school.code}-#{user.ci}-#{Time.zone.now.strftime('%d-%m-%Y-%H%M')}", locals: {grade: @grade}, formats: [:html], page_size: 'letter', header: {html: {template: '/grades/kardex_title', formats: [:html], layout: false, locals: {title: title, school: school, user: user}}}, footer: {center: "Página: [page] de [topage]", font_size: '10'}, margin: {top: 30}
       end
     end      
   end

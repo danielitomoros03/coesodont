@@ -91,7 +91,14 @@ class ApplicationController < ActionController::Base
 
   def set_session_id_if_multirols
     session[:rol] = params[:rol] if (params[:rol] and current_user)
-  end 
+  end
+
+  # Para documentos que cambian con el tiempo (kardex, constancias): sin esto,
+  # navegadores móviles/proxies pueden servir un PDF viejo cacheado.
+  def no_browser_cache
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, private'
+    response.headers['Pragma'] = 'no-cache'
+  end
 
 
   def after_sign_in_path_for(resource)

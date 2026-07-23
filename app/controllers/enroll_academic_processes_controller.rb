@@ -36,7 +36,8 @@ class EnrollAcademicProcessesController < ApplicationController
           # @encrypted_id, @salt = crypt.encrypt_and_sign(@version.id).split("/")
 
 
-          render pdf: file_name, template: "enroll_academic_processes/constance", formats: [:html], page_size: 'letter', backgroud: false,  footer: { center: 'Página: [page] de [topage]', font_size: '8'}
+          no_browser_cache
+          render pdf: "#{file_name}-#{Time.zone.now.strftime('%d-%m-%Y-%H%M')}", template: "enroll_academic_processes/constance", formats: [:html], page_size: 'letter', backgroud: false,  footer: { center: 'Página: [page] de [topage]', font_size: '8'}
         end
       end
 
