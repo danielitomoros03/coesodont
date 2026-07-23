@@ -121,6 +121,9 @@ Required in `.env`:
 - `PROVIDER_EMAIL_SERVER`, `PROVIDER_EMAIL_PORT`, `PROVIDER_EMAIL_ADDRESS`, `PROVIDER_EMAIL_USERNAME`, `PROVIDER_EMAIL_PASSWORD` — SMTP config
 - `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY`, `STORAGE_BUCKET`, `STORAGE_REGION` — S3-compatible storage (production)
 
+Opcional:
+- `WKHTMLTOPDF_EXE` — ruta a un binario wkhtmltopdf alternativo; necesario en hosts que el wrapper de wkhtmltopdf-binary no reconoce (Ubuntu 24.04+)
+
 ## RuboCop
 
 Max line length: 120. Many style cops disabled (see `.rubocop.yml`). Excludes `bin/`, `db/`, `config/`, `test/`, `node_modules/`.
