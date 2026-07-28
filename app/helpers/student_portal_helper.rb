@@ -62,7 +62,6 @@ module StudentPortalHelper
     end
   end
 
-  # Semestre predominante entre las asignaturas en curso
   def semestre_en_curso(records_en_curso)
     ordinales = records_en_curso.map { |ar| ar.subject.ordinal }.reject(&:zero?)
     ordinales.tally.max_by { |ordinal, veces| [veces, ordinal] }&.first
@@ -135,7 +134,6 @@ module StudentPortalHelper
     chip_portal(texto, tono)
   end
 
-  # Tono del chip según el status de un AcademicRecord
   def tono_academic_record(academic_record)
     case academic_record.status
     when 'aprobado' then :aprobado

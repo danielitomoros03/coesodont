@@ -1,6 +1,7 @@
 class StudentSessionController < ApplicationController
 	before_action :set_session_id_if_multirols, only: [:dashboard]
 	before_action :authenticate_student!
+	before_action :set_student_and_grade, only: [:dashboard, :historial]
 
 	layout 'student_portal'
 	def dashboard
@@ -16,10 +17,6 @@ class StudentSessionController < ApplicationController
 		elsif current_student.address.empty_info?
 			redirect_to edit_address_path(current_student)
 		end
-
-		@student = current_student
-		@grades = @student.grades.includes(:study_plan, :school, :admission_type)
-		@grade = @grades.find_by(id: params[:grade_id]) || @grades.first
 
 		return unless @grade
 
@@ -37,9 +34,6 @@ class StudentSessionController < ApplicationController
 	# Cargado vía Turbo Frame lazy desde el dashboard: es la sección más pesada
 	# (historial completo con calificaciones) y la menos urgente para el primer pintado.
 	def historial
-		@student = current_student
-		@grades = @student.grades.includes(:study_plan, :school, :admission_type)
-		@grade = @grades.find_by(id: params[:grade_id]) || @grades.first
 		return head :no_content unless @grade
 
 		proceso_activo = @grade.school&.active_process
@@ -52,5 +46,13 @@ class StudentSessionController < ApplicationController
 		end
 
 		render layout: false
+	end
+
+	private
+
+	def set_student_and_grade
+		@student = current_student
+		@grades = @student.grades.includes(:study_plan, :school, :admission_type)
+		@grade = @grades.find_by(id: params[:grade_id]) || @grades.first
 	end
 end
