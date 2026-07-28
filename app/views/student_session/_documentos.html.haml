@@ -1,0 +1,54 @@
+%section#documentos{'aria-labelledby': 't-documentos'}
+  .seccion-cabeza
+    %span.ceja Documentos
+    %h2.seccion-titulo#t-documentos Constancias y kardex
+    %span.seccion-meta Se generan al instante, con código de verificación
+
+  - proceso_inscripcion = grade.school.enroll_process
+  - candidatos = [inscripcion_actual, proceso_inscripcion && grade.enroll_academic_processes.of_academic_process(proceso_inscripcion.id).first]
+  - eap_constancia = candidatos.compact.find(&:confirmado?)
+
+  .docs-grid
+    .tarjeta.doc
+      %span.doc-icono{'aria-hidden': true}
+        %svg{width: 18, height: 18, viewBox: '0 0 20 20', fill: :none}
+          %path{d: 'M5 2.5h7l3.5 3.5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-13.5a1 1 0 0 1 1-1z', stroke: 'currentColor', 'stroke-width': 1.4, 'stroke-linejoin': :round}
+          %path{d: 'M12 2.5V6h3.5M7 10h6M7 13h6', stroke: 'currentColor', 'stroke-width': 1.4, 'stroke-linecap': :round}
+      %h3 Constancia de inscripción
+      - if eap_constancia
+        %p= "Certifica las asignaturas y secciones inscritas en el período #{eap_constancia.academic_process.period_name}."
+        %span.doc-meta= "PDF · Período #{eap_constancia.academic_process.period_name}"
+        = enlace_descarga 'Descargar', "/enroll_academic_processes/#{eap_constancia.id}.pdf"
+      - else
+        %p Disponible cuando Control de Estudios confirme tu inscripción del período.
+        %span.doc-meta PDF · No disponible
+        %span.btn-portal.btn-portal--secundario.btn-portal--sm.btn-portal--inactivo Descargar
+
+    .tarjeta.doc
+      %span.doc-icono{'aria-hidden': true}
+        %svg{width: 18, height: 18, viewBox: '0 0 20 20', fill: :none}
+          %path{d: 'M10 2 3 5.5v3C3 13 6 16.5 10 18c4-1.5 7-5 7-9.5v-3L10 2z', stroke: 'currentColor', 'stroke-width': 1.4, 'stroke-linejoin': :round}
+          %path{d: 'm7.2 9.8 2 2 3.6-3.8', stroke: 'currentColor', 'stroke-width': 1.4, 'stroke-linecap': :round, 'stroke-linejoin': :round}
+      %h3 Constancia de estudio
+      - if eap_constancia && !eap_constancia.any_permanence_articulo?
+        %p Acredita tu condición de estudiante ante terceros e instituciones.
+        %span.doc-meta= "PDF · Período #{eap_constancia.academic_process.period_name}"
+        = enlace_descarga 'Descargar', "/enroll_academic_processes/#{eap_constancia.id}.pdf?study='true'"
+      - else
+        %p
+          - if eap_constancia
+            No disponible por tu condición de permanencia actual. Contacta a Control de Estudios.
+          - else
+            Disponible cuando Control de Estudios confirme tu inscripción del período.
+        %span.doc-meta PDF · No disponible
+        %span.btn-portal.btn-portal--secundario.btn-portal--sm.btn-portal--inactivo Descargar
+
+    .tarjeta.doc
+      %span.doc-icono{'aria-hidden': true}
+        %svg{width: 18, height: 18, viewBox: '0 0 20 20', fill: :none}
+          %rect{x: 3, y: 3, width: 14, height: 14, rx: 1.2, stroke: 'currentColor', 'stroke-width': 1.4}
+          %path{d: 'M3 7.5h14M7.5 7.5V17M3 12h14', stroke: 'currentColor', 'stroke-width': 1.2}
+      %h3 Kardex académico
+      %p Historial completo de calificaciones, créditos y promedios por período.
+      %span.doc-meta PDF · Expediente completo
+      = enlace_descarga 'Descargar', "/grades/#{grade.id}/kardex.pdf"
