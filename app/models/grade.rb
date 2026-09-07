@@ -415,11 +415,18 @@ class Grade < ApplicationRecord
   #   return [levels]
   # end
 
+  # Asignaturas con prelación incumplida: quedan fuera de la oferta aunque el año le
+  # corresponda al estudiante (Operatoria de 2º prela las clínicas de 3º).
+  def subjects_blocked_by_prelation(aprobadas_ids = subjects_approved_ids)
+    SubjectLink.where.not(prelate_subject_id: aprobadas_ids).select(:depend_subject_id)
+  end
+
   # OFERTA POR ASIGNATURAS
   def subjects_offer_by_level_approved
-      # Buscamos los ids de las asignaturas aprobadas
-      asig_aprobadas_ids = self.subjects_approved_ids
-    Subject.where(ordinal: level_offer).or(Subject.optativa).where.not(id: asig_aprobadas_ids)
+    aprobadas_ids = subjects_approved_ids
+    Subject.where(ordinal: level_offer).or(Subject.optativa)
+           .where.not(id: aprobadas_ids)
+           .where.not(id: subjects_blocked_by_prelation(aprobadas_ids))
   end
 
   def subjects_offer_by_dependent
