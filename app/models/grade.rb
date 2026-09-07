@@ -332,8 +332,7 @@ class Grade < ApplicationRecord
   # asignaturas que el plan sigue dictando: una raspada de una asignatura que ya salió del
   # pensum no es una deuda que el estudiante pueda saldar.
   def subjects_arrastre
-    ids = academic_records.coursed.not_aprobado.joins(:subject)
-                          .where('subjects.modality': Subject.modalities[:obligatoria])
+    ids = academic_records.coursed.not_aprobado.by_subject_types('obligatoria')
                           .where.not('subjects.id': subjects_approved_ids)
                           .distinct.pluck('subjects.id')
 
@@ -354,9 +353,8 @@ class Grade < ApplicationRecord
   #     asignatura. Arrastrar de dos años atrás obliga a saldar esa deuda primero.
   #   - Raspar 2+ asignaturas en el último período también bloquea el avance.
   def level_offer
-    oblig = Subject.modalities[:obligatoria]
     # Obligatorias distintas aprobadas, agrupadas por año del plan (subjects.ordinal)
-    approved_by_level = academic_records.aprobado.joins(:subject).where('subjects.modality': oblig)
+    approved_by_level = academic_records.aprobado.by_subject_types('obligatoria')
                           .distinct.group('subjects.ordinal').count('subjects.id')
     return [1] if approved_by_level.empty?
 
