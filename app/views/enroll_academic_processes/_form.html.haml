@@ -57,25 +57,22 @@
 = form_tag('/enroll_academic_processes/enroll', id: "#{grade.id}Form", class: 'form-horizontal', multipart: true) do
   = hidden_field_tag 'grade_id', grade.id
   = hidden_field_tag 'academic_process_id', academic_process.id  
-  .border{style: 'overflow-y:scroll;max-height:280px'}
-    - if false
-      %h3= "Año: #{grade.level_offer&.map{|e| "#{e}°"}.to_sentence}"
-    - SubjectType.all.each do |subject_type|
-      - subject_type_name = subject_type.name&.downcase.pluralize.titleize
-      - courses = courses_offer.where('subjects.modality': subject_type.name&.downcase).order_by_subject_ordinal_and_subject_code
-      = render partial: 'enroll_academic_processes/courses_offer', locals: {courses: courses, pcis: false, grade: grade, tipo_name: subject_type_name} if courses.any?
+  - if courses_offer.any?
+    .border{style: 'overflow-y:scroll;max-height:280px'}
+      - SubjectType.all.each do |subject_type|
+        - subject_type_name = subject_type.name&.downcase.pluralize.titleize
+        - courses = courses_offer.where('subjects.modality': subject_type.name&.downcase).order_by_subject_ordinal_and_subject_code
+        = render partial: 'enroll_academic_processes/courses_offer', locals: {courses: courses, pcis: false, grade: grade, tipo_name: subject_type_name} if courses.any?
 
-  = render partial: 'enroll_academic_processes/total_credits', locals: {limitCredits: limitCredits, limitSubjects: limitSubjects, totalCreditsReserved: totalCreditsReserved, totalSubjectsReserved: totalSubjectsReserved }
+    = render partial: 'enroll_academic_processes/total_credits', locals: {limitCredits: limitCredits, limitSubjects: limitSubjects, totalCreditsReserved: totalCreditsReserved, totalSubjectsReserved: totalSubjectsReserved }
 
-  =# render partial: 'schedules/index', locals: {schedules: academic_process.schedules}
-
-  .modal-footer
-    / %a.btn.btn-sm.btn-outline-light{data: {dismiss: 'modal'}} Cancelar
-    - enableSubmit = (totalCreditsReserved > 0 and totalCreditsReserved <= limitCredits and totalSubjectsReserved > 0 and totalSubjectsReserved <= limitSubjects)
-
-    - disabledClass = enableSubmit ? '' : 'disabled'
-    .d-grid.gap-2
-      = submit_tag 'Completar', class: "#{disabledClass} btn btn-success btn-lg", id: 'submitBtn', 'data-disable-with': 'Enviando', disabled: !enableSubmit, onclick: 'completeEnroll(this);'
+    .modal-footer
+      - enableSubmit = (totalCreditsReserved > 0 and totalCreditsReserved <= limitCredits and totalSubjectsReserved > 0 and totalSubjectsReserved <= limitSubjects)
+      - disabledClass = enableSubmit ? '' : 'disabled'
+      .d-grid.gap-2
+        = submit_tag 'Completar', class: "#{disabledClass} btn btn-success btn-lg", id: 'submitBtn', 'data-disable-with': 'Enviando', disabled: !enableSubmit, onclick: 'completeEnroll(this);'
+  - else
+    = render partial: 'enroll_academic_processes/empty_offer', locals: {grade: grade}
 
 :javascript
 
