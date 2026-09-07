@@ -326,6 +326,33 @@ class Grade < ApplicationRecord
   #   end
   # end
 
+  # Obligatorias que el estudiante cursó y todavía no ha aprobado: su arrastre.
+  # Se mide contra el historial y no contra requirement_by_levels, que se desincroniza cuando el
+  # plan mueve asignaturas de año y ahí terminaría escondiendo la raspada. Se limita a las
+  # asignaturas que el plan sigue dictando: una raspada de una asignatura que ya salió del
+  # pensum no es una deuda que el estudiante pueda saldar.
+  def subjects_arrastre
+    ids = academic_records.coursed.not_aprobado.joins(:subject)
+                          .where('subjects.modality': Subject.modalities[:obligatoria])
+                          .where.not('subjects.id': subjects_approved_ids)
+                          .distinct.pluck('subjects.id')
+
+    scope = Subject.where(id: ids)
+    vigentes = school&.enroll_process&.courses
+    scope = scope.where(id: vigentes.select(:subject_id)) if vigentes
+    scope
+  end
+
+  def arrastres_by_level
+    subjects_arrastre.group(:ordinal).count(:id)
+  end
+
+  # Años cuya oferta de asignaturas ve el estudiante.
+  # Reglamento de Odontología:
+  #   - La asignatura raspada se arrastra: su año sigue en la oferta hasta aprobarla.
+  #   - El año siguiente se libera sólo si la deuda es del año en curso y es de una sola
+  #     asignatura. Arrastrar de dos años atrás obliga a saldar esa deuda primero.
+  #   - Raspar 2+ asignaturas en el último período también bloquea el avance.
   def level_offer
     oblig = Subject.modalities[:obligatoria]
     # Obligatorias distintas aprobadas, agrupadas por año del plan (subjects.ordinal)
@@ -333,28 +360,28 @@ class Grade < ApplicationRecord
                           .distinct.group('subjects.ordinal').count('subjects.id')
     return [1] if approved_by_level.empty?
 
-    # Obligatorias distintas CURSADAS (aprobadas + raspadas) para medir cuántas raspó de lo que inscribió
-    coursed_by_level = academic_records.coursed.joins(:subject).where('subjects.modality': oblig)
-                         .distinct.group('subjects.ordinal').count('subjects.id')
     required_by_level = study_plan.requirement_by_levels
                           .of_subject_type(SubjectType.obligatoria.id)
                           .pluck(:level, :required_subjects).to_h
 
+    arrastres = arrastres_by_level
     last_level = approved_by_level.keys.max
-    levels = []
+
+    # El año de cada raspada pendiente siempre se oferta, y el año sin completar también
+    levels = arrastres.keys
     approved_by_level.each do |level, approved|
-      required = required_by_level[level]
-      next if required.nil? || required.zero?
-      # Año sin completar: sigue en la oferta (materias pendientes de ese año)
-      levels << level if approved < required
-      # Reglamento de arrastre: del último año cursado se libera el año siguiente si de lo que
-      # inscribió le quedó <=1 raspada y no raspó 2+ en el último período (Art. reglamento UCV).
-      # Las obligatorias que nunca cursó no bloquean el avance.
-      if level == last_level && level < 5
-        reprobadas_pendientes = (coursed_by_level[level] || approved) - approved
-        levels << (level + 1) if reprobadas_pendientes <= 1 && aplazadas_in_last_period < 2
-      end
+      required = required_by_level[level].to_i
+      levels << level if required.positive? && approved < required
     end
+
+    # Avance de año: sólo con la deuda al día del último año cursado. Las obligatorias que
+    # nunca cursó no bloquean el avance; las raspadas de años anteriores sí.
+    deuda_de_anos_anteriores = arrastres.keys.any? { |level| level < last_level }
+    if last_level < 5 && !deuda_de_anos_anteriores &&
+       arrastres.fetch(last_level, 0) <= 1 && aplazadas_in_last_period < 2
+      levels << (last_level + 1)
+    end
+
     levels.uniq.sort
   rescue => e
     Rails.logger.warn("level_offer falló para grade #{id}: #{e.message}")

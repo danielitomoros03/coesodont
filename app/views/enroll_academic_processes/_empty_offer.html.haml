@@ -1,0 +1,22 @@
+- arrastres = grade.subjects_arrastre.order(:ordinal, :code)
+- una = arrastres.size.eql? 1
+- contacto = grade.school.contact_email
+
+.alert.alert-warning.m-3{role: :alert}
+  %h6.text-center.mb-3
+    %i.fas.fa-info-circle.me-2.text-secondary
+    Sin Asignaturas disponibles para inscribir
+
+  - if arrastres.any?
+    %p.mb-1
+      = una ? 'Tienes una asignatura pendiente de un año anterior:' : "Tienes #{arrastres.size} asignaturas pendientes de años anteriores:"
+    %ul
+      - arrastres.each do |subject|
+        %li
+          %b= "#{subject.code}: #{subject.name}"
+          = "(#{subject.ordinal}° año)"
+    %p= una ? 'Debes aprobarla antes de avanzar al año siguiente.' : 'Debes aprobarlas antes de avanzar al año siguiente.'
+
+  %p.mb-0.text-muted.small
+    La inscripción se habilita por año. Si el tuyo ya fue convocado y aun así no ves asignaturas, comunícate con el Departamento de Control de Estudios
+    = contacto.present? ? "al correo #{contacto}." : '.'
