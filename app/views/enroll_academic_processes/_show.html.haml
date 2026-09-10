@@ -4,7 +4,7 @@
 - school = enroll_academic_process.school
 - enabled_to_admin = (current_user&.admin? and session[:rol].eql? 'admin') ? true : false
 = render partial: 'enroll_academic_processes/options', locals: {period: period, enroll_academic_process: enroll_academic_process, enabled_options: (enrolling_process or active_process)}
-.responsive-table
+.table-responsive
   %table.table.table-sm
     %thead
       %tr
