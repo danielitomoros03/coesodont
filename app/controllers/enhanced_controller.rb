@@ -4,6 +4,20 @@ class EnhancedController < ActionController::Base
   before_action :set_paper_trail_request_info
   rescue_from CanCan::AccessDenied, with: :handle_access_denied
 
+  # Necesario aquí además de ApplicationController porque RailsAdmin se monta
+  # sobre este controller (config.parent_controller = 'EnhancedController') y
+  # ActionController::Base no hereda del rescue del controller global. Sin
+  # esto, el throw :warden por timeout escapa como UncaughtThrowError en
+  # /admin/*, y con ActionController::Live incluido acá el catch del middleware
+  # queda en otro hilo y no lo alcanza nunca.
+  rescue_from UncaughtThrowError do |exception|
+    raise exception unless exception.tag == :warden
+
+    reset_session
+    flash[:warning] = "Su sesión ha expirado por inactividad. Por favor, ingrese nuevamente."
+    redirect_to main_app.new_user_session_path
+  end
+
   def info_for_paper_trail
     { ip: request.remote_ip, user_agent: request.user_agent }
   end

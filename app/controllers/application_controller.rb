@@ -5,6 +5,19 @@ class ApplicationController < ActionController::Base
   before_action :set_current_process
   rescue_from CanCan::AccessDenied, with: :handle_access_denied
 
+  # Devise::Hooks::Timeoutable lanza `throw :warden, message: :timeout` cuando
+  # la sesión expira. Normalmente Warden::Manager captura ese throw y dispara
+  # la failure_app, pero en algunos paths (notablemente cuando RailsAdmin
+  # evalúa current_user dentro de instance_eval) el throw escapa y llega como
+  # UncaughtThrowError. Lo capturamos aquí para cerrar sesión limpiamente.
+  rescue_from UncaughtThrowError do |exception|
+    raise exception unless exception.tag == :warden
+
+    reset_session
+    flash[:warning] = "Su sesión ha expirado por inactividad. Por favor, ingrese nuevamente."
+    redirect_to main_app.new_user_session_path
+  end
+
   def info_for_paper_trail
     { ip: request.remote_ip, user_agent: request.user_agent }
   end
