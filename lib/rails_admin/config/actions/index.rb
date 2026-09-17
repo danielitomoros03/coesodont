@@ -41,7 +41,10 @@ module RailsAdmin
                 user = users.first
                 if user.respond_to?(:student?) && user.student?
                   redirect_to "/admin/student/#{user.student.id}"
-                  return
+                  # `next` y no `return`: esto es un proc que RailsAdmin instance_eval'a
+                  # mucho después de definirlo, así que un `return` busca un método que
+                  # ya no existe y revienta con LocalJumpError.
+                  next
                 end
               end
             end
