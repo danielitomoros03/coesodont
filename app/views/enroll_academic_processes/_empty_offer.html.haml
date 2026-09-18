@@ -1,7 +1,8 @@
 - arrastres = grade.subjects_arrastre.order(:ordinal, :code)
 -# Reprobar el arrastre confina al estudiante al año de esa deuda, así que sus pendientes se
 -# parten en dos: lo que le toca saldar ahora y lo que recién podrá inscribir después.
-- ahora = arrastres.select { |subject| grade.level_offer.include? subject.ordinal }
+- ofertables = grade.level_offer
+- ahora = arrastres.select { |subject| ofertables.include? subject.ordinal }
 - ahora = arrastres if ahora.empty?
 - despues = arrastres - ahora
 - una = ahora.size.eql? 1

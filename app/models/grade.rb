@@ -358,10 +358,6 @@ class Grade < ApplicationRecord
                           .distinct.group('subjects.ordinal').count('subjects.id')
     return [1] if approved_by_level.empty?
 
-    required_by_level = study_plan.requirement_by_levels
-                          .of_subject_type(SubjectType.obligatoria.id)
-                          .pluck(:level, :required_subjects).to_h
-
     arrastres = arrastres_by_level
     last_level = approved_by_level.keys.max
 
@@ -370,6 +366,10 @@ class Grade < ApplicationRecord
     # año en curso no se inscribe mientras quede algo pendiente de un año anterior.
     deuda_vieja = arrastres.keys.select { |level| level < last_level }.min
     return [deuda_vieja] if deuda_vieja
+
+    required_by_level = study_plan.requirement_by_levels
+                          .of_subject_type(SubjectType.obligatoria.id)
+                          .pluck(:level, :required_subjects).to_h
 
     # El año de cada raspada pendiente siempre se oferta, y el año sin completar también
     levels = arrastres.keys
