@@ -1,5 +1,11 @@
 - arrastres = grade.subjects_arrastre.order(:ordinal, :code)
-- una = arrastres.size.eql? 1
+-# Reprobar el arrastre confina al estudiante al año de esa deuda, así que sus pendientes se
+-# parten en dos: lo que le toca saldar ahora y lo que recién podrá inscribir después.
+- ahora = arrastres.select { |subject| grade.level_offer.include? subject.ordinal }
+- ahora = arrastres if ahora.empty?
+- despues = arrastres - ahora
+- una = ahora.size.eql? 1
+- mismo_anio = ahora.map(&:ordinal).uniq.size.eql? 1
 - contacto = grade.school.contact_email
 
 .alert.alert-warning.m-3{role: :alert}
@@ -7,15 +13,29 @@
     %i.fas.fa-info-circle.me-2.text-secondary
     Sin Asignaturas disponibles para inscribir
 
-  - if arrastres.any?
-    %p.mb-1
-      = una ? 'Tienes una asignatura pendiente de un año anterior:' : "Tienes #{arrastres.size} asignaturas pendientes de años anteriores:"
+  - if ahora.any?
+    - cuantas = una ? 'una asignatura pendiente' : "#{ahora.size} asignaturas pendientes"
+    - de_donde = mismo_anio ? "de #{ahora.first.ordinal}° año" : 'de años anteriores'
+    %p.mb-1= "Tienes #{cuantas} #{de_donde}:"
     %ul
-      - arrastres.each do |subject|
+      - ahora.each do |subject|
         %li
           %b= "#{subject.code}: #{subject.name}"
           = "(#{subject.ordinal}° año)"
-    %p= una ? 'Debes aprobarla antes de avanzar al año siguiente.' : 'Debes aprobarlas antes de avanzar al año siguiente.'
+
+    - if despues.any?
+      %p= una ? 'Debes aprobarla antes de volver a inscribir asignaturas de años posteriores.' : 'Debes aprobarlas antes de volver a inscribir asignaturas de años posteriores.'
+      %p.mb-1 También tienes pendientes de años posteriores, que podrás inscribir más adelante:
+      %ul
+        - despues.each do |subject|
+          %li
+            = "#{subject.code}: #{subject.name}"
+            = "(#{subject.ordinal}° año)"
+    - elsif ahora.all? { |subject| subject.ordinal >= 5 }
+      -# Último año del plan: no hay siguiente al que avanzar.
+      %p= una ? 'Debes aprobarla para culminar tu plan de estudios.' : 'Debes aprobarlas para culminar tu plan de estudios.'
+    - else
+      %p= una ? 'Debes aprobarla antes de avanzar al año siguiente.' : 'Debes aprobarlas antes de avanzar al año siguiente.'
 
   %p.mb-0.text-muted.small
     La inscripción se habilita por año. Si el tuyo ya fue convocado y aun así no ves asignaturas, comunícate con el Departamento de Control de Estudios
