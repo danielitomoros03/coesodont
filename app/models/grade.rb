@@ -365,6 +365,12 @@ class Grade < ApplicationRecord
     arrastres = arrastres_by_level
     last_level = approved_by_level.keys.max
 
+    # Reprobar el arrastre devuelve al estudiante a ese año. Aunque haya aprobado parte de lo
+    # que cursaba, sólo se le oferta el año al que pertenece su deuda más vieja: la carga del
+    # año en curso no se inscribe mientras quede algo pendiente de un año anterior.
+    deuda_vieja = arrastres.keys.select { |level| level < last_level }.min
+    return [deuda_vieja] if deuda_vieja
+
     # El año de cada raspada pendiente siempre se oferta, y el año sin completar también
     levels = arrastres.keys
     approved_by_level.each do |level, approved|
@@ -372,11 +378,10 @@ class Grade < ApplicationRecord
       levels << level if required.positive? && approved < required
     end
 
-    # Avance de año: sólo con la deuda al día del último año cursado. Las obligatorias que
-    # nunca cursó no bloquean el avance; las raspadas de años anteriores sí.
-    deuda_de_anos_anteriores = arrastres.keys.any? { |level| level < last_level }
-    if last_level < 5 && !deuda_de_anos_anteriores &&
-       arrastres.fetch(last_level, 0) <= 1 && aplazadas_in_last_period < 2
+    # Avance de año: con la deuda del año en curso al día, se libera el siguiente si quedó
+    # <=1 raspada y no raspó 2+ en el último período. Las obligatorias que nunca cursó no
+    # bloquean el avance.
+    if last_level < 5 && arrastres.fetch(last_level, 0) <= 1 && aplazadas_in_last_period < 2
       levels << (last_level + 1)
     end
 
