@@ -56,6 +56,22 @@ class Subject < ApplicationRecord
   validates :unit_credits, presence: true
   validates :area, presence: true
 
+  # PARCHE: pares de códigos que el pensum duplicó en dos años distintos y que Control de
+  # Estudios considera una sola asignatura — aprobar cualquiera da la otra por aprobada.
+  # Hoy sólo Microbiología (10012801 en 1º, 10012602 en 2º). Es provisional: cuando el plan
+  # unifique el par, este arreglo se vacía y el código de abajo deja de tener efecto.
+  EQUIVALENT_CODES = [%w[10012801 10012602]].freeze
+
+  # Agrega a la lista los ids de las asignaturas equivalentes a las ya aprobadas.
+  def self.with_equivalents(subject_ids)
+    ids = subject_ids.to_a
+    EQUIVALENT_CODES.each do |codes|
+      grupo = where(code: codes).pluck(:id)
+      ids |= grupo if (ids & grupo).any?
+    end
+    ids
+  end
+
   # SCOPES: 
 
   scope :todos, -> {where('0 = 0')}

@@ -501,7 +501,8 @@ class Grade < ApplicationRecord
   end
 
   def subjects_approved_ids
-    self.academic_records.aprobado.joins(:subject).select('subjects.id').map{|su| su.id}
+    ids = academic_records.aprobado.joins(:subject).pluck('subjects.id')
+    Subject.with_equivalents(ids)
   end
 
   # TOTALS CREDITS:
