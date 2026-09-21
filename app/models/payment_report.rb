@@ -39,9 +39,23 @@ class PaymentReport < ApplicationRecord
   scope :grades, -> {where(payable_type: 'Grade')}  
   scope :enroll_academic_processes, -> {where(payable_type: 'EnrollAcademicProcess')}  
 
-  scope :custom_search, -> (keyword) { joins_enroll_academic_process.joins("INNER JOIN academic_processes ON enroll_academic_processes.academic_process_id = academic_processes.id").where("academic_processes.name ILIKE ?", "%#{keyword}%") }
+  scope :custom_search, -> (keyword) {
+    joins_student_user
+      .joins("INNER JOIN academic_processes ON enroll_academic_processes.academic_process_id = academic_processes.id")
+      .where(
+        "academic_processes.name ILIKE :k OR users.ci ILIKE :k OR users.first_name ILIKE :k OR users.last_name ILIKE :k OR (users.first_name || ' ' || users.last_name) ILIKE :k OR users.email ILIKE :k OR users.number_phone ILIKE :k OR payment_reports.depositor_name ILIKE :k OR payment_reports.depositor_ci ILIKE :k",
+        k: "%#{keyword}%"
+      )
+  }
 
   scope :joins_enroll_academic_process, -> {joins("INNER JOIN enroll_academic_processes ON enroll_academic_processes.id = payment_reports.payable_id AND payment_reports.payable_type = 'EnrollAcademicProcess'")}
+
+  # grades.student_id apunta a students.user_id, que es el mismo id de users.
+  scope :joins_student_user, -> {
+    joins_enroll_academic_process
+      .joins("INNER JOIN grades ON grades.id = enroll_academic_processes.grade_id")
+      .joins("INNER JOIN users ON users.id = grades.student_id")
+  }
 
   attr_accessor :remove_voucher
   after_save { voucher.purge if remove_voucher.eql? '1' }   
@@ -132,6 +146,27 @@ class PaymentReport < ApplicationRecord
       field :student do
         pretty_value do
           "<a href='/admin/student/#{bindings[:object].student&.id}'>#{bindings[:object].student&.user&.ci_fullname}</a>".html_safe
+        end
+      end
+
+      # Datos del estudiante como filtros de "Agregar Filtro". Van invisibles porque
+      # la columna Estudiante ya los muestra: RailsAdmin arma el menú de filtros con
+      # list.fields (todos), pero la tabla sólo con los visibles.
+      [
+        [:student_ci,        'CI del Estudiante',        'users.ci'],
+        [:student_names,     'Nombres del Estudiante',   'users.first_name'],
+        [:student_lastnames, 'Apellidos del Estudiante', 'users.last_name'],
+        [:student_email,     'Correo del Estudiante',    'users.email'],
+        [:student_phone,     'Teléfono del Estudiante',  'users.number_phone']
+      ].each do |field_name, field_label, column|
+        field field_name do
+          label field_label
+          visible false
+          sortable false
+          eager_load :user
+          searchable column
+          # Sin esto el operador arranca en "..." (_discard) y el filtro se ignora en silencio.
+          default_filter_operator 'like'
         end
       end
       # field :payable_name do
