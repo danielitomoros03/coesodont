@@ -1,0 +1,52 @@
+%section#perfil{'aria-labelledby': 't-perfil'}
+  - user = student.user
+  .seccion-cabeza
+    %span.ceja Mis datos
+    %h2.seccion-titulo#t-perfil Datos personales
+    %span.seccion-meta Tu correo es el canal oficial de notificaciones
+
+  .perfil-grid
+    .tarjeta.perfil-foto
+      .foto-marco{'aria-hidden': true}
+        - if user.profile_picture.attached?
+          = image_tag user.profile_picture_as_thumb
+        - else
+          = iniciales(user)
+      .perfil-nombre= user.full_name.titleize
+      .perfil-ci= ci_formateada(user)
+      .perfil-estado
+        - if user.empty_info? || student.empty_info? || student.address.nil? || student.address.empty_info?
+          = chip_portal('Datos incompletos', :alerta)
+        - else
+          = chip_portal('Expediente completo', :aprobado)
+
+    .tarjeta.perfil-datos
+      %dl.datos-grid
+        .dato
+          %dt Correo electrónico
+          %dd
+            = user.email
+            - if user.false_email?
+              = chip_portal('Correo temporal: actualízalo', :alerta)
+        .dato
+          %dt Teléfono
+          %dd= user.number_phone.presence || '—'
+        .dato
+          %dt Dirección
+          %dd= student.address&.full_address.presence || '—'
+        .dato
+          %dt Sede
+          %dd= student.sede
+        .dato
+          %dt Fecha de nacimiento
+          %dd= student.birth_date ? I18n.l(student.birth_date, format: :long) : '—'
+        .dato
+          %dt Nacionalidad
+          %dd= student.nacionality || '—'
+      .perfil-acciones
+        = link_to 'Actualizar mis datos', edit_user_path(user), class: 'btn-portal btn-portal--secundario btn-portal--sm'
+        = link_to 'Datos complementarios', edit_student_path(student), class: 'btn-portal btn-portal--secundario btn-portal--sm'
+        - if student.address
+          = link_to 'Actualizar dirección', edit_student_address_path(student, student.address), class: 'btn-portal btn-portal--secundario btn-portal--sm'
+        = link_to 'Cambiar contraseña', edit_password_user_path(user), class: 'btn-portal btn-portal--fantasma btn-portal--sm'
+        %p.perfil-nota Mantén tu correo y teléfono al día: allí recibirás tu cita horaria y la confirmación de cada inscripción.
