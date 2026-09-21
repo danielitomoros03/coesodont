@@ -122,6 +122,22 @@ class PaymentReport < ApplicationRecord
 
       field :created_at do
         sticky true
+        # El filtro por día vive en :registered_on; la columna conserva la hora.
+        filterable false
+      end
+
+      # created_at es datetime y RailsAdmin lo parsea con Time.zone.parse: filtrar
+      # pedía una hora y comparaba el instante exacto, así que elegir un día no
+      # devolvía nada. Declarado :date el picker no muestra reloj y parse_value da un
+      # Date; la columna se declara :datetime para que expanda el día completo
+      # (build_statement_for_datetime_or_timestamp sólo hace beginning_of_day..
+      # end_of_day cuando el valor es un Date).
+      field :registered_on, :date do
+        label 'Fecha Registro'
+        visible false
+        sortable false
+        filterable true
+        searchable_columns [{ column: 'payment_reports.created_at', type: :datetime }]
       end
       field :status do
         sticky true
@@ -144,8 +160,12 @@ class PaymentReport < ApplicationRecord
         end
       end
       field :student do
+        # Resuelto sobre :user, que los filtros de abajo ya precargan. Ir por .student
+        # costaba dos queries por fila (la asociación y su user) para llegar al mismo
+        # registro: students tiene user_id de clave primaria, así que student.id es user.id.
         pretty_value do
-          "<a href='/admin/student/#{bindings[:object].student&.id}'>#{bindings[:object].student&.user&.ci_fullname}</a>".html_safe
+          user = bindings[:object].user
+          "<a href='/admin/student/#{user&.id}'>#{user&.ci_fullname}</a>".html_safe
         end
       end
 
