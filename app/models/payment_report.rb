@@ -74,6 +74,15 @@ class PaymentReport < ApplicationRecord
   validates :status, presence: true
   validate :voucher_size_within_limit
 
+  # Un número de transacción identifica un solo pago. Hubo reportes repetidos por doble envío
+  # (2646/2647, el mismo estudiante a 21 s) y por números que no son de la transferencia: el de
+  # la cuenta de la Facultad (11 reportes de distintos estudiantes), el monto o un 200000627.
+  # Se revisa sólo al crear o al cambiar el número: los repetidos que ya existen siguen
+  # pudiéndose validar o editar en lo demás.
+  before_validation :normalizar_transaction_id
+  validate :transaction_id_no_es_cuenta_receptora, if: :revisar_transaction_id?
+  validate :transaction_id_no_repetido, if: :revisar_transaction_id?
+
   enum transaction_type: [:transferencia, :efectivo, :punto_venta]
 
   def name
@@ -270,6 +279,34 @@ class PaymentReport < ApplicationRecord
   end  
 
   private
+
+    def normalizar_transaction_id
+      self.transaction_id = transaction_id.gsub(/\s/, '').upcase if transaction_id
+    end
+
+    def revisar_transaction_id?
+      transaction_id.present? && !Invalidado? && (new_record? || will_save_change_to_transaction_id?)
+    end
+
+    # Los invalidados no cuentan: si Control de Estudios rechazó un reporte, el estudiante
+    # puede volver a reportar ese mismo pago con los datos corregidos.
+    def transaction_id_no_repetido
+      return if errors.include?(:transaction_id)
+
+      repetido = PaymentReport.where.not(status: :Invalidado).where.not(id: id)
+                              .where("upper(regexp_replace(transaction_id, '\\s', '', 'g')) = ?", transaction_id)
+      return unless repetido.exists?
+
+      errors.add(:transaction_id, 'ya fue registrado en otro reporte de pago. Si es un pago distinto, revisa el número de referencia de tu transferencia')
+    end
+
+    def transaction_id_no_es_cuenta_receptora
+      digitos = transaction_id.gsub(/[^0-9]/, '')
+      return if digitos.empty?
+      return unless BankAccount.where("regexp_replace(code, '[^0-9]', '', 'g') = ?", digitos).exists?
+
+      errors.add(:transaction_id, 'es el número de la cuenta de destino, no la referencia de tu transferencia')
+    end
 
     def voucher_size_within_limit
       return unless voucher.attached?
