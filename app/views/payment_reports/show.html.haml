@@ -20,6 +20,11 @@
   %b Cuenta:
   = @payment_report.receiving_bank_account&.name
 
+- if @payment_report.comment.present?
+  %p
+    %b Comentario:
+    = @payment_report.comment
+
 %p
   %b Comprobante de Pago:
 = render partial: "layouts/set_image", locals: {image: @payment_report.voucher, size: '', alt: 'Comprobante'}

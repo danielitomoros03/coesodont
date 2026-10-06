@@ -703,6 +703,7 @@ es:
         voucher: 'Imagen de Comprobante'
         depositor_name: Nombre del Titular Cuenta
         depositor_ci: CI del Titular Cuenta
+        comment: 'Comentario'
         created_at: 'Fecha Registro'
       period:
         year: 'Año'

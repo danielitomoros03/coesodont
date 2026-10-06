@@ -28,6 +28,10 @@
   = f.input :depositor_name, required: true, input_html: {onInput: "$(this).val($(this).val().toUpperCase().replace(/[^A-Z| ]/g,''))"}
   = f.input :depositor_ci, required: true, input_html: {onInput: "$(this).val($(this).val().replace(/[^0-9]/g,''))"}
 
+  = f.input :comment, as: :text, required: false, label: 'Comentario (opcional)',
+                     hint: 'Algo que Control de Estudios deba saber sobre este pago. Máximo 300 caracteres.',
+                     input_html: {rows: 2, maxlength: 300}
+
   .form-actions
     = f.button :submit
 

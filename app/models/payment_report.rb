@@ -73,6 +73,7 @@ class PaymentReport < ApplicationRecord
   validates :voucher, presence: true
   validates :status, presence: true
   validate :voucher_size_within_limit
+  validates :comment, length: { maximum: 300 }
 
   # Un número de transacción identifica un solo pago. Hubo reportes repetidos por doble envío
   # (2646/2647, el mismo estudiante a 21 s) y por números que no son de la transferencia: el de
@@ -218,10 +219,12 @@ class PaymentReport < ApplicationRecord
         end
       end
       fields :depositor_name, :depositor_ci
+      # La celda ya lleva el texto completo en su title y RailsAdmin la recorta con «…».
+      field :comment
     end
 
     show do
-      fields :id, :created_at, :amount, :status, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account, :voucher, :depositor_name, :depositor_ci
+      fields :id, :created_at, :amount, :status, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :receiving_bank_account, :voucher, :depositor_name, :depositor_ci, :comment
     end
 
     edit do
@@ -245,10 +248,15 @@ class PaymentReport < ApplicationRecord
         inline_add false
       end
       fields :voucher, :depositor_name, :depositor_ci
+      field :comment, :text do
+        html_attributes do
+          { rows: 2, maxlength: 300 }
+        end
+      end
     end
 
     export do
-      fields :id, :created_at, :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :origin_bank, :depositor_name, :depositor_ci
+      fields :id, :created_at, :amount, :transaction_id, :transaction_type, :transaction_date, :origin_bank, :origin_bank, :depositor_name, :depositor_ci, :comment
       field :payable_type do
         label 'Tipo'
       end
@@ -282,6 +290,7 @@ class PaymentReport < ApplicationRecord
 
     def normalizar_transaction_id
       self.transaction_id = transaction_id.gsub(/\s/, '').upcase if transaction_id
+      self.comment = comment.strip.presence if comment
     end
 
     def revisar_transaction_id?
