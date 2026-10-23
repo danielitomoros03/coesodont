@@ -171,6 +171,37 @@ class AcademicRecord < ApplicationRecord
     )
   }
 
+  # Intento previo: la misma asignatura, del mismo estudiante (en cualquier plan), inscrita en un
+  # año anterior con cualquier estado salvo retirado. «Sin calificar» cuenta: las notas del año
+  # anterior pueden no estar cargadas cuando se arma el listado del año en curso.
+  # Se correlaciona SOLO por id: así Postgres lo resuelve como semi/anti-join después de los
+  # filtros del listado. Correlacionado por curso o inscripción lo evaluaba fila por fila sobre
+  # toda la tabla (~15 s por consulta en Rails Admin, que hace JOIN de 18 tablas).
+  PREVIOUS_ATTEMPT_SQL = <<~SQL.squish
+    EXISTS (
+      SELECT 1
+      FROM academic_records cur
+      INNER JOIN enroll_academic_processes cur_eap ON cur_eap.id = cur.enroll_academic_process_id
+      INNER JOIN grades cur_g ON cur_g.id = cur_eap.grade_id
+      INNER JOIN grades prev_g ON prev_g.student_id = cur_g.student_id
+      INNER JOIN enroll_academic_processes prev_eap ON prev_eap.grade_id = prev_g.id
+      INNER JOIN academic_records prev ON prev.enroll_academic_process_id = prev_eap.id
+      INNER JOIN courses prev_c ON prev_c.id = prev.course_id
+      INNER JOIN courses cur_c ON cur_c.id = cur.course_id
+      INNER JOIN academic_processes prev_ap ON prev_ap.id = prev_eap.academic_process_id
+      INNER JOIN academic_processes cur_ap ON cur_ap.id = cur_eap.academic_process_id
+      INNER JOIN periods prev_p ON prev_p.id = prev_ap.period_id
+      INNER JOIN periods cur_p ON cur_p.id = cur_ap.period_id
+      WHERE cur.id = academic_records.id
+        AND prev_c.subject_id = cur_c.subject_id
+        AND prev.status <> 3
+        AND prev_p.year < cur_p.year
+    )
+  SQL
+
+  scope :no_repitientes, -> { where.not(PREVIOUS_ATTEMPT_SQL) }
+  scope :repitientes, -> { where(PREVIOUS_ATTEMPT_SQL) }
+
 
   # FUNCTIONS:
 
@@ -531,7 +562,7 @@ class AcademicRecord < ApplicationRecord
     list do
       search_by :custom_search
       sort_by :id
-      scopes [:todos, :nuevos_en_periodo]
+      scopes [:todos, :nuevos_en_periodo, :no_repitientes, :repitientes]
       filters [:period, :area, :status]
 
       field :period, :enum do
