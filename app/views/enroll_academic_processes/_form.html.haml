@@ -124,8 +124,9 @@
       complete: function(json){
         elem.data('reserving', false);
         elem.prop('disabled', false);
-        if (json["responseJSON"].status == 'success'){
-          toastr.success(json["responseJSON"].data);
+        let respuesta = json["responseJSON"] || {data: 'Error: no se procesó la selección'};
+        if (respuesta.status == 'success'){
+          toastr.success(respuesta.data);
 
           totalizar();
           let trParent = elem.closest('tr');
@@ -138,10 +139,10 @@
 
 
         }else{
-          toastr.error(json["responseJSON"].data);
+          toastr.error(respuesta.data);
           el.selectedIndex = 0;
         }
-        opcion.text(json["responseJSON"].cupo);
+        if (respuesta.cupo) opcion.text(respuesta.cupo);
       }
     });
   }

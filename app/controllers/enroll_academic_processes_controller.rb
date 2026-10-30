@@ -1,5 +1,9 @@
 class EnrollAcademicProcessesController < ApplicationController
   before_action :set_enroll_academic_process, only: %i[ show edit update destroy study_constance total_retire update_permanece_status]
+  before_action :require_admin, except: %i[ show reserve_space enroll ]
+  before_action -> { rechazar unless administra_escuela?(@enroll_academic_process.school&.id) }, only: %i[ edit update destroy total_retire update_permanece_status ]
+  before_action -> { rechazar unless administra_escuela?(@enroll_academic_process.school&.id) or estudiante_dueno?(@enroll_academic_process.grade) }, only: %i[ show ]
+  before_action :autorizar_inscripcion, only: %i[ reserve_space enroll create ]
 
   # GET /enroll_academic_processes or /enroll_academic_processes.json
   def index
@@ -277,6 +281,15 @@ class EnrollAcademicProcessesController < ApplicationController
   end
 
   private
+    # El admin de la escuela inscribe a cualquiera; el estudiante, sólo en su expediente
+    def autorizar_inscripcion
+      grade = Grade.find_by(id: params[:grade_id])
+      proceso = AcademicProcess.find_by(id: params[:academic_process_id] || Course.find_by(id: params[:course_id])&.academic_process_id)
+      autorizado = grade && proceso && proceso.school_id.eql?(grade.school&.id) &&
+                   (administra_escuela?(proceso.school_id) || estudiante_dueno?(grade))
+      rechazar 'No puede inscribir en este proceso académico' unless autorizado
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_enroll_academic_process
       @enroll_academic_process = EnrollAcademicProcess.find(params[:id])

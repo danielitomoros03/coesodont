@@ -1,6 +1,6 @@
 class QualificationsController < ApplicationController
   before_action :set_academic_record, only: %i[ update ]
-  before_action :logged_as_teacher_or_admin?, only: %i[ update ]
+  before_action :autorizar_calificacion!, only: %i[ update ]
 
   # PATCH/PUT /academic_records/1 or /academic_records/1.json
   def update
@@ -25,6 +25,17 @@ class QualificationsController < ApplicationController
   end
 
   private
+    # El titular de la sección mientras no la haya cerrado, o un admin que gestione secciones de esa escuela
+    def autorizar_calificacion!
+      section = @academic_record.section
+      autorizado = if logged_as_admin?
+                     current_admin.authorized_manage?('Section') and administra_escuela?(section.school&.id)
+                   else
+                     profesor_califica?(section)
+                   end
+      rechazar 'No autorizado para calificar esta sección' unless autorizado
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_academic_record
       @academic_record = AcademicRecord.find(params[:id])

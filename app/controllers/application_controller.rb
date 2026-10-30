@@ -98,6 +98,9 @@ class ApplicationController < ActionController::Base
         env.schools
       elsif env.is_a? School
         School.where(id: env.id)
+      else
+        # 8 de 10 admins de producción no tienen entorno asignado (2026-10-30): ven todo, igual que en RailsAdmin
+        School.all
       end
     end    
   end
@@ -175,6 +178,41 @@ class ApplicationController < ActionController::Base
       reset_session
       flash[:danger] = "Debe iniciar sesión como Estudiante o Profesor"  
       redirect_to root_path      
+    end
+  end
+
+  # Ojo: los predicados logged_as_...? no sirven como before_action (devuelven true/false y no cortan nada).
+  # Para proteger una acción, este filtro o rechazar.
+  def require_admin
+    rechazar unless logged_as_admin?
+  end
+
+  def administra_escuela?(school_id)
+    logged_as_admin? and current_schools&.exists?(id: school_id)
+  end
+
+  def estudiante_dueno?(grade)
+    logged_as_student? and grade&.student_id.eql? current_user.id
+  end
+
+  # El titular de la sección, mientras no haya cerrado el acta
+  def profesor_califica?(section)
+    logged_as_teacher? and section&.teacher_id.eql? current_user.id and !section.qualified?
+  end
+
+  # Corta la petición: en HTML vuelve atrás con el aviso; en JSON, JS o descargas responde 403.
+  # json y js van antes que html: jQuery manda "application/json, text/javascript, */*" y con */* Rails
+  # elige el primer formato declarado.
+  def rechazar(mensaje = 'No autorizado')
+    prohibido = -> { render json: {data: mensaje, type: 'danger', status: 'error', error: mensaje}, status: :forbidden }
+    respond_to do |format|
+      format.json(&prohibido)
+      format.js(&prohibido)
+      format.html do
+        flash[:danger] = mensaje
+        redirect_back fallback_location: root_path
+      end
+      format.any(&prohibido)
     end
   end
 

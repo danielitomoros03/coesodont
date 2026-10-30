@@ -184,8 +184,9 @@
         // if (val2 != undefined) {numero_a_letras(val2, id)}
         messageSendData(json.type, json.data);
       },
-      error: function(json) {
-        messageSendData(json.type, json.data);
+      error: function(xhr) {
+        let json = xhr.responseJSON || {};
+        messageSendData('danger', json.data || 'Error: no se guardó el cambio');
       },
       unprocessable_entity: function(json) {
         messageSendData(json.type, json.data);
