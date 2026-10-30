@@ -1,8 +1,7 @@
--# Premio al Mérito Académico de la escuela. Misma vista en COES FHE, ODON y FAU.
+-# Premio al Mérito Académico de la escuela. FHE es la matriz: ODON y FAU la copian cuando Daniel la aprueba.
 - premio = School::PremioMerito.new(@object, params[:anio])
 - anio = premio.anio
 - medallas = %w[🥇 🥈 🥉]
-- cifra = ->(valor) { number_with_precision(valor, precision: 2, strip_insignificant_zeros: true) }
 
 = turbo_frame_tag 'premio_merito', data: { turbo_action: 'advance' } do
   %h5.text-primary.fw-bold.mb-3
@@ -12,16 +11,19 @@
   - if anio.nil?
     .alert.alert-light.text-center.text-muted Esta escuela todavía no tiene años cursados.
   - else
-    %ul.nav.nav-pills.mb-3
-      - premio.anios.each do |a|
-        %li.nav-item
-          = link_to rails_admin.premio_merito_path(model_name: 'school', id: @object.id, anio: a.numero), class: "nav-link #{'active' if a.numero == anio.numero}" do
-            = a.numero
-            - if a.en_curso?
-              %span.badge.rounded-pill.bg-warning.text-dark.ms-1 en curso
+    .d-flex.flex-wrap.align-items-center.justify-content-between.gap-2.mb-3
+      %ul.nav.nav-pills
+        - premio.anios.each do |a|
+          %li.nav-item
+            = link_to rails_admin.premio_merito_path(model_name: 'school', id: @object.id, anio: a.numero), class: "nav-link #{'active' if a.numero == anio.numero}" do
+              = a.numero
+              - if a.en_curso?
+                %span.badge.rounded-pill.bg-warning.text-dark.ms-1 en curso
+      = link_to rails_admin.premio_merito_path(model_name: 'school', id: @object.id, anio: anio.numero, formato: 'xlsx'), class: 'btn btn-outline-success btn-sm', data: { turbo: false } do
+        %i.fa-solid.fa-file-excel.me-1
+        = "Descargar Excel #{anio.numero}"
 
-    %p.small.text-muted.mb-3
-      = "Primera carrera · Carga completa: #{cifra.(premio.minimo(:creditos_semestre))} créditos en cada semestre, o #{cifra.(premio.minimo(:creditos_anual))} en el año si la carrera es anual · Eficiencia 1 en la carrera hasta #{anio.numero} · Promedio del año mayor a #{cifra.(premio.minimo(:promedio_mayor_a))}"
+    %p.small.text-muted.mb-3= premio.texto_criterios
 
     .d-flex.flex-wrap.align-items-center.gap-2.mb-3
       - premio.embudo.each_with_index do |(etiqueta, cantidad), i|
@@ -40,12 +42,20 @@
         %i.fa-solid.fa-hourglass-half.me-1
         = "#{premio.esperando_notas} con carga completa y sin reprobadas tienen notas de #{anio.numero} sin cargar; aparecen cuando se carguen."
 
-    - if premio.premiados_por_plan.empty?
-      .alert.alert-light.text-center.text-muted.mt-3= "Nadie cumple los cuatro criterios en #{anio.numero}."
-    - premio.premiados_por_plan.each do |plan, lista|
+    - if premio.grupos.empty?
+      .alert.alert-light.text-center.text-muted.mt-3= "No hay estudiantes de primera carrera con #{anio.numero} evaluado."
+    - premio.grupos.each do |grupo|
+      - lista = grupo.estudiantes
       %h6.fw-bold.mt-4.mb-2
-        = plan.name
-        %span.text-muted.fw-normal= "· #{plan.code} · #{lista.size} #{lista.size == 1 ? 'cumple' : 'cumplen'} los criterios"
+        = grupo.plan.name
+        - if grupo.falta
+          %span.text-muted.fw-normal= "· #{grupo.plan.code} · sin premio: nadie cumple todos los criterios"
+        - else
+          %span.text-muted.fw-normal= "· #{grupo.plan.code} · #{lista.size} #{lista.size == 1 ? 'cumple' : 'cumplen'} los criterios"
+      - if grupo.falta
+        .alert.alert-warning.small.py-2
+          %i.fa-solid.fa-circle-info.me-1
+          = premio.aviso_sin_premio(grupo)
       .table-responsive
         %table.table.table-hover.align-middle
           %thead.table-light
@@ -54,12 +64,19 @@
               %th Cédula
               %th Estudiante
               %th.text-end= "Créditos #{anio.numero}"
-              %th.text-end= "Promedio #{anio.numero}"
+              - if grupo.falta
+                %th.text-end= "Eficiencia hasta #{anio.numero}"
+              %th.text-end= "Simple #{anio.numero}"
+              %th.text-end= "Ponderado #{anio.numero}"
           %tbody
             - lista.each do |c|
-              %tr{class: ('fw-semibold' if c.puesto <= medallas.size)}
-                %td.text-center= c.puesto <= medallas.size ? medallas[c.puesto - 1] : c.puesto
+              - medalla = medallas[c.puesto - 1] unless grupo.falta
+              %tr{class: ('fw-semibold' if medalla)}
+                %td.text-center= medalla || c.puesto
                 %td= c.ci
                 %td= link_to c.nombre, rails_admin.show_path(model_name: 'student', id: c.student_id), data: { turbo_frame: '_top' }
                 %td.text-end= c.creditos_texto
-                %td.text-end= number_with_precision(c.promedio, precision: 2)
+                - if grupo.falta
+                  %td.text-end= number_with_precision(c.eficiencia, precision: 2)
+                %td.text-end= c.promedio_simple ? number_with_precision(c.promedio_simple, precision: 2) : '—'
+                %td.text-end= c.promedio ? number_with_precision(c.promedio, precision: 2) : '—'
