@@ -28,6 +28,7 @@ class AdmissionType < ApplicationRecord
       field :name
       field :code
       field :school
+      field :first_career
 
       field :total_students do
         label 'Total Estudiantes'
@@ -40,6 +41,7 @@ class AdmissionType < ApplicationRecord
       field :name
       field :code
       field :school
+      field :first_career
     end
 
     edit do
@@ -53,6 +55,9 @@ class AdmissionType < ApplicationRecord
 
       field :school do
         inline_edit false
+      end
+      field :first_career do
+        help 'Marcada: sus estudiantes pueden optar al Premio al Mérito Académico.'
       end
     end
 

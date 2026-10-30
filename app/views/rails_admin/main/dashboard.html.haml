@@ -32,6 +32,11 @@
 					= link_to "/admin/enroll_academic_process#{@query}", class: 'btn btn-primary' do
 						%h1.fa.fa-calendar-check
 						%h4.text-center= "#{object.upcase} #{@period_name}"
+			- if logged_as_admin and school.pregrado? and can?(:premio_merito, school)
+				.row
+					= link_to rails_admin.premio_merito_path(model_name: 'school', id: school.id), class: 'btn btn-primary' do
+						%h1.fa.fa-award
+						%h4.text-center PREMIO AL MÉRITO
 - if false
 	.mt-4.align-middle.align-items-center{style: 'width:100%'}
 		.row

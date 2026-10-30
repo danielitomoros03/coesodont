@@ -170,6 +170,16 @@ RailsAdmin.config do |config|
     #   end
     # end
 
+    member :premio_merito do
+      only [School]
+      link_icon do
+        'fa-solid fa-award'
+      end
+      visible do
+        authorized? && (bindings[:object].nil? || bindings[:object].pregrado?)
+      end
+    end
+
     member :enrollment_day do 
 
       only [AcademicProcess]
