@@ -104,6 +104,10 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+
+  # Security scanners
+  gem "brakeman", require: false
+  gem "bundler-audit", require: false
 end
 
 group :test do
