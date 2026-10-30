@@ -1,0 +1,46 @@
+%section#periodo{'aria-labelledby': 't-periodo'}
+  .seccion-cabeza
+    %span.ceja Período en curso
+    - semestre = semestre_en_curso(records_en_curso)
+    %h2.seccion-titulo#t-periodo
+      = proceso_activo.period_name
+      - if semestre
+        = "· #{semestre_palabra(semestre)}"
+    - creditos = records_en_curso.sum { |ar| ar.subject.unit_credits }
+    %span.seccion-meta= "#{records_en_curso.size} asignaturas · #{creditos} créditos inscritos"
+
+  .periodo-grid
+    .tarjeta.asignaturas
+      - records_en_curso.each do |ar|
+        - section = ar.section
+        %article.asig
+          %span.asig-codigo= ar.subject.code
+          %div
+            .asig-nombre= nombre_asignatura(ar.subject.name)
+            - detalle = ["Sección #{section.code}", section.teacher&.user&.full_name&.titleize, section.classroom].compact_blank
+            .asig-detalle= detalle.join(' · ')
+          .asig-lado
+            = chip_portal(ar.sin_calificar? ? 'Inscrita' : ar.status.titleize, tono_academic_record(ar))
+            %span.asig-cred= "#{ar.subject.unit_credits} créditos"
+          - if section.schedules.any?
+            .asig-horas
+              - section.schedules.each do |schedule|
+                %span.hora-chip= hora_chip(schedule)
+
+    - if (horario = horario_semanal(records_en_curso))
+      .tarjeta.horario-tarjeta
+        %p.grafico-titulo Horario semanal
+        %p.grafico-sub= "Semana tipo del período #{proceso_activo.period_name}"
+        .horario-scroll
+          .horario{style: "--dias:#{horario[:dias].size}; --horas:#{horario[:hora_max] - horario[:hora_min] + 1};", role: :img, 'aria-label': "Horario semanal del período #{proceso_activo.period_name}."}
+            %span
+            - horario[:dias].each_with_index do |dia, i|
+              %span.h-dia{style: "grid-column:#{i + 2}"}= dia[0, 3]
+            - (horario[:hora_min]..horario[:hora_max]).each_with_index do |hora, i|
+              %span.h-hora{style: "grid-row:#{i + 2}"}= hora
+              %span.h-celda{style: "grid-row:#{i + 2}"}
+            - horario[:bloques].each do |bloque|
+              .h-bloque{style: "grid-column:#{bloque[:columna]}; grid-row:#{bloque[:fila_inicio]}/#{bloque[:fila_fin]}"}
+                %b= nombre_asignatura(bloque[:nombre])
+                - if bloque[:aula].present?
+                  %span= bloque[:aula]

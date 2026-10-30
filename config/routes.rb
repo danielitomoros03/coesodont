@@ -142,6 +142,7 @@ Rails.application.routes.draw do
 
   get 'teacher_session/dashboard', to: 'teacher_session#dashboard'
   get 'student_session/dashboard', to: 'student_session#dashboard'
+  get 'student_session/historial', to: 'student_session#historial'
 
 
 

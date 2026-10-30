@@ -1,0 +1,148 @@
+%section#inscripcion{'aria-labelledby': 't-inscripcion'}
+  - school = grade.school
+  - academic_process = school&.enroll_process
+  - if academic_process.nil?
+    .tarjeta.inscripcion
+      %div
+        .insc-estado= chip_portal('Sin proceso abierto', :neutro)
+        %h2.insc-titulo#t-inscripcion Inscripción
+        %p.insc-cierre Cuando Control de Estudios abra un nuevo proceso de inscripción lo verás aquí.
+  - else
+    - academic_process_before = academic_process.process_before
+    - inscripcion = grade.enroll_academic_processes.of_academic_process(academic_process.id).first
+    - has_enrollment_days = academic_process.enrollment_days.any?
+    .tarjeta.inscripcion
+
+      - if inscripcion&.confirmado?
+        %div
+          .insc-estado= chip_portal('Inscripción confirmada', :aprobado)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+          %p.insc-cita Tu inscripción fue confirmada por Control de Estudios.
+          %p.insc-cierre La constancia certifica las asignaturas y secciones inscritas en el período.
+        .insc-acciones
+          = link_to "/enroll_academic_processes/#{inscripcion.id}.pdf", class: 'btn-portal btn-portal--primario', target: '_blank', rel: 'noopener noreferrer' do
+            Constancia de inscripción
+
+      - elsif inscripcion&.preinscrito?
+        %div
+          .insc-estado
+            = chip_portal('Preinscripción completada', :aprobado)
+            - falta_pago = school.enable_enroll_payment_report? && inscripcion.payment_reports.none?
+            - if falta_pago
+              = chip_portal('Pago pendiente', :alerta)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+          %p.insc-cita Tu selección de asignaturas quedó registrada. Espera la confirmación de Control de Estudios.
+          - if falta_pago
+            .aviso.aviso--alerta
+              %b Es necesario reportar el pago de tu inscripción.
+              A continuación los datos bancarios:
+            = render partial: '/payment_reports/show_data_bank_account', locals: {bank_accounts: school.bank_accounts, amount: academic_process.registration_amount}
+            - id = "paymentReportModal#{inscripcion.id}"
+            - titlePayment = "Reportar Pago inscripción #{academic_process.short_desc}"
+            %a.btn-portal.btn-portal--primario.btn-portal--sm.my-3{'data-bs-target': "##{id}", 'data-bs-toggle': :modal, type: :button}= titlePayment
+            - @payment_report_new = PaymentReport.new(payable: inscripcion, amount: academic_process.registration_amount)
+            - content = render partial: '/payment_reports/form'
+            = render partial: '/layouts/scaffold-modal', locals: {content: content, title: titlePayment, id: id}
+
+      - elsif grade.valid_to_enroll_in academic_process
+        - enabled_to_enroll = false
+        - cita_activa = false
+        %div
+          .insc-estado
+            = chip_portal('Proceso abierto', :aprobado)
+            - if has_enrollment_days && grade.has_a_appointment_time? && grade.can_enroll_by_apponintment?
+              - cita_activa = true
+              = chip_portal('Tu cita horaria está activa', :curso)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+
+          = render partial: '/grades/regulation', locals: {grado: grade}
+          - if academic_process.enroll_instructions.present?
+            .aviso= raw academic_process.enroll_instructions
+
+          - if has_enrollment_days
+            - if grade.has_a_appointment_time?
+              - if cita_activa
+                - if inscripcion&.reservado?
+                  .aviso.aviso--exito
+                    %b Tienes una inscripción en proceso.
+                    Complétala antes de que termine tu cita.
+                %p.insc-cita
+                  Dispones
+                  %b= I18n.localize(grade.appointment_slot_time, format: 'hasta las %I:%M %p')
+                  del día de hoy para completar tu preinscripción.
+                - enabled_to_enroll = true
+              - elsif grade.enroll_is_in_future? && inscripcion.nil?
+                %p.insc-cita
+                  Tu cita:
+                  %b= grade.appointment_from_to
+                %p.insc-cierre Vuelve a esta página en tu horario asignado para inscribir asignaturas.
+              - else
+                .aviso.aviso--alerta
+                  %b Tu tiempo para inscribirte pasó
+                  = "(#{grade.appointment_passed})."
+                  Contacta al personal de Control de Estudios para solventar tu situación.
+            - else
+              .aviso
+                Aún no tienes una cita horaria asignada para este proceso. Cuando Control de Estudios la asigne, aparecerá aquí.
+          - else
+            - enabled_to_enroll = true
+
+          - if enabled_to_enroll
+            .insc-pasos{'aria-label': 'Pasos del proceso de inscripción'}
+              %span.paso{class: ('paso--activo' unless inscripcion&.reservado?)}
+                %span.paso-n 1
+                Revisa la oferta de secciones
+              %span.paso-sep{'aria-hidden': true}
+              %span.paso{class: ('paso--activo' if inscripcion&.reservado?)}
+                %span.paso-n 2
+                Selecciona y reserva tu cupo
+              %span.paso-sep{'aria-hidden': true}
+              %span.paso
+                %span.paso-n 3
+                Confirma tu preinscripción
+        - if enabled_to_enroll
+          .insc-acciones
+            = render partial: '/enroll_academic_processes/new', locals: {grade: grade}
+
+      - elsif %w[articulo3 articulo6 articulo7].include? grade.current_permanence_status
+        %div
+          .insc-estado
+            = chip_portal('Proceso abierto', :aprobado)
+            = chip_portal("Permanencia: #{permanencia_texto(grade.current_permanence_status)}", :reprobado)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+          = render partial: '/grades/regulation', locals: {grado: grade}
+
+      - elsif %w[nuevo intercambio egresado egresado_doble_titulo].include? grade.current_permanence_status
+        %div
+          .insc-estado= chip_portal('Proceso abierto', :aprobado)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+          .aviso.aviso--alerta
+            %b Atención:
+            Si deseas inscribirte debes realizarlo directamente por Control de Estudios.
+            = grade.help_msg
+
+      - elsif %w[desertor permiso_para_no_cursar].include? grade.current_permanence_status
+        %div
+          .insc-estado= chip_portal('Proceso abierto', :aprobado)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+          .aviso.aviso--peligro
+            %b Atención:
+            Tu estado actual de permanencia te imposibilita para inscribirte. Contacta al personal de Control de Estudios de la escuela para solventar tu situación si consideras que el caso lo amerita.
+            = grade.help_msg
+
+      - elsif academic_process_before && grade.enroll_academic_processes.of_academic_process(academic_process_before.id).none?
+        %div
+          .insc-estado= chip_portal('Proceso abierto', :aprobado)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+          .aviso.aviso--peligro
+            %b Atención:
+            = "No realizaste un proceso de inscripción en el período anterior (#{academic_process_before.period_name}), por lo que tu preinscripción no podrá realizarse. Debes dirigirte a Control de Estudios para solventar tu situación."
+            = grade.help_msg
+
+      - else
+        %div
+          .insc-estado= chip_portal('Proceso abierto', :aprobado)
+          %h2.insc-titulo#t-inscripcion= "Inscripción · Período #{academic_process.period_name}"
+          .aviso.aviso--peligro
+            %b Atención:
+            No estás habilitado para inscribirte en este proceso. Contacta al personal de Control de Estudios para solventar tu situación si consideras que el caso lo amerita.

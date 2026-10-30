@@ -1,0 +1,78 @@
+%section#resumen{'aria-labelledby': 't-resumen'}
+  .tarjeta.expediente
+    %span.exp-num{'aria-hidden': true}= "EXP · #{grade.school.code}-#{grade.id}"
+    .exp-grid
+
+      .exp-col
+        %span.ceja Expediente académico
+        %h1.exp-nombre#t-resumen= grade.user.full_name.titleize
+        .exp-ci= ci_formateada(grade.user)
+        .exp-escuela= grade.school.name
+        %dl.exp-specs
+          .spec
+            %dt Plan de estudios
+            %dd= grade.study_plan.code
+          .spec
+            %dt Ingreso
+            %dd= grade.start_process&.period_name || '—'
+          .spec
+            %dt Admisión
+            %dd= grade.admission_type&.name || '—'
+        .exp-chips
+          = chip_portal("Permanencia: #{permanencia_texto(grade.current_permanence_status)}", tono_permanencia(grade.current_permanence_status))
+          - if inscripcion_actual
+            = chip_portal("Cursando #{proceso_activo.period_name}", :curso)
+
+      .exp-col
+        %p.celosia-titulo Avance del plan de estudios
+        - teselas = celosia_teselas(grade, records_en_curso.map { |ar| ar.subject.id })
+        - aprobadas = teselas.count { |_, estado| estado == :aprobada }
+        - en_curso = teselas.count { |_, estado| estado == :curso }
+        - restantes = teselas.count { |_, estado| estado == :resta }
+        .celosia{role: :img, 'aria-label': "Avance del pensum: #{aprobadas} asignaturas aprobadas, #{en_curso} en curso y #{restantes} por cursar."}
+          - nombres_estado = { aprobada: 'Aprobada', curso: 'En curso', resta: 'Por cursar' }
+          - teselas.each do |subject, estado|
+            %i.tesela{class: ("tesela--#{estado}" unless estado == :aprobada), title: "S#{subject.ordinal} · #{subject.name} — #{nombres_estado[estado]}"}
+        .celosia-leyenda{'aria-hidden': true}
+          %span
+            %i.muestra.muestra--aprobada
+            = "#{aprobadas} aprobadas"
+          %span
+            %i.muestra.muestra--curso
+            = "#{en_curso} en curso"
+          %span
+            %i.muestra.muestra--resta
+            = "#{restantes} por cursar"
+        - total_plan = grade.study_plan.total_credits.to_i
+        - creditos_aprobados = grade.total_credits_approved
+        - if total_plan.positive?
+          - porcentaje = (creditos_aprobados * 100.0 / total_plan).round
+          .medidor
+            .medidor-cabeza
+              %span Créditos aprobados
+              %b= "#{creditos_aprobados} / #{total_plan} · #{porcentaje} %"
+            .medidor-pista{role: :progressbar, 'aria-valuenow': creditos_aprobados, 'aria-valuemin': 0, 'aria-valuemax': total_plan, 'aria-label': "Créditos aprobados: #{creditos_aprobados} de #{total_plan}"}
+              .medidor-lleno{style: "width:#{porcentaje}%"}
+
+      .exp-col.exp-col--kpis
+        .kpis
+          .kpi
+            %span.kpi-label Promedio ponderado
+            %span.kpi-valor
+              = numero_portal(grade.weighted_average)
+              %small / 20
+          .kpi
+            %span.kpi-label Promedio simple
+            %span.kpi-valor
+              = numero_portal(grade.simple_average)
+              %small / 20
+          .kpi
+            %span.kpi-label Eficiencia
+            %span.kpi-valor= numero_portal(grade.efficiency)
+          - if (semestre = semestre_en_curso(records_en_curso))
+            - total_semestres = grade.school.subjects.where(active: true).maximum(:ordinal)
+            .kpi
+              %span.kpi-label Semestre en curso
+              %span.kpi-valor
+                = "#{semestre}.º"
+                %small= "de #{total_semestres}"

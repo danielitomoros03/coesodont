@@ -1,9 +1,10 @@
 
-%ul.nav.nav-tabs
-	- student.grades.each_with_index do |g,i|
-		- active = (i.eql? 0) ? 'active' : ''
-		%li.nav-item
-			%a.nav-link{class: active, href: "#grade#{g.id}", 'aria-controls': "grade#{g.id}", "aria-selected": true, id: "grade-#{g.id}-tab"}= g.school.short_name
+.nav-tabs-wrapper{style: 'overflow-x: auto; -webkit-overflow-scrolling: touch;'}
+	%ul.nav.nav-tabs.flex-nowrap{style: 'white-space: nowrap;'}
+		- student.grades.each_with_index do |g,i|
+			- active = (i.eql? 0) ? 'active' : ''
+			%li.nav-item
+				%a.nav-link{class: active, href: "#grade#{g.id}", 'aria-controls': "grade#{g.id}", "aria-selected": true, id: "grade-#{g.id}-tab"}= g.school.short_name
 
 .tab-content.border-bottom.border-end.border-start.p-3
 	- student.grades.each_with_index do |g,i|

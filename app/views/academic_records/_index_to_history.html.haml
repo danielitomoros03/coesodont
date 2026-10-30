@@ -1,36 +1,37 @@
 - admin = current_user.admin
 - logged_as_admin = (admin and session[:rol].eql? 'admin') ? true : false
 
-%table.table.table-sm.table-striped.table-hover
-  %thead
-    %tr
-      - if (current_user&.admin&.yo?)
-        %th ID
-      %th{style: 'width:120px;'} Código
-      %th.text-center{style: 'width:10px;'} Año
-      %th Asignatura
-      %th.text-center{style: 'width:10px;'} Créd
-      %th.text-center{style: 'width:10px;'} Tipo
-      %th.text-center{style: 'width:10px;'} Sec
-      %th.text-center{style: 'width:10px;'} Cal
-      %th.text-center.col-3 Estado
-      - if (logged_as_admin and admin.authorized_manage? 'AcademicRecord' and ( enabled_delete or enabled_change or enabled_retire))
-        %th.text-center{style: 'width:240px;'} Opciones
-
-  %tbody
-    - academic_records.sort_by_subject_name.each do |academic_record|
-      - subject = academic_record.subject
-      %tr{class: academic_record.tr_class_by_status_q}
+.table-responsive
+  %table.table.table-sm.table-striped.table-hover
+    %thead
+      %tr
         - if (current_user&.admin&.yo?)
-          %td= academic_record.id
-        %td{title: 'Ir al detalle de la asignatura'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Subject'), subject.code, "/admin/subject/#{subject.id}"
-        %td.text-center= subject.ordinal_to_cardinal_short
-        %td{title: subject.name}= subject.name
-        %td.text-center= subject.unit_credits
-        %td.text-center= subject.modality_initial_letter
-        %td.text-center{title: 'Ir al detalle de la sección'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Section'), academic_record.section.code, "/admin/section/#{academic_record.section.id}"
-        %td.text-center= academic_record.q_value_to_02i
-        %td.text-center.align-middle= academic_record.badge_status.html_safe
+          %th ID
+        %th{style: 'width:120px;'} Código
+        %th.text-center{style: 'width:10px;'} Año
+        %th Asignatura
+        %th.text-center{style: 'width:10px;'} Créd
+        %th.text-center{style: 'width:10px;'} Tipo
+        %th.text-center{style: 'width:10px;'} Sec
+        %th.text-center{style: 'width:10px;'} Cal
+        %th.text-center.col-3 Estado
         - if (logged_as_admin and admin.authorized_manage? 'AcademicRecord' and ( enabled_delete or enabled_change or enabled_retire))
-          %td.align-middle
-            = render partial: 'academic_records/options', locals: {academic_record: academic_record, enabled_delete: enabled_delete, enabled_change: enabled_change, enabled_retire: enabled_retire}
+          %th.text-center{style: 'width:240px;'} Opciones
+
+    %tbody
+      - academic_records.sort_by_subject_name.each do |academic_record|
+        - subject = academic_record.subject
+        %tr{class: academic_record.tr_class_by_status_q}
+          - if (current_user&.admin&.yo?)
+            %td= academic_record.id
+          %td{title: 'Ir al detalle de la asignatura'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Subject'), subject.code, "/admin/subject/#{subject.id}"
+          %td.text-center= subject.ordinal_to_cardinal_short
+          %td{title: subject.name}= subject.name
+          %td.text-center= subject.unit_credits
+          %td.text-center= subject.modality_initial_letter
+          %td.text-center{title: 'Ir al detalle de la sección'}= link_to_if (logged_as_admin and admin.authorized_manage? 'Section'), academic_record.section.code, "/admin/section/#{academic_record.section.id}"
+          %td.text-center= academic_record.q_value_to_02i
+          %td.text-center.align-middle= academic_record.badge_status.html_safe
+          - if (logged_as_admin and admin.authorized_manage? 'AcademicRecord' and ( enabled_delete or enabled_change or enabled_retire))
+            %td.align-middle
+              = render partial: 'academic_records/options', locals: {academic_record: academic_record, enabled_delete: enabled_delete, enabled_change: enabled_change, enabled_retire: enabled_retire}

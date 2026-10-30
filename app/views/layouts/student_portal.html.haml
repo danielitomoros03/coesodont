@@ -1,0 +1,74 @@
+!!!
+%html{lang: I18n.locale}
+  %head
+    %meta{content: 'text/html; charset=UTF-8', 'http-equiv': 'Content-Type'}/
+    %title COES Odontología · Portal del Estudiante
+    %meta{content: 'width=device-width, initial-scale=1', name: :viewport}/
+    = csrf_meta_tags
+    = csp_meta_tag
+    %link{rel: :preconnect, href: 'https://fonts.googleapis.com'}/
+    %link{rel: :preconnect, href: 'https://fonts.gstatic.com', crossorigin: ''}/
+    %link{rel: :stylesheet, href: 'https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap'}/
+    = stylesheet_link_tag 'application', 'data-turbo-track': 'reload'
+    = stylesheet_link_tag 'fontawesome', 'data-turbo-track': 'reload'
+    = stylesheet_link_tag 'student_portal', 'data-turbo-track': 'reload'
+    = javascript_include_tag 'application', 'data-turbo-track': 'reload', defer: true
+    = favicon_link_tag 'ico_logo.png'
+
+  %body.portal-estudiante{data: {controller: :scrollspy}}
+    %a.skip{href: '#contenido'} Ir al contenido
+    .guarda{'aria-hidden': true}
+
+    %header.cabecera
+      .cabecera-marca
+        = render 'shared/logo_diente'
+        .marca-texto
+          %span.marca-nombre COES · Odontología
+          %span.marca-sub Control de Estudios — Facultad de Odontología · UCV
+        .cabecera-lado
+          - if (periodo_actual = @grade&.school&.active_process&.period&.name)
+            %span.pildora-periodo
+              Período en curso
+              %b= periodo_actual
+          .usuario
+            %span.usuario-avatar{'aria-hidden': true}
+              - if current_user.profile_picture.attached?
+                = image_tag current_user.profile_picture_as_thumb
+              - else
+                = iniciales(current_user)
+            %span
+              %span.usuario-nombre= current_user.full_name.titleize
+              = link_to 'Cerrar sesión', destroy_user_session_path, class: 'usuario-salir', data: {turbo_method: :delete}
+      %nav.nav-portal{'aria-label': 'Secciones del portal'}
+        %a{href: '#resumen', 'aria-current': true} Resumen
+        %a{href: '#inscripcion'} Inscripción
+        %a{href: '#periodo'} Período en curso
+        %a{href: '#historial'} Historial
+        %a{href: '#documentos'} Documentos
+        %a{href: '#perfil'} Mis datos
+
+    = render 'shared/flashes'
+
+    %main.lienzo#contenido
+      = yield
+
+    %footer.pie
+      .pie-inner
+        .pie-marca
+          = render 'shared/logo_diente', size: 30
+          %div
+            %p.pie-titulo COES · Control de Estudios
+            %p.pie-texto Facultad de Odontología, Universidad Central de Venezuela.
+        .pie-col
+          %h4 Trámites
+          %ul
+            %li= link_to 'Inscripción', '#inscripcion'
+            %li= link_to 'Constancias y kardex', '#documentos'
+        .pie-col
+          %h4 Ayuda
+          %ul
+            %li= link_to 'Control de Estudios — atención', '#perfil'
+            - if (correo = @grade&.school&.contact_email).present?
+              %li= mail_to correo
+      .pie-unesco
+        %p Ciudad Universitaria de Caracas · Obra de Carlos Raúl Villanueva · Patrimonio Mundial de la UNESCO, 2000
