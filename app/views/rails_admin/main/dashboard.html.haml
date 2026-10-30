@@ -5,6 +5,13 @@
 - logged_as_admin = (current_user and current_user.admin? and session[:rol].eql? 'admin') ? true : false
 .mb-0= render partial: 'layouts/main_banner', locals: {bg_color: 'bg-info bg-opacity-20 '}
 .text-center.m-3= image_tag 'logo_completo.svg', width: '15%'
+- if logged_as_admin
+	-# Acceso directo, arriba: abajo, después de los botones grandes, quedaba fuera de la pantalla.
+	- School.all.select { |school| school.pregrado? && can?(:premio_merito, school) }.each do |school|
+		.text-center.mb-3
+			= link_to rails_admin.premio_merito_path(model_name: 'school', id: school.id), class: 'btn btn-outline-primary', title: school.name do
+				%i.fa-solid.fa-award.text-warning.me-1
+				Premio al Mérito Académico
 
 .row
 	- School.all.each do |school|
@@ -32,11 +39,6 @@
 					= link_to "/admin/enroll_academic_process#{@query}", class: 'btn btn-primary' do
 						%h1.fa.fa-calendar-check
 						%h4.text-center= "#{object.upcase} #{@period_name}"
-			- if logged_as_admin and school.pregrado? and can?(:premio_merito, school)
-				.row
-					= link_to rails_admin.premio_merito_path(model_name: 'school', id: school.id), class: 'btn btn-primary' do
-						%h1.fa.fa-award
-						%h4.text-center PREMIO AL MÉRITO
 - if false
 	.mt-4.align-middle.align-items-center{style: 'width:100%'}
 		.row
