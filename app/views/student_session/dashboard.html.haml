@@ -1,10 +1,21 @@
-- if false #current_user.sign_in_count.eql? 1
-  =# render template: 'devise/passwords/edit', locals: {resource: current_user, resource_name: 'User'}
+- if @grades.size > 1
+  .carreras{'aria-label': 'Selector de carrera'}
+    - @grades.each do |g|
+      %a{href: student_session_dashboard_path(grade_id: g.id), 'aria-current': (g.id == @grade.id)}= g.school.short_name
 
-
-.p-3
-  = render partial: '/users/personal_data', locals: {user: @student.user}
-
-  = render partial: '/students/show', locals: {student: @student}
-
-=# link_to show_path(@grade, format: :pdf), target: '_blank', title: 'Click para Exportar como PDF', class: 'btn btn-default'
+- if @grade
+  = render 'student_session/expediente', grade: @grade, proceso_activo: @proceso_activo, inscripcion_actual: @inscripcion_actual, records_en_curso: @records_en_curso
+  = render 'student_session/inscripcion', grade: @grade
+  - if @proceso_activo && @records_en_curso.any?
+    = render 'student_session/periodo_actual', proceso_activo: @proceso_activo, records_en_curso: @records_en_curso
+  %section#historial{'aria-labelledby': 't-historial'}
+    = turbo_frame_tag 'historial_frame', src: student_session_historial_path(grade_id: @grade.id), loading: :lazy do
+      .seccion-cabeza
+        %span.ceja Historial académico
+        %h2.seccion-titulo#t-historial Cargando…
+      .tarjeta.vacio Cargando historial académico…
+  = render 'student_session/documentos', grade: @grade, inscripcion_actual: @inscripcion_actual
+  = render 'student_session/perfil', student: @student
+- else
+  .tarjeta.vacio
+    Su expediente aún no está disponible. Si considera que es un error, contacte a Control de Estudios de su escuela.

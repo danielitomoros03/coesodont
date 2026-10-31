@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>COES ODONT · Portal del Estudiante — Propuesta de rediseño</title>
+<!--
+  PROPUESTA DE REDISEÑO — UI DEL ESTUDIANTE · COES ODONT
+  Mockup estático con datos ficticios. No consume el backend.
+  Adaptación a Odontología del sistema de diseño de COES FAU
+  (COES-FAU/coesfau/design/propuesta-ui-estudiante.html):
+  papel de plano, tinta violeta y el morado #330066 que usa el
+  Rails Admin de este proyecto ($cool-primary) como color de marca.
+  Diferencias de dominio: régimen anual (períodos 2022-A…2026-A,
+  cinco años de carrera), estados aprobada/aplazada/retirada y
+  reporte de pago como paso del proceso de inscripción.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS — el mundo del producto: papel de plano, tinta de
+   rotring y el morado COES del Rails Admin del proyecto.
+   ============================================================ */
+:root{
+  /* superficies: cal y concreto claro */
+  --papel:        #F7F7F3;   /* lienzo */
+  --papel-plano:  #FDFDFB;   /* tarjeta */
+  --papel-alto:   #FFFFFF;   /* elevado (tooltip, menú) */
+  --papel-hueco:  #EFEFE9;   /* celdas inset, pistas */
+
+  /* tinta: cuatro pesos */
+  --tinta:    #261B41;
+  --tinta-2:  #4C4169;
+  --tinta-3:  #776E92;
+  --tinta-4:  #A29CB5;
+
+  /* líneas: cotas del plano */
+  --linea:        rgba(38,27,65,.16);
+  --linea-suave:  rgba(38,27,65,.085);
+  --linea-fuerte: rgba(38,27,65,.32);
+
+  /* marca: morado COES (primary del Rails Admin del proyecto) */
+  --morado:        #330066;
+  --morado-tinta:  #1F0040;   /* hover / activo */
+  --morado-medio:  #8F76C2;   /* paso medio de la rampa */
+  --morado-claro:  #DCD2EC;   /* paso claro (pistas, en curso) */
+  --morado-velo:   rgba(51,0,102,.06);
+
+  /* estados académicos */
+  --aprobado:       #1E7A4A;
+  --aprobado-tx:    #17603B;
+  --aprobado-velo:  rgba(30,122,74,.10);
+  --alerta:         #A25E0A;
+  --alerta-tx:      #7E4A06;
+  --alerta-velo:    rgba(162,94,10,.10);
+  --reprobado:      #B3372E;
+  --reprobado-tx:   #942E26;
+  --reprobado-velo: rgba(179,55,46,.09);
+  --retirado:       #5D6B84;
+  --retirado-velo:  rgba(93,107,132,.10);
+
+  /* guarda superior — rampa monocroma de la marca */
+  --guarda-media:   #6B4FA3;
+  --guarda-clara:   #B4A3D6;
+
+  /* tipografía */
+  --f-sans: "Archivo", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* ritmo */
+  --u: 8px;
+  --radio: 6px;
+  --radio-s: 4px;
+  --ancho: 1148px;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; scroll-padding-top:118px; }
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{ transition:none !important; animation:none !important; }
+}
+body{
+  margin:0; background:var(--papel); color:var(--tinta);
+  font-family:var(--f-sans); font-size:14.5px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+a{ color:var(--morado); text-decoration:none; }
+a:hover{ color:var(--morado-tinta); text-decoration:underline; text-underline-offset:3px; }
+:focus-visible{ outline:2px solid var(--morado); outline-offset:2px; border-radius:2px; }
+.skip{
+  position:absolute; left:-9999px; top:0; background:var(--tinta); color:#fff;
+  padding:10px 16px; z-index:99; border-radius:0 0 var(--radio) 0; font-weight:600;
+}
+.skip:focus{ left:0; }
+
+/* ============================================================
+   GUARDA — teselas en la gama del morado de la marca.
+   Un solo gesto decorativo en toda la página.
+   ============================================================ */
+.guarda{
+  height:5px; flex:none;
+  background:repeating-linear-gradient(90deg,
+    var(--morado)       0 22px,  var(--papel) 22px 25px,
+    var(--guarda-media) 25px 47px, var(--papel) 47px 50px,
+    var(--guarda-clara) 50px 61px, var(--papel) 61px 64px,
+    var(--morado)       64px 86px, var(--papel) 86px 89px,
+    var(--guarda-media) 89px 99px, var(--papel) 99px 102px,
+    var(--morado)       102px 124px, var(--papel) 124px 127px);
+}
+
+/* ============================================================
+   CABECERA — cajetín de la lámina
+   ============================================================ */
+.cabecera{
+  position:sticky; top:0; z-index:50;
+  background:color-mix(in srgb, var(--papel-plano) 92%, transparent);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--linea);
+}
+.cabecera-marca{
+  max-width:var(--ancho); margin:0 auto; padding:12px 24px 10px;
+  display:flex; align-items:center; gap:14px;
+}
+.logo-diente{ flex:none; display:block; }
+.marca-texto{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.marca-nombre{
+  font-weight:750; font-size:16px; letter-spacing:.01em;
+  font-variation-settings:"wdth" 116; line-height:1.1; white-space:nowrap;
+}
+.marca-sub{
+  font-family:var(--f-mono); font-size:10.5px; color:var(--tinta-3);
+  letter-spacing:.08em; text-transform:uppercase; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis;
+}
+.cabecera-lado{ margin-left:auto; display:flex; align-items:center; gap:14px; }
+.pildora-periodo{
+  font-family:var(--f-mono); font-size:11.5px; font-weight:500;
+  color:var(--tinta-2); background:var(--papel-hueco);
+  border:1px solid var(--linea-suave); border-radius:999px;
+  padding:5px 12px; white-space:nowrap;
+}
+.pildora-periodo b{ color:var(--tinta); font-weight:600; }
+.usuario{ display:flex; align-items:center; gap:10px; }
+.usuario-avatar{
+  width:34px; height:34px; border-radius:50%; flex:none;
+  background:var(--morado); color:#fff; display:grid; place-items:center;
+  font-weight:700; font-size:12.5px; letter-spacing:.03em;
+}
+.usuario-nombre{ font-weight:600; font-size:13px; line-height:1.2; }
+.usuario-salir{
+  display:block; font-size:11.5px; color:var(--tinta-3); font-weight:500;
+}
+.usuario-salir:hover{ color:var(--reprobado); }
+
+.nav{
+  max-width:var(--ancho); margin:0 auto; padding:0 24px;
+  display:flex; gap:2px; overflow-x:auto; scrollbar-width:none;
+}
+.nav::-webkit-scrollbar{ display:none; }
+.nav a{
+  padding:9px 13px 11px; font-size:13px; font-weight:550; color:var(--tinta-2);
+  border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap;
+  transition:color .15s ease;
+}
+.nav a:hover{ color:var(--tinta); text-decoration:none; }
+.nav a[aria-current="true"]{ color:var(--morado); border-bottom-color:var(--morado); }
+
+/* ============================================================
+   LIENZO
+   ============================================================ */
+main{
+  max-width:var(--ancho); margin:0 auto;
+  padding:28px 24px 72px;
+  display:flex; flex-direction:column; gap:28px;
+}
+.seccion-cabeza{
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  margin:10px 0 14px;
+}
+.ceja{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--tinta-3);
+  display:flex; align-items:center; gap:8px;
+}
+.ceja::before{
+  content:""; width:8px; height:8px; border-radius:2px;
+  background:var(--morado); display:inline-block;
+}
+.seccion-titulo{
+  font-size:21px; font-weight:700; letter-spacing:-.01em; margin:0;
+  font-variation-settings:"wdth" 108;
+}
+.seccion-meta{ font-size:12.5px; color:var(--tinta-3); margin-left:auto; }
+
+.tarjeta{
+  background:var(--papel-plano); border:1px solid var(--linea);
+  border-radius:var(--radio); position:relative;
+}
+
+/* ============================================================
+   EXPEDIENTE — la cabecera de la lámina
+   ============================================================ */
+.expediente{ padding:0; overflow:hidden; }
+.exp-num{
+  position:absolute; top:0; right:0;
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.1em;
+  color:var(--tinta-4); border-left:1px solid var(--linea-suave);
+  border-bottom:1px solid var(--linea-suave); border-radius:0 var(--radio) 0 var(--radio-s);
+  padding:5px 12px; background:var(--papel);
+}
+.exp-grid{
+  display:grid; grid-template-columns:1.25fr .95fr .78fr;
+}
+.exp-col{ padding:26px 28px 24px; min-width:0; }
+.exp-col + .exp-col{ border-left:1px solid var(--linea-suave); }
+
+.exp-nombre{
+  font-size:31px; font-weight:760; line-height:1.08; letter-spacing:-.015em;
+  font-variation-settings:"wdth" 112; margin:6px 0 10px;
+}
+.exp-ci{
+  font-family:var(--f-mono); font-size:12.5px; color:var(--tinta-2);
+  letter-spacing:.02em;
+}
+.exp-escuela{ font-size:13px; color:var(--tinta-2); margin-top:2px; }
+.exp-specs{
+  margin-top:18px; padding-top:14px; border-top:1px solid var(--linea-suave);
+  display:grid; grid-template-columns:repeat(3,auto); gap:4px 28px;
+  width:fit-content;
+}
+.spec dt{
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--tinta-4); margin:0;
+}
+.spec dd{ margin:2px 0 0; font-size:13.5px; font-weight:600; }
+.exp-chips{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+
+/* chips de estado — punto + texto, nunca color solo */
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:11.5px; font-weight:600; letter-spacing:.01em;
+  padding:4px 10px; border-radius:999px; white-space:nowrap;
+}
+.chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+.chip--aprobado{ color:var(--aprobado-tx); background:var(--aprobado-velo); }
+.chip--curso{ color:var(--morado-tinta); background:var(--morado-velo); }
+.chip--alerta{ color:var(--alerta-tx); background:var(--alerta-velo); }
+.chip--reprobado{ color:var(--reprobado-tx); background:var(--reprobado-velo); }
+.chip--retirado{ color:var(--retirado); background:var(--retirado-velo); }
+.chip--neutro{ color:var(--tinta-2); background:var(--papel-hueco); }
+
+/* --- celosía: el avance del pensum, tesela a tesela --- */
+.celosia-titulo{
+  font-size:12.5px; font-weight:600; color:var(--tinta-2); margin:0 0 12px;
+}
+.celosia{
+  display:grid; grid-template-columns:repeat(10, 17px);
+  grid-auto-rows:17px; gap:3px; width:fit-content;
+}
+.tesela{
+  border-radius:3px; background:var(--morado);
+  transition:transform .12s ease;
+}
+.tesela:hover{ transform:scale(1.18); }
+.tesela--curso{ background:var(--morado-claro); }
+.tesela--resta{ background:transparent; border:1px solid var(--linea); }
+.celosia-leyenda{
+  display:flex; gap:14px; flex-wrap:wrap; margin-top:12px;
+  font-size:11.5px; color:var(--tinta-2);
+}
+.celosia-leyenda span{ display:inline-flex; align-items:center; gap:6px; }
+.muestra{ width:10px; height:10px; border-radius:2.5px; flex:none; }
+.muestra--aprobada{ background:var(--morado); }
+.muestra--curso{ background:var(--morado-claro); }
+.muestra--resta{ border:1px solid var(--linea); }
+
+.medidor{ margin-top:16px; }
+.medidor-cabeza{
+  display:flex; justify-content:space-between; align-items:baseline;
+  font-size:11.5px; color:var(--tinta-3); margin-bottom:6px;
+}
+.medidor-cabeza b{
+  color:var(--tinta); font-size:12.5px; font-weight:650;
+  font-family:var(--f-mono);
+}
+.medidor-pista{
+  height:8px; border-radius:999px; background:var(--morado-claro); overflow:hidden;
+}
+.medidor-lleno{
+  height:100%; width:51.2%; background:var(--morado); border-radius:999px;
+}
+
+/* --- índices académicos: filas de cajetín, no tarjetas flotantes --- */
+.kpis{ display:flex; flex-direction:column; }
+.kpi{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  padding:10px 0;
+}
+.kpi + .kpi{ border-top:1px solid var(--linea-suave); }
+.kpi-label{ font-size:12.5px; color:var(--tinta-2); }
+.kpi-valor{
+  font-size:21px; font-weight:700; letter-spacing:-.01em; white-space:nowrap;
+}
+.kpi-valor small{ font-size:12px; font-weight:550; color:var(--tinta-3); margin-left:2px; }
+
+/* ============================================================
+   INSCRIPCIÓN — el momento de mayor tensión del año
+   ============================================================ */
+.inscripcion{
+  border-color:var(--morado); border-left-width:4px;
+  display:grid; grid-template-columns:1fr auto; gap:24px;
+  padding:24px 28px; align-items:center;
+}
+.insc-estado{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;
+}
+.insc-titulo{
+  font-size:19px; font-weight:730; margin:0;
+  font-variation-settings:"wdth" 108; letter-spacing:-.01em;
+}
+.insc-cita{ font-size:14px; color:var(--tinta-2); margin:6px 0 0; }
+.insc-cita b{ color:var(--tinta); font-weight:680; }
+.insc-cierre{ font-size:12.5px; color:var(--tinta-3); margin:4px 0 0; }
+.insc-pasos{
+  display:flex; gap:0; margin-top:16px; flex-wrap:wrap;
+}
+.paso{
+  display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--tinta-2);
+}
+.paso-n{
+  width:20px; height:20px; border-radius:4px; flex:none;
+  display:grid; place-items:center;
+  font-family:var(--f-mono); font-size:10.5px; font-weight:600;
+  border:1px solid var(--linea); color:var(--tinta-3); background:var(--papel-plano);
+}
+.paso--activo .paso-n{ background:var(--morado); border-color:var(--morado); color:#fff; }
+.paso--activo{ color:var(--tinta); font-weight:600; }
+.paso-sep{
+  width:26px; height:1px; background:var(--linea); margin:0 10px; flex:none; align-self:center;
+}
+.insc-acciones{ display:flex; flex-direction:column; gap:10px; align-items:stretch; min-width:230px; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--f-sans); font-size:14px; font-weight:650; letter-spacing:.005em;
+  border-radius:var(--radio); padding:11px 20px; cursor:pointer;
+  border:1px solid transparent; transition:background .15s ease, border-color .15s ease;
+  text-decoration:none;
+}
+.btn:hover{ text-decoration:none; }
+.btn--primario{ background:var(--morado); color:#fff; }
+.btn--primario:hover{ background:var(--morado-tinta); color:#fff; }
+.btn--secundario{
+  background:var(--papel-plano); color:var(--tinta); border-color:var(--linea-fuerte);
+}
+.btn--secundario:hover{ border-color:var(--tinta-3); background:var(--papel-alto); }
+.btn--fantasma{ background:transparent; color:var(--morado); padding:8px 12px; }
+.btn--fantasma:hover{ background:var(--morado-velo); }
+.btn--sm{ font-size:12.5px; padding:7px 13px; border-radius:var(--radio-s); }
+
+/* ============================================================
+   PERÍODO EN CURSO — asignaturas + horario
+   ============================================================ */
+.periodo-grid{
+  display:grid; grid-template-columns:1.08fr .92fr; gap:20px; align-items:start;
+}
+/* min-width:0 — el min-width interno del horario no debe ensanchar la retícula */
+.periodo-grid > *, .historial-grid > *{ min-width:0; }
+.asignaturas{ padding:6px 0; }
+.asig{
+  display:grid; grid-template-columns:74px 1fr auto; gap:6px 16px;
+  padding:14px 22px; align-items:center;
+}
+.asig + .asig{ border-top:1px solid var(--linea-suave); }
+.asig-codigo{
+  font-family:var(--f-mono); font-size:11.5px; font-weight:500; color:var(--tinta-3);
+  letter-spacing:.02em; align-self:start; padding-top:2px;
+}
+.asig-nombre{ font-size:14px; font-weight:650; line-height:1.3; }
+.asig-detalle{ font-size:12px; color:var(--tinta-3); margin-top:2px; }
+.asig-horas{ display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; grid-column:2; }
+.hora-chip{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:500; color:var(--tinta-2);
+  background:var(--papel-hueco); border-radius:var(--radio-s); padding:3px 7px;
+  white-space:nowrap;
+}
+.asig-lado{ text-align:right; grid-row:1 / span 2; grid-column:3; align-self:start; }
+.asig-cred{
+  font-size:12px; color:var(--tinta-3); display:block; margin-top:6px;
+  font-variant-numeric:tabular-nums;
+}
+
+/* --- horario semanal: la retícula del plano --- */
+.horario-tarjeta{ padding:20px 22px 22px; }
+.horario-scroll{ overflow-x:auto; }
+.horario{
+  display:grid; min-width:520px;
+  grid-template-columns:40px repeat(5, minmax(84px,1fr));
+  grid-template-rows:24px repeat(11, 27px);
+  gap:0 4px; position:relative;
+}
+.h-dia{
+  font-family:var(--f-mono); font-size:10.5px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--tinta-3); text-align:center; align-self:center;
+}
+.h-hora{
+  grid-column:1; font-family:var(--f-mono); font-size:10px; color:var(--tinta-4);
+  text-align:right; padding-right:8px; transform:translateY(-6px);
+  font-variant-numeric:tabular-nums;
+}
+.h-celda{ border-top:1px solid var(--linea-suave); grid-column:2 / -1; }
+.h-bloque{
+  background:var(--morado-velo); border:1px solid rgba(51,0,102,.20);
+  border-left:3px solid var(--morado);
+  border-radius:var(--radio-s); margin:1.5px 1px; padding:5px 7px 4px;
+  font-size:10.8px; line-height:1.25; overflow:hidden; z-index:1;
+}
+.h-bloque b{ display:block; font-weight:650; color:var(--tinta); font-size:11px; }
+.h-bloque span{ color:var(--tinta-3); font-family:var(--f-mono); font-size:9.5px; }
+
+/* ============================================================
+   HISTORIAL — la secuencia de períodos
+   ============================================================ */
+.historial-grid{
+  display:grid; grid-template-columns:.9fr 1.1fr; gap:20px; align-items:start;
+}
+.grafico-tarjeta{ padding:20px 22px 14px; }
+@media (min-width:1021px){
+  .grafico-tarjeta{ position:sticky; top:118px; }
+}
+.grafico-titulo{ font-size:13px; font-weight:650; margin:0 0 2px; }
+.grafico-sub{ font-size:11.5px; color:var(--tinta-3); margin:0 0 10px; }
+.grafico-wrap{ position:relative; }
+.tooltip{
+  position:absolute; pointer-events:none; opacity:0; z-index:5;
+  background:var(--papel-alto); border:1px solid var(--linea);
+  border-radius:var(--radio-s); padding:6px 10px;
+  box-shadow:0 4px 14px rgba(38,27,65,.10);
+  font-size:11px; color:var(--tinta-2); white-space:nowrap;
+  transform:translate(-50%,-118%); transition:opacity .1s ease;
+}
+.tooltip b{
+  display:block; color:var(--tinta); font-size:12.5px; font-weight:650;
+  font-variant-numeric:tabular-nums;
+}
+
+.periodos{ display:flex; flex-direction:column; }
+details.periodo{ border-bottom:1px solid var(--linea-suave); }
+details.periodo:last-of-type{ border-bottom:none; }
+.periodo summary{
+  list-style:none; cursor:pointer; display:grid;
+  grid-template-columns:86px 1fr auto auto 18px; gap:14px; align-items:center;
+  padding:13px 22px;
+  transition:background .12s ease;
+}
+.periodo summary::-webkit-details-marker{ display:none; }
+.periodo summary:hover{ background:var(--morado-velo); }
+.periodo-codigo{
+  font-family:var(--f-mono); font-size:12.5px; font-weight:600; letter-spacing:.02em;
+  display:flex; align-items:center; gap:8px;
+}
+.periodo-codigo::before{
+  content:""; width:8px; height:8px; border-radius:2px; flex:none;
+  background:var(--morado);
+}
+.periodo--curso .periodo-codigo::before{ background:var(--morado-claro); border:1px solid var(--morado-medio); }
+.periodo-resumen{ font-size:12.5px; color:var(--tinta-3); }
+.periodo-pps{
+  font-size:13px; font-weight:650; font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.periodo-pps small{ font-weight:500; color:var(--tinta-4); font-size:10.5px; }
+.flecha{
+  width:14px; height:14px; color:var(--tinta-4); transition:transform .18s ease; justify-self:end;
+}
+details[open] .flecha{ transform:rotate(180deg); }
+.periodo-cuerpo{ padding:2px 22px 18px; }
+
+.tabla-scroll{ overflow-x:auto; border:1px solid var(--linea-suave); border-radius:var(--radio-s); }
+table.notas{
+  width:100%; border-collapse:collapse; font-size:12.5px; min-width:520px;
+  background:var(--papel-plano);
+}
+.notas th{
+  font-family:var(--f-mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--tinta-4); text-align:left;
+  padding:8px 12px; border-bottom:1px solid var(--linea); background:var(--papel);
+  white-space:nowrap;
+}
+.notas td{
+  padding:9px 12px; border-bottom:1px solid var(--linea-suave); vertical-align:middle;
+}
+.notas tr:last-child td{ border-bottom:none; }
+.notas .cod{ font-family:var(--f-mono); font-size:11px; color:var(--tinta-3); white-space:nowrap; }
+.notas .num{ text-align:center; font-variant-numeric:tabular-nums; }
+.notas .cal{ font-weight:700; font-size:13px; }
+.notas .asig-n{ font-weight:600; }
+.periodo-pie{
+  display:flex; gap:18px; flex-wrap:wrap; margin-top:12px;
+  font-size:12px; color:var(--tinta-3); align-items:center;
+}
+.periodo-pie .docs{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+
+.nota-eq{
+  padding:13px 22px; font-size:12.5px; color:var(--tinta-3);
+  display:flex; gap:10px; align-items:center; border-top:1px solid var(--linea-suave);
+}
+.nota-eq b{ color:var(--tinta-2); }
+
+/* ============================================================
+   DOCUMENTOS
+   ============================================================ */
+.docs-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.doc{
+  padding:20px 22px; display:flex; flex-direction:column; gap:8px; min-width:0;
+}
+.doc-icono{
+  width:36px; height:36px; border-radius:var(--radio-s);
+  background:var(--morado-velo); color:var(--morado);
+  display:grid; place-items:center; margin-bottom:4px;
+}
+.doc h3{ font-size:14.5px; font-weight:680; margin:0; }
+.doc p{ font-size:12.5px; color:var(--tinta-3); margin:0; flex:1; }
+.doc-meta{
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--tinta-4);
+}
+.doc .btn{ align-self:flex-start; margin-top:6px; }
+.docs-nota{
+  margin-top:14px; font-size:12.5px; color:var(--tinta-3);
+  display:flex; gap:8px; align-items:center;
+}
+
+/* ============================================================
+   PERFIL
+   ============================================================ */
+.perfil-grid{ display:grid; grid-template-columns:280px 1fr; gap:20px; align-items:start; }
+.perfil-foto{ padding:24px; text-align:center; }
+.foto-marco{
+  width:112px; height:112px; margin:0 auto 14px; border-radius:var(--radio);
+  background:var(--morado); color:#fff; display:grid; place-items:center;
+  font-size:34px; font-weight:750; font-variation-settings:"wdth" 112;
+  position:relative; overflow:hidden;
+}
+.foto-marco::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.14)) 0 0/22px 22px,
+    linear-gradient(rgba(255,255,255,0),rgba(255,255,255,0));
+  background-blend-mode:overlay;
+  -webkit-mask:conic-gradient(from 0deg at 3px 3px, transparent 90deg, #000 0) 0 0/28px 28px;
+          mask:conic-gradient(from 0deg at 3px 3px, transparent 90deg, #000 0) 0 0/28px 28px;
+  opacity:.5;
+}
+.perfil-estado{ margin-top:6px; }
+.perfil-datos{ padding:24px 28px; }
+.datos-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:16px 32px; margin:4px 0 0;
+}
+.dato dt{
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--tinta-4);
+}
+.dato dd{ margin:3px 0 0; font-size:13.5px; font-weight:550; overflow-wrap:anywhere; }
+.perfil-acciones{
+  display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; padding-top:18px;
+  border-top:1px solid var(--linea-suave); align-items:center;
+}
+.perfil-nota{ font-size:12px; color:var(--tinta-3); flex-basis:100%; margin-top:2px; }
+
+/* ============================================================
+   PIE — sello institucional
+   ============================================================ */
+footer{ margin-top:20px; border-top:1px solid var(--linea); background:var(--papel-plano); }
+.pie-inner{
+  max-width:var(--ancho); margin:0 auto; padding:30px 24px 36px;
+  display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:24px;
+}
+.pie-marca{ display:flex; gap:12px; align-items:flex-start; }
+.pie-titulo{ font-weight:700; font-size:13.5px; margin:0 0 2px; font-variation-settings:"wdth" 112; }
+.pie-texto{ font-size:12px; color:var(--tinta-3); margin:0; max-width:34ch; }
+.pie-col h4{
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--tinta-4); margin:0 0 10px; font-weight:600;
+}
+.pie-col ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+.pie-col a{ font-size:12.5px; color:var(--tinta-2); }
+.pie-col a:hover{ color:var(--morado); }
+.pie-unesco{
+  border-top:1px solid var(--linea-suave);
+}
+.pie-unesco p{
+  max-width:var(--ancho); margin:0 auto; padding:14px 24px;
+  font-family:var(--f-mono); font-size:10.5px; letter-spacing:.06em; color:var(--tinta-4);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1020px){
+  .exp-grid{ grid-template-columns:1fr 1fr; }
+  .exp-col--kpis{
+    grid-column:1 / -1; border-left:none; border-top:1px solid var(--linea-suave);
+  }
+  .kpis{ flex-direction:row; flex-wrap:wrap; gap:0 36px; }
+  .kpi{ flex:1 1 40%; }
+  .kpi + .kpi{ border-top:none; }
+  .periodo-grid, .historial-grid{ grid-template-columns:1fr; }
+  .docs-grid{ grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width: 720px){
+  html{ scroll-padding-top:104px; }
+  main{ padding:20px 16px 56px; gap:22px; }
+  .cabecera-marca{ padding:10px 16px 8px; }
+  .marca-sub{ display:none; }
+  .pildora-periodo{ display:none; }
+  .usuario-nombre{ display:none; }
+  .usuario-salir{ display:none; }
+  .nav{ padding:0 16px; }
+  .exp-grid{ grid-template-columns:1fr; }
+  .exp-col + .exp-col{ border-left:none; border-top:1px solid var(--linea-suave); }
+  .exp-nombre{ font-size:25px; }
+  .exp-specs{ grid-template-columns:repeat(2,auto); gap:10px 24px; }
+  .exp-num{ display:none; }
+  .inscripcion{ grid-template-columns:1fr; padding:20px; }
+  .insc-acciones{ min-width:0; }
+  .paso-sep{ display:none; }
+  .insc-pasos{ flex-direction:column; gap:8px; align-items:flex-start; }
+  .asig{ grid-template-columns:1fr auto; padding:14px 16px; }
+  .asig-codigo{ grid-column:1 / -1; padding:0; }
+  .asig-horas{ grid-column:1 / -1; }
+  .asig-lado{ grid-row:2; grid-column:2; }
+  .periodo summary{ grid-template-columns:1fr auto auto 18px; padding:13px 16px; gap:8px; }
+  .periodo summary .chip{ white-space:nowrap; }
+  .periodo-resumen{ grid-column:1 / -1; order:4; }
+  .periodo-cuerpo{ padding:2px 16px 16px; }
+  .docs-grid{ grid-template-columns:1fr; }
+  .perfil-grid{ grid-template-columns:1fr; }
+  .datos-grid{ grid-template-columns:1fr; gap:14px; }
+  .pie-inner{ grid-template-columns:1fr; gap:20px; }
+  .seccion-meta{ margin-left:0; flex-basis:100%; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Ir al contenido</a>
+<div class="guarda" aria-hidden="true"></div>
+
+<!-- ══════════════ CABECERA ══════════════ -->
+<header class="cabecera">
+  <div class="cabecera-marca">
+    <!-- Marca: molar estilizado en morado -->
+    <svg class="logo-diente" width="38" height="38" viewBox="0 0 38 38" role="img" aria-label="Logotipo Facultad de Odontología UCV">
+      <path fill="#330066" d="M19 4.6c-3.1 0-4.5-1.7-7.9-1.7C6.5 2.9 3 6.6 3 11.5c0 3.9 1.8 6.4 3.4 9 1.5 2.6 2.3 6.5 2.9 10.4.4 2.7 1.2 4.7 3 4.7 3.4 0 1.7-9.4 6.7-9.4s3.3 9.4 6.7 9.4c1.8 0 2.6-2 3-4.7.6-3.9 1.4-7.8 2.9-10.4 1.6-2.6 3.4-5.1 3.4-9 0-4.9-3.5-8.6-8.1-8.6-3.4 0-4.8 1.7-7.9 1.7z"/>
+    </svg>
+    <div class="marca-texto">
+      <span class="marca-nombre">COES · Odontología</span>
+      <span class="marca-sub">Control de Estudios — Facultad de Odontología · UCV</span>
+    </div>
+    <div class="cabecera-lado">
+      <span class="pildora-periodo">Período en curso <b>2025-A</b></span>
+      <div class="usuario">
+        <span class="usuario-avatar" aria-hidden="true">CH</span>
+        <span>
+          <span class="usuario-nombre">Camila Herrera</span>
+          <a class="usuario-salir" href="#">Cerrar sesión</a>
+        </span>
+      </div>
+    </div>
+  </div>
+  <nav class="nav" aria-label="Secciones del portal">
+    <a href="#resumen" aria-current="true">Resumen</a>
+    <a href="#inscripcion">Inscripción</a>
+    <a href="#periodo">Período en curso</a>
+    <a href="#historial">Historial</a>
+    <a href="#documentos">Documentos</a>
+    <a href="#perfil">Mis datos</a>
+  </nav>
+</header>
+
+<main id="contenido">
+
+  <!-- ══════════════ EXPEDIENTE ══════════════ -->
+  <section id="resumen" aria-labelledby="t-resumen">
+    <div class="tarjeta expediente">
+      <span class="exp-num" aria-hidden="true">EXP · ODO-2022-0873</span>
+      <div class="exp-grid">
+
+        <div class="exp-col">
+          <span class="ceja">Expediente académico</span>
+          <h1 class="exp-nombre" id="t-resumen">Camila Herrera Blanco</h1>
+          <div class="exp-ci">C.I. V-28.456.789</div>
+          <div class="exp-escuela">Facultad de Odontología · Ciudad Universitaria de Caracas</div>
+          <dl class="exp-specs">
+            <div class="spec"><dt>Plan de estudios</dt><dd>ODO-2004</dd></div>
+            <div class="spec"><dt>Ingreso</dt><dd>2022-A</dd></div>
+            <div class="spec"><dt>Admisión</dt><dd>Prueba interna</dd></div>
+          </dl>
+          <div class="exp-chips">
+            <span class="chip chip--aprobado">Permanencia: Regular</span>
+            <span class="chip chip--curso">Inscrita en 2025-A</span>
+          </div>
+        </div>
+
+        <div class="exp-col">
+          <p class="celosia-titulo">Avance del plan de estudios</p>
+          <div class="celosia" id="celosia" role="img"
+               aria-label="Avance del pensum: 15 de 29 asignaturas aprobadas, 6 en curso y 8 por cursar."></div>
+          <div class="celosia-leyenda" aria-hidden="true">
+            <span><i class="muestra muestra--aprobada"></i>15 aprobadas</span>
+            <span><i class="muestra muestra--curso"></i>6 en curso</span>
+            <span><i class="muestra muestra--resta"></i>8 por cursar</span>
+          </div>
+          <div class="medidor">
+            <div class="medidor-cabeza">
+              <span>Créditos aprobados</span>
+              <b>88 / 172 · 51&thinsp;%</b>
+            </div>
+            <div class="medidor-pista" role="progressbar" aria-valuenow="88" aria-valuemin="0"
+                 aria-valuemax="172" aria-label="Créditos aprobados: 88 de 172">
+              <div class="medidor-lleno"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-col exp-col--kpis">
+          <div class="kpis">
+            <div class="kpi">
+              <span class="kpi-label">Promedio ponderado</span>
+              <span class="kpi-valor">14,78<small>/ 20</small></span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Promedio simple</span>
+              <span class="kpi-valor">14,88<small>/ 20</small></span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Eficiencia</span>
+              <span class="kpi-valor">0,94</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-label">Año en curso</span>
+              <span class="kpi-valor">4.º<small>de 5</small></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ INSCRIPCIÓN ══════════════ -->
+  <section id="inscripcion" aria-labelledby="t-inscripcion">
+    <div class="tarjeta inscripcion">
+      <div>
+        <div class="insc-estado">
+          <span class="chip chip--aprobado">Proceso abierto</span>
+          <span class="chip chip--curso">Tu cita horaria está activa</span>
+        </div>
+        <h2 class="insc-titulo" id="t-inscripcion">Inscripción · Período 2026-A · 5.º año</h2>
+        <p class="insc-cita">Tu cita: <b>hoy, 12 de julio · 10:00 a 11:30 a.&nbsp;m.</b></p>
+        <p class="insc-cierre">El proceso cierra el viernes 24 de julio. Podrás ajustar tu selección hasta confirmar la inscripción.</p>
+        <div class="insc-pasos" aria-label="Pasos del proceso de inscripción">
+          <span class="paso paso--activo"><span class="paso-n">1</span> Selecciona tus asignaturas</span>
+          <span class="paso-sep" aria-hidden="true"></span>
+          <span class="paso"><span class="paso-n">2</span> Registra tu reporte de pago</span>
+          <span class="paso-sep" aria-hidden="true"></span>
+          <span class="paso"><span class="paso-n">3</span> Confirma y descarga tu constancia</span>
+        </div>
+      </div>
+      <div class="insc-acciones">
+        <a class="btn btn--primario" href="#">Inscribir asignaturas</a>
+        <a class="btn btn--fantasma" href="#">Ver oferta de secciones</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ PERÍODO EN CURSO ══════════════ -->
+  <section id="periodo" aria-labelledby="t-periodo">
+    <div class="seccion-cabeza">
+      <span class="ceja">Período en curso</span>
+      <h2 class="seccion-titulo" id="t-periodo">2025-A · Cuarto año</h2>
+      <span class="seccion-meta">6 asignaturas · 36 créditos inscritos</span>
+    </div>
+
+    <div class="periodo-grid">
+      <div class="tarjeta asignaturas">
+        <article class="asig">
+          <span class="asig-codigo">0411</span>
+          <div>
+            <div class="asig-nombre">Operatoria Dental I</div>
+            <div class="asig-detalle">Sección 01 · Od. Rafael Marcano · Clínica 2</div>
+          </div>
+          <div class="asig-lado">
+            <span class="chip chip--curso">Inscrita</span>
+            <span class="asig-cred">8 créditos</span>
+          </div>
+          <div class="asig-horas">
+            <span class="hora-chip">Lu 8:00–12:00</span>
+            <span class="hora-chip">Ju 8:00–12:00</span>
+          </div>
+        </article>
+        <article class="asig">
+          <span class="asig-codigo">0412</span>
+          <div>
+            <div class="asig-nombre">Endodoncia I</div>
+            <div class="asig-detalle">Sección 02 · Od. Carla Fuenmayor · Clínica 3</div>
+          </div>
+          <div class="asig-lado">
+            <span class="chip chip--curso">Inscrita</span>
+            <span class="asig-cred">6 créditos</span>
+          </div>
+          <div class="asig-horas">
+            <span class="hora-chip">Ma 8:00–11:00</span>
+          </div>
+        </article>
+        <article class="asig">
+          <span class="asig-codigo">0413</span>
+          <div>
+            <div class="asig-nombre">Periodoncia I</div>
+            <div class="asig-detalle">Sección 01 · Od. Luis Hernández · Clínica 1</div>
+          </div>
+          <div class="asig-lado">
+            <span class="chip chip--curso">Inscrita</span>
+            <span class="asig-cred">6 créditos</span>
+          </div>
+          <div class="asig-horas">
+            <span class="hora-chip">Mi 8:00–11:00</span>
+          </div>
+        </article>
+        <article class="asig">
+          <span class="asig-codigo">0414</span>
+          <div>
+            <div class="asig-nombre">Cirugía Bucal I</div>
+            <div class="asig-detalle">Sección 03 · Od. Marielena Silva · Quirófano</div>
+          </div>
+          <div class="asig-lado">
+            <span class="chip chip--curso">Inscrita</span>
+            <span class="asig-cred">6 créditos</span>
+          </div>
+          <div class="asig-horas">
+            <span class="hora-chip">Vi 8:00–12:00</span>
+          </div>
+        </article>
+        <article class="asig">
+          <span class="asig-codigo">0415</span>
+          <div>
+            <div class="asig-nombre">Prostodoncia I</div>
+            <div class="asig-detalle">Sección 01 · Od. Pedro García · Lab. de Prótesis</div>
+          </div>
+          <div class="asig-lado">
+            <span class="chip chip--curso">Inscrita</span>
+            <span class="asig-cred">6 créditos</span>
+          </div>
+          <div class="asig-horas">
+            <span class="hora-chip">Ma 14:00–17:00</span>
+          </div>
+        </article>
+        <article class="asig">
+          <span class="asig-codigo">0416</span>
+          <div>
+            <div class="asig-nombre">Odontopediatría I</div>
+            <div class="asig-detalle">Sección 02 · Od. Ana Requena · Clínica infantil</div>
+          </div>
+          <div class="asig-lado">
+            <span class="chip chip--curso">Inscrita</span>
+            <span class="asig-cred">4 créditos</span>
+          </div>
+          <div class="asig-horas">
+            <span class="hora-chip">Mi 14:00–16:00</span>
+          </div>
+        </article>
+        <p class="nota-eq">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3.5 8.4 2.8 2.8 6.2-6.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span><b>Inscripción confirmada</b> · Reporte de pago verificado el 15 de enero de 2025.</span>
+        </p>
+      </div>
+
+      <div class="tarjeta horario-tarjeta">
+        <p class="grafico-titulo">Horario semanal</p>
+        <p class="grafico-sub">Semana tipo del período 2025-A</p>
+        <div class="horario-scroll">
+          <div class="horario" role="img" aria-label="Horario semanal: Operatoria Dental lunes y jueves de 8 a 12; Endodoncia martes de 8 a 11; Periodoncia miércoles de 8 a 11; Cirugía Bucal viernes de 8 a 12; Prostodoncia martes de 14 a 17; Odontopediatría miércoles de 14 a 16.">
+            <span></span>
+            <span class="h-dia" style="grid-column:2">Lun</span>
+            <span class="h-dia" style="grid-column:3">Mar</span>
+            <span class="h-dia" style="grid-column:4">Mié</span>
+            <span class="h-dia" style="grid-column:5">Jue</span>
+            <span class="h-dia" style="grid-column:6">Vie</span>
+
+            <!-- gutter de horas + líneas de retícula (7:00 → 17:00) -->
+            <span class="h-hora" style="grid-row:2">7</span><span class="h-celda" style="grid-row:2"></span>
+            <span class="h-hora" style="grid-row:3">8</span><span class="h-celda" style="grid-row:3"></span>
+            <span class="h-hora" style="grid-row:4">9</span><span class="h-celda" style="grid-row:4"></span>
+            <span class="h-hora" style="grid-row:5">10</span><span class="h-celda" style="grid-row:5"></span>
+            <span class="h-hora" style="grid-row:6">11</span><span class="h-celda" style="grid-row:6"></span>
+            <span class="h-hora" style="grid-row:7">12</span><span class="h-celda" style="grid-row:7"></span>
+            <span class="h-hora" style="grid-row:8">13</span><span class="h-celda" style="grid-row:8"></span>
+            <span class="h-hora" style="grid-row:9">14</span><span class="h-celda" style="grid-row:9"></span>
+            <span class="h-hora" style="grid-row:10">15</span><span class="h-celda" style="grid-row:10"></span>
+            <span class="h-hora" style="grid-row:11">16</span><span class="h-celda" style="grid-row:11"></span>
+            <span class="h-hora" style="grid-row:12">17</span><span class="h-celda" style="grid-row:12"></span>
+
+            <!-- bloques: fila = hora − 7 + 2 -->
+            <div class="h-bloque" style="grid-column:2; grid-row:3/7"><b>Operatoria Dental I</b><span>Clínica 2</span></div>
+            <div class="h-bloque" style="grid-column:5; grid-row:3/7"><b>Operatoria Dental I</b><span>Clínica 2</span></div>
+            <div class="h-bloque" style="grid-column:3; grid-row:3/6"><b>Endodoncia I</b><span>Clínica 3</span></div>
+            <div class="h-bloque" style="grid-column:4; grid-row:3/6"><b>Periodoncia I</b><span>Clínica 1</span></div>
+            <div class="h-bloque" style="grid-column:6; grid-row:3/7"><b>Cirugía Bucal I</b><span>Quirófano</span></div>
+            <div class="h-bloque" style="grid-column:3; grid-row:9/12"><b>Prostodoncia I</b><span>Lab. Prótesis</span></div>
+            <div class="h-bloque" style="grid-column:4; grid-row:9/11"><b>Odontopediatría I</b><span>Cl. infantil</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ HISTORIAL ══════════════ -->
+  <section id="historial" aria-labelledby="t-historial">
+    <div class="seccion-cabeza">
+      <span class="ceja">Historial académico</span>
+      <h2 class="seccion-titulo" id="t-historial">Tres períodos cursados</h2>
+      <span class="seccion-meta">Facultad de Odontología · desde 2022-A</span>
+    </div>
+
+    <div class="historial-grid">
+
+      <div class="tarjeta grafico-tarjeta">
+        <p class="grafico-titulo">Promedio ponderado por período (PPS)</p>
+        <p class="grafico-sub">Escala 0–20 · se muestra el rango 12–18</p>
+        <div class="grafico-wrap">
+          <svg id="sparkline" width="100%" height="150" viewBox="0 0 460 150" role="img"
+               aria-label="Evolución del promedio ponderado por período: 15,74 en 2022-A; 13,53 en 2023-A y 14,93 en 2024-A."></svg>
+          <div class="tooltip" id="spark-tooltip" role="presentation"></div>
+        </div>
+      </div>
+
+      <div class="tarjeta periodos">
+
+        <details class="periodo" open>
+          <summary>
+            <span class="periodo-codigo">2024-A</span>
+            <span class="periodo-resumen">5 asignaturas · 30 créditos</span>
+            <span class="periodo-pps">14,93 <small>PPS</small></span>
+            <span class="chip chip--aprobado">Confirmada</span>
+            <svg class="flecha" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="periodo-cuerpo">
+            <div class="tabla-scroll">
+              <table class="notas">
+                <thead>
+                  <tr>
+                    <th scope="col">Código</th><th scope="col">Asignatura</th>
+                    <th scope="col" class="num">Créd.</th><th scope="col" class="num">Sección</th>
+                    <th scope="col" class="num">Calif.</th><th scope="col">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td class="cod">0206</td><td class="asig-n">Farmacología y Terapéutica</td><td class="num">6</td><td class="num cod">02</td><td class="num cal">15</td><td><span class="chip chip--aprobado">Aprobada · 2.ª inscripción</span></td></tr>
+                  <tr><td class="cod">0311</td><td class="asig-n">Patología General y Bucal</td><td class="num">8</td><td class="num cod">01</td><td class="num cal">14</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0312</td><td class="asig-n">Semiología y Clínica Estomatológica</td><td class="num">6</td><td class="num cod">01</td><td class="num cal">15</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0313</td><td class="asig-n">Materiales Dentales</td><td class="num">6</td><td class="num cod">03</td><td class="num cal">16</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0314</td><td class="asig-n">Emergencias Médicas en Odontología</td><td class="num">4</td><td class="num cod">01</td><td class="num cal">15</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="periodo-pie">
+              <span>Eficiencia del período: <b>1,00</b></span>
+              <span>Promedio simple: <b>15,00</b></span>
+              <span class="docs">
+                <a class="btn btn--secundario btn--sm" href="#">Constancia de estudio</a>
+                <a class="btn btn--secundario btn--sm" href="#">Constancia de inscripción</a>
+              </span>
+            </div>
+          </div>
+        </details>
+
+        <details class="periodo">
+          <summary>
+            <span class="periodo-codigo">2023-A</span>
+            <span class="periodo-resumen">6 asignaturas · 34 créditos · 1 aplazada · 1 retirada</span>
+            <span class="periodo-pps">13,53 <small>PPS</small></span>
+            <span class="chip chip--aprobado">Confirmada</span>
+            <svg class="flecha" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="periodo-cuerpo">
+            <div class="tabla-scroll">
+              <table class="notas">
+                <thead><tr><th scope="col">Código</th><th scope="col">Asignatura</th><th scope="col" class="num">Créd.</th><th scope="col" class="num">Sección</th><th scope="col" class="num">Calif.</th><th scope="col">Estado</th></tr></thead>
+                <tbody>
+                  <tr><td class="cod">0201</td><td class="asig-n">Fisiología Humana</td><td class="num">8</td><td class="num cod">01</td><td class="num cal">15</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0202</td><td class="asig-n">Microbiología</td><td class="num">6</td><td class="num cod">02</td><td class="num cal">14</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0203</td><td class="asig-n">Oclusión</td><td class="num">6</td><td class="num cod">01</td><td class="num cal">15</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0206</td><td class="asig-n">Farmacología y Terapéutica</td><td class="num">6</td><td class="num cod">03</td><td class="num cal">08</td><td><span class="chip chip--reprobado">Aplazada</span></td></tr>
+                  <tr><td class="cod">0204</td><td class="asig-n">Radiología</td><td class="num">4</td><td class="num cod">01</td><td class="num cal">—</td><td><span class="chip chip--retirado">Retirada</span></td></tr>
+                  <tr><td class="cod">0205</td><td class="asig-n">Odontología Sanitaria II</td><td class="num">4</td><td class="num cod">02</td><td class="num cal">16</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="periodo-pie">
+              <span>Eficiencia del período: <b>0,80</b></span>
+              <span>Promedio simple: <b>13,60</b></span>
+            </div>
+          </div>
+        </details>
+
+        <details class="periodo">
+          <summary>
+            <span class="periodo-codigo">2022-A</span>
+            <span class="periodo-resumen">6 asignaturas · 34 créditos</span>
+            <span class="periodo-pps">15,74 <small>PPS</small></span>
+            <span class="chip chip--aprobado">Confirmada</span>
+            <svg class="flecha" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="periodo-cuerpo">
+            <div class="tabla-scroll">
+              <table class="notas">
+                <thead><tr><th scope="col">Código</th><th scope="col">Asignatura</th><th scope="col" class="num">Créd.</th><th scope="col" class="num">Sección</th><th scope="col" class="num">Calif.</th><th scope="col">Estado</th></tr></thead>
+                <tbody>
+                  <tr><td class="cod">0101</td><td class="asig-n">Anatomía Humana</td><td class="num">9</td><td class="num cod">01</td><td class="num cal">16</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0102</td><td class="asig-n">Histología y Embriología</td><td class="num">6</td><td class="num cod">02</td><td class="num cal">15</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0103</td><td class="asig-n">Bioquímica</td><td class="num">6</td><td class="num cod">01</td><td class="num cal">14</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0104</td><td class="asig-n">Anatomía Dental</td><td class="num">6</td><td class="num cod">01</td><td class="num cal">17</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0105</td><td class="asig-n">Odontología Sanitaria I</td><td class="num">4</td><td class="num cod">03</td><td class="num cal">16</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                  <tr><td class="cod">0106</td><td class="asig-n">Inglés Instrumental</td><td class="num">3</td><td class="num cod">01</td><td class="num cal">17</td><td><span class="chip chip--aprobado">Aprobada</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+
+        <p class="nota-eq">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.4" stroke="currentColor" stroke-width="1.3"/><path d="M8 7.4v3.4M8 5.2v.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span><b>Asignaturas aplazadas o retiradas:</b> pueden cursarse de nuevo el año siguiente. En el expediente vale la calificación de la última inscripción.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ DOCUMENTOS ══════════════ -->
+  <section id="documentos" aria-labelledby="t-documentos">
+    <div class="seccion-cabeza">
+      <span class="ceja">Documentos</span>
+      <h2 class="seccion-titulo" id="t-documentos">Constancias y kardex</h2>
+      <span class="seccion-meta">Se generan al instante, con código de verificación</span>
+    </div>
+    <div class="docs-grid">
+      <div class="tarjeta doc">
+        <span class="doc-icono" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 2.5h7l3.5 3.5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-13.5a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 2.5V6h3.5M7 10h6M7 13h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </span>
+        <h3>Constancia de inscripción</h3>
+        <p>Certifica las asignaturas y secciones inscritas en el período 2025-A.</p>
+        <span class="doc-meta">PDF · Período 2025-A</span>
+        <a class="btn btn--secundario btn--sm" href="#">Descargar</a>
+      </div>
+      <div class="tarjeta doc">
+        <span class="doc-icono" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2 3 5.5v3C3 13 6 16.5 10 18c4-1.5 7-5 7-9.5v-3L10 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="m7.2 9.8 2 2 3.6-3.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h3>Constancia de estudio</h3>
+        <p>Acredita tu condición de estudiante activa ante terceros e instituciones.</p>
+        <span class="doc-meta">PDF · Período 2025-A</span>
+        <a class="btn btn--secundario btn--sm" href="#">Descargar</a>
+      </div>
+      <div class="tarjeta doc">
+        <span class="doc-icono" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M3 7.5h14M7.5 7.5V17M3 12h14" stroke="currentColor" stroke-width="1.2"/></svg>
+        </span>
+        <h3>Kardex académico</h3>
+        <p>Historial completo de calificaciones, créditos y promedios por período.</p>
+        <span class="doc-meta">PDF · Expediente completo</span>
+        <a class="btn btn--secundario btn--sm" href="#">Descargar</a>
+      </div>
+    </div>
+    <p class="docs-nota">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.4" stroke="currentColor" stroke-width="1.3"/><path d="M8 7.4v3.4M8 5.2v.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Cada documento incluye un código único que Control de Estudios puede validar. Las actas físicas prevalecen sobre lo mostrado en pantalla.
+    </p>
+  </section>
+
+  <!-- ══════════════ MIS DATOS ══════════════ -->
+  <section id="perfil" aria-labelledby="t-perfil">
+    <div class="seccion-cabeza">
+      <span class="ceja">Mis datos</span>
+      <h2 class="seccion-titulo" id="t-perfil">Datos personales</h2>
+      <span class="seccion-meta">Tu correo es el canal oficial de notificaciones</span>
+    </div>
+    <div class="perfil-grid">
+      <div class="tarjeta perfil-foto">
+        <div class="foto-marco" aria-hidden="true">CH</div>
+        <div style="font-weight:680; font-size:14px;">Camila Herrera Blanco</div>
+        <div style="font-family:var(--f-mono); font-size:11.5px; color:var(--tinta-3); margin-top:2px;">V-28.456.789</div>
+        <div class="perfil-estado"><span class="chip chip--aprobado">Expediente completo</span></div>
+      </div>
+      <div class="tarjeta perfil-datos">
+        <dl class="datos-grid">
+          <div class="dato"><dt>Correo electrónico</dt><dd>camilaherrera.od@gmail.com</dd></div>
+          <div class="dato"><dt>Teléfono</dt><dd>0414 233 0456</dd></div>
+          <div class="dato"><dt>Dirección</dt><dd>Av. Intercomunal de El Valle, Caracas</dd></div>
+          <div class="dato"><dt>Sede</dt><dd>Ciudad Universitaria de Caracas</dd></div>
+          <div class="dato"><dt>Fecha de nacimiento</dt><dd>2 de agosto de 2004</dd></div>
+          <div class="dato"><dt>Nacionalidad</dt><dd>Venezolana</dd></div>
+        </dl>
+        <div class="perfil-acciones">
+          <a class="btn btn--secundario btn--sm" href="#">Actualizar mis datos</a>
+          <a class="btn btn--fantasma btn--sm" href="#">Cambiar contraseña</a>
+          <p class="perfil-nota">Mantén tu correo y teléfono al día: allí recibirás tu cita horaria y la confirmación de cada inscripción.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════ PIE ══════════════ -->
+<footer>
+  <div class="pie-inner">
+    <div class="pie-marca">
+      <svg width="30" height="30" viewBox="0 0 38 38" role="img" aria-label="Facultad de Odontología UCV">
+        <path fill="#330066" d="M19 4.6c-3.1 0-4.5-1.7-7.9-1.7C6.5 2.9 3 6.6 3 11.5c0 3.9 1.8 6.4 3.4 9 1.5 2.6 2.3 6.5 2.9 10.4.4 2.7 1.2 4.7 3 4.7 3.4 0 1.7-9.4 6.7-9.4s3.3 9.4 6.7 9.4c1.8 0 2.6-2 3-4.7.6-3.9 1.4-7.8 2.9-10.4 1.6-2.6 3.4-5.1 3.4-9 0-4.9-3.5-8.6-8.1-8.6-3.4 0-4.8 1.7-7.9 1.7z"/>
+      </svg>
+      <div>
+        <p class="pie-titulo">COES · Control de Estudios</p>
+        <p class="pie-texto">Facultad de Odontología, Universidad Central de Venezuela.</p>
+      </div>
+    </div>
+    <div class="pie-col">
+      <h4>Trámites</h4>
+      <ul>
+        <li><a href="#inscripcion">Inscripción 2026-A</a></li>
+        <li><a href="#documentos">Constancias y kardex</a></li>
+        <li><a href="#">Validar un documento</a></li>
+      </ul>
+    </div>
+    <div class="pie-col">
+      <h4>Ayuda</h4>
+      <ul>
+        <li><a href="#">Manual del estudiante</a></li>
+        <li><a href="#">Control de Estudios — atención</a></li>
+        <li><a href="#">controldeestudios@odont.ucv.ve</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="pie-unesco">
+    <p>Ciudad Universitaria de Caracas · Obra de Carlos Raúl Villanueva · Patrimonio Mundial de la UNESCO, 2000</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   Datos ficticios del mockup
+   ============================================================ */
+
+/* Pensum anual: 29 asignaturas — cada tesela de la celosía es una. */
+const PENSUM = [
+  /* [año, nombre, estado, calificación] — estado: a(probada) c(ursando) r(estante) */
+  [1,"Anatomía Humana","a",16],[1,"Histología y Embriología","a",15],[1,"Bioquímica","a",14],
+  [1,"Anatomía Dental","a",17],[1,"Odontología Sanitaria I","a",16],[1,"Inglés Instrumental","a",17],
+  [2,"Fisiología Humana","a",15],[2,"Microbiología","a",14],[2,"Oclusión","a",15],
+  [2,"Farmacología y Terapéutica","a",15],[2,"Radiología","r"],[2,"Odontología Sanitaria II","a",16],
+  [3,"Patología General y Bucal","a",14],[3,"Semiología y Clínica Estomatológica","a",15],
+  [3,"Materiales Dentales","a",16],[3,"Emergencias Médicas en Odontología","a",15],
+  [4,"Operatoria Dental I","c"],[4,"Endodoncia I","c"],[4,"Periodoncia I","c"],
+  [4,"Cirugía Bucal I","c"],[4,"Prostodoncia I","c"],[4,"Odontopediatría I","c"],
+  [5,"Operatoria Dental II","r"],[5,"Endodoncia II","r"],[5,"Periodoncia II","r"],
+  [5,"Cirugía Bucal II","r"],[5,"Prostodoncia II","r"],[5,"Odontopediatría II","r"],
+  [5,"Pasantía y Servicio Comunitario","r"]
+];
+
+/* PPS por período cerrado, escala 0–20 */
+const PPS = [
+  ["2022-A",15.74],["2023-A",13.53],["2024-A",14.93]
+];
+
+/* ============================================================
+   Celosía — el avance del pensum como muro que se construye
+   ============================================================ */
+const celosia = document.getElementById("celosia");
+const ESTADOS = { a:["","Aprobada"], c:["tesela--curso","En curso"], r:["tesela--resta","Por cursar"] };
+PENSUM.forEach(([anio, nombre, estado, cal]) => {
+  const t = document.createElement("i");
+  const [clase, texto] = ESTADOS[estado];
+  t.className = "tesela " + clase;
+  t.title = `${anio}.º año · ${nombre} — ${texto}${cal ? ` (${cal})` : ""}`;
+  celosia.appendChild(t);
+});
+
+/* ============================================================
+   Sparkline PPS — línea 2px, punto final ≥8px con anillo de
+   superficie, etiqueta directa solo en el extremo, hover.
+   ============================================================ */
+(function(){
+  const svg = document.getElementById("sparkline");
+  const tip = document.getElementById("spark-tooltip");
+  const W = 460, H = 150, m = { t:16, r:18, b:26, l:40 };
+  const yMin = 12, yMax = 18;
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const x = i => m.l + (i / (PPS.length - 1)) * iw;
+  const y = v => m.t + (1 - (v - yMin) / (yMax - yMin)) * ih;
+  const fmt = v => v.toFixed(2).replace(".", ",");
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e); return e;
+  };
+
+  /* retícula recesiva: 14 y 16, cifras al margen izquierdo */
+  [14,16].forEach(v => {
+    el("line", { x1:m.l, x2:W-m.r, y1:y(v), y2:y(v), stroke:"rgba(38,27,65,.08)", "stroke-width":1 });
+    el("text", { x:m.l-8, y:y(v)+3, "text-anchor":"end", "font-size":9.5, fill:"#A29CB5",
+                 "font-family":"IBM Plex Mono, monospace" }).textContent = v.toFixed(0);
+  });
+
+  /* área: velo al 10 % */
+  const pts = PPS.map((d,i) => `${x(i)},${y(d[1])}`).join(" ");
+  el("polygon", { points:`${m.l},${y(yMin)} ${pts} ${x(PPS.length-1)},${y(yMin)}`,
+                  fill:"rgba(51,0,102,.09)" });
+  /* línea: 2px, uniones redondas */
+  el("polyline", { points:pts, fill:"none", stroke:"#330066", "stroke-width":2,
+                   "stroke-linejoin":"round", "stroke-linecap":"round" });
+
+  /* etiquetas del eje x — extremos anclados hacia adentro para no recortarse */
+  PPS.forEach((d,i) => {
+    const anchor = i === 0 ? "start" : (i === PPS.length-1 ? "end" : "middle");
+    el("text", { x:x(i), y:H-8, "text-anchor":anchor, "font-size":9,
+                 fill:"#A29CB5", "font-family":"IBM Plex Mono, monospace" }).textContent = d[0];
+  });
+
+  /* punto final con anillo de superficie + etiqueta directa */
+  const last = PPS.length - 1;
+  el("circle", { cx:x(last), cy:y(PPS[last][1]), r:6, fill:"#FDFDFB" });
+  el("circle", { cx:x(last), cy:y(PPS[last][1]), r:4, fill:"#330066" });
+  el("text", { x:x(last)-10, y:y(PPS[last][1])-12, "text-anchor":"end", "font-size":11.5,
+               "font-weight":700, fill:"#261B41", "font-family":"Archivo, sans-serif" })
+    .textContent = fmt(PPS[last][1]);
+
+  /* capa de hover: objetivo más grande que la marca */
+  const dot = el("circle", { r:4.5, fill:"#330066", stroke:"#FDFDFB",
+                             "stroke-width":2, opacity:0 });
+  PPS.forEach((d,i) => {
+    const hit = el("rect", {
+      x: x(i) - iw/(PPS.length-1)/2, y:0, width: iw/(PPS.length-1), height:H,
+      fill:"transparent", cursor:"pointer"
+    });
+    const show = () => {
+      dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(d[1]));
+      dot.setAttribute("opacity", 1);
+      tip.innerHTML = `${d[0]}<b>${fmt(d[1])} / 20</b>`;
+      const box = svg.getBoundingClientRect();
+      tip.style.left = (x(i) / W * box.width) + "px";
+      tip.style.top  = (y(d[1]) / H * box.height) + "px";
+      tip.style.opacity = 1;
+    };
+    const hide = () => { dot.setAttribute("opacity", 0); tip.style.opacity = 0; };
+    hit.addEventListener("mouseenter", show);
+    hit.addEventListener("mouseleave", hide);
+    hit.addEventListener("focus", show);
+    hit.addEventListener("blur", hide);
+  });
+})();
+
+/* ============================================================
+   Scrollspy — la sección visible marca el plano de navegación
+   ============================================================ */
+(function(){
+  const enlaces = [...document.querySelectorAll(".nav a")];
+  const porId = Object.fromEntries(enlaces.map(a => [a.getAttribute("href").slice(1), a]));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        enlaces.forEach(a => a.removeAttribute("aria-current"));
+        porId[e.target.id]?.setAttribute("aria-current", "true");
+      }
+    });
+  }, { rootMargin:"-30% 0px -60% 0px" });
+  document.querySelectorAll("main section[id]").forEach(s => observer.observe(s));
+})();
+</script>
+</body>
+</html>
