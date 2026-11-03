@@ -1,5 +1,8 @@
 class StudyPlansController < ApplicationController
+  before_action :autorizar_como_en_rails_admin, except: %i[ save_requirement_by_level ]
   before_action :set_study_plan, only: %i[ show edit update destroy save_requirement_by_level]
+  before_action -> { rechazar unless administra_escuela?(@study_plan.school_id) }, only: %i[ show edit update destroy save_requirement_by_level ]
+  before_action -> { rechazar unless current_admin.authorized_manage?('StudyPlan') }, only: %i[ save_requirement_by_level ]
 
   # GET /study_plans or /study_plans.json
   def save_requirement_by_level

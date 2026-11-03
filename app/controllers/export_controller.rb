@@ -1,6 +1,6 @@
 class ExportController < ApplicationController
   include ActionController::Live
-  before_action :logged_as_admin?
+  before_action :require_admin
 
   def history_grade
     @grade = Grade.find params[:id]

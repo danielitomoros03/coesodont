@@ -1,4 +1,5 @@
 class DownloaderController < ApplicationController
+	before_action :require_admin
 
 	def section_list
 		# section = Section.find params[:id]

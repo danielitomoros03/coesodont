@@ -1,5 +1,8 @@
 class GradesController < ApplicationController
+  before_action :autorizar_como_en_rails_admin, except: %i[ kardex ]
   before_action :set_grade, only: %i[ show edit update destroy kardex ]
+  before_action -> { rechazar unless administra_escuela?(@grade.school&.id) }, only: %i[ show edit update destroy ]
+  before_action :autorizar_kardex, only: %i[ kardex ]
 
   # GET /grades or /grades.json
   def index
@@ -78,6 +81,14 @@ class GradesController < ApplicationController
   end
 
   private
+    # El estudiante baja solo su kardex; el admin, el de su escuela si puede leer expedientes
+    def autorizar_kardex
+      return if estudiante_dueno?(@grade)
+      return if administra_escuela?(@grade.school&.id) and current_admin.authorized_read?('Grade')
+
+      rechazar
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_grade
       @grade = Grade.find(params[:id])

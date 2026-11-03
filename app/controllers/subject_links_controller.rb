@@ -1,5 +1,5 @@
 class SubjectLinksController < ApplicationController
-  before_action :logged_as_admin?
+  before_action :autorizar_como_en_rails_admin
   before_action :set_subject_link, only: %i[ destroy ]
 
 

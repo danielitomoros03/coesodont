@@ -1,6 +1,7 @@
 class SchoolsController < ApplicationController
-  before_action :logged_as_admin?
+  before_action :require_admin
   before_action :set_school, only: %i[ show edit update destroy export_grades export_grades_stream]
+  before_action :require_administra_escuela, only: %i[ show edit update destroy export_grades export_grades_stream]
 
   def export_grades
     respond_to do |format|
@@ -90,6 +91,10 @@ class SchoolsController < ApplicationController
   end
 
   private
+    def require_administra_escuela
+      rechazar unless administra_escuela?(@school.id)
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_school
       @school = School.find(params[:id])

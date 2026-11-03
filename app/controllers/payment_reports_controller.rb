@@ -1,5 +1,7 @@
 class PaymentReportsController < ApplicationController
   before_action :set_payment_report, only: %i[ show edit update destroy quick_validation ]
+  before_action :require_admin, except: %i[ show create ]
+  before_action :autorizar_reporte, except: %i[ index new ]
 
   # GET /payment_reports or /payment_reports.json
   def index
@@ -79,6 +81,14 @@ class PaymentReportsController < ApplicationController
   end
 
   private
+    # El estudiante solo sobre lo suyo; el admin, sobre su escuela. El pago cuelga de su inscripcion.
+    def autorizar_reporte
+      enroll = @payment_report&.enroll_academic_process
+      enroll ||= EnrollAcademicProcess.find_by(id: params.dig(:payment_report, :payable_id))
+      grade = enroll&.grade
+      rechazar unless administra_escuela?(grade&.school&.id) or estudiante_dueno?(grade)
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_payment_report
       @payment_report = PaymentReport.find(params[:id])

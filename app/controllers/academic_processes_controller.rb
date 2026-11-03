@@ -1,5 +1,7 @@
 class AcademicProcessesController < ApplicationController
   before_action :set_academic_process, only: %i[ show edit update destroy clone_sections clean_courses massive_confirmation]
+  before_action :require_admin, prepend: true
+  before_action :require_administra_escuela, except: %i[ index new ]
 
   def massive_confirmation
     total = @academic_process.enroll_academic_processes.not_confirmado
@@ -141,6 +143,14 @@ class AcademicProcessesController < ApplicationController
   end
 
   private
+    # La escuela del proceso, y la de destino si la cambian; al clonar, tambien la del proceso de origen
+    def require_administra_escuela
+      escuelas = [@academic_process&.school_id, params.dig(:academic_process, :school_id), params[:school_id]]
+      escuelas << AcademicProcess.find_by(id: params[:cloneble_academic_process_id])&.school_id if params[:cloneble_academic_process_id]
+      escuelas = escuelas.compact_blank
+      rechazar unless escuelas.any? and escuelas.all? { |id| administra_escuela?(id) }
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_academic_process
       @academic_process = AcademicProcess.find(params[:id])

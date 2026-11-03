@@ -1,4 +1,6 @@
 class ImporterController < ApplicationController
+	before_action :require_admin
+
 	COLUMN_NAMES = {
 		'students'         => %w[cédula email nombres apellidos sexo teléfono periodo_ingreso tipo_admisión fecha_nacimiento],
 		'teachers'         => %w[cédula email nombres apellidos sexo teléfono],

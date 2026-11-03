@@ -1,6 +1,6 @@
 class ExportCsvController < ApplicationController
   include ActionController::Live
-  before_action :logged_as_admin?
+  before_action :require_admin
 
   ALLOWED_MODELS = %w[AcademicProcess School].freeze
 

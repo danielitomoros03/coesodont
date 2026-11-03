@@ -1,6 +1,9 @@
 class RegulationStreamsController < ApplicationController
   include ActionController::Live
 
+  before_action :require_admin
+  before_action -> { rechazar unless administra_escuela?(AcademicProcess.find_by(id: params[:id])&.school_id) }
+
   # GET /academic_processes/:id/run_regulation_stream?id_return=:id_return&mode=full|regulation
   # Recalcula por inscripción del proceso, emitiendo el avance por Server-Sent Events:
   #   - mode=full (default): reglamento (art. 3/6/7, desertor) + eficiencia + promedios + borra citas.

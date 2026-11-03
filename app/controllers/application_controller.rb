@@ -191,6 +191,12 @@ class ApplicationController < ActionController::Base
     logged_as_admin? and current_schools&.exists?(id: school_id)
   end
 
+  # Mismo permiso que en rails_admin: el scaffold (sin su propia vista) hereda lo que Ability concede.
+  def autorizar_como_en_rails_admin
+    accion = {'index' => :read, 'show' => :read, 'new' => :create, 'create' => :create, 'destroy' => :destroy}.fetch(action_name, :update)
+    rechazar unless logged_as_admin? and current_ability.can?(accion, controller_name.classify.constantize)
+  end
+
   def estudiante_dueno?(grade)
     logged_as_student? and grade&.student_id.eql? current_user.id
   end
