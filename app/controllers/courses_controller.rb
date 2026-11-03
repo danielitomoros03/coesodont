@@ -7,9 +7,9 @@ class CoursesController < ApplicationController
         course = Course.new(course_params)
         if course.save
           new_section = ApplicationController.helpers.button_add_section(course.id)
-          offer_subject = view_context.render partial: '/academic_processes/form_offer_subject', locals: {course: course}
+          # La petición es JSON: sin formats, Rails busca el parcial en .json y no lo encuentra
+          offer_subject = view_context.render partial: '/academic_processes/form_offer_subject', formats: [:html], locals: {course: course}
 
-          # p "   CURSO: <#{new_section}>.   ".center(500, "#")
           format.json {render json: {data: "¡Curso activado para el período #{course.academic_process.period_name}!", status: :success, new_section: new_section, type: :create, offer_subject: offer_subject} }
         else
           format.json { render json: {data: course.errors, status: :unprocessable_entity} }
@@ -17,7 +17,10 @@ class CoursesController < ApplicationController
       end
       
     rescue StandardError => e
-      format.json { render json: {data: e, status: :unprocessable_entity} }
+      # Fuera del bloque, «format» era el Kernel#format de Ruby: el error se perdía en un 500
+      respond_to do |format|
+        format.json { render json: {data: e, status: :unprocessable_entity} }
+      end
     end
   end
 
@@ -28,7 +31,7 @@ class CoursesController < ApplicationController
         msg = @course.offer? ? "Curso ofertado para inscripción #{@course.academic_process.period.name}" : "Curso oculto para inscripción #{@course.academic_process.period.name}"
         format.json { render json: {data: msg, status: :success, type: :update} }
       else
-        format.json {render json: {data: "¡Error al intentar ofertar/ocultar la asignatura para el período #{period_name}!", status: :unprocessable_entity} }
+        format.json {render json: {data: "¡Error al intentar ofertar/ocultar la asignatura para el período #{@course.academic_process.period_name}!", status: :unprocessable_entity} }
       end
     end
   end
