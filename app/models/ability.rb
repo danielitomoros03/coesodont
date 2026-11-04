@@ -42,8 +42,8 @@ class Ability
                 can :enrollment_day, [AcademicProcess]
             end
             if authd.authorizable.klazz.eql? 'School' and authd.can_read?
-               can :organization_chart, [School] 
-               can :premio_merito, [School]
+               can :organization_chart, [School]
+               # El Premio al Mérito Académico es solo del jefe de CE, no de los asistentes
             end
             if authd.authorizable.klazz.eql? 'School' and authd.can_manage?
                can :manage, [Bank, BankAccount] 
