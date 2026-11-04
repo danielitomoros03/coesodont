@@ -81,10 +81,12 @@ class GradesController < ApplicationController
   end
 
   private
-    # El estudiante baja solo su kardex; el admin, el de su escuela si puede leer expedientes
+    # El estudiante baja solo su kardex; el admin, el de su escuela si puede leer
+    # registros académicos. Se gatea por AcademicRecord, no por Grade: en el catálogo
+    # PARE de ODON «Grade» no existe, así que exigirlo dejaba fuera a todos los asistentes.
     def autorizar_kardex
       return if estudiante_dueno?(@grade)
-      return if administra_escuela?(@grade.school&.id) and current_admin.authorized_read?('Grade')
+      return if administra_escuela?(@grade.school&.id) and current_admin.authorized_read?('AcademicRecord')
 
       rechazar
     end
