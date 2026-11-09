@@ -9,3 +9,6 @@ application.register("hello", HelloController)
 
 import PasswordToggleController from "./password_toggle_controller"
 application.register("password-toggle", PasswordToggleController)
+
+import PestanasController from "./pestanas_controller"
+application.register("pestanas", PestanasController)
