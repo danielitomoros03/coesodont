@@ -19,6 +19,9 @@ class School
   #
   # Los tres números se cambian por facultad en Configuración General (claves PREMIO_MERITO_*).
   # FHE es la matriz: se prueba aquí y después se copia igual a COES ODON y FAU.
+  #
+  # En ODON el premio es por la CARRERA (PremioMeritoCarrera, Daniel, 9-nov-2026): de esta clase usa los años
+  # de las pestañas y la consulta.
   class PremioMerito
     MINIMOS = {
       creditos_semestre: ['PREMIO_MERITO_CREDITOS_SEMESTRE', 18],
@@ -67,12 +70,8 @@ class School
 
     attr_reader :school, :anios, :anio
 
-    # El premio de la escuela: por la carrera si PREMIO_MERITO_POR_CARRERA está en SI (ODON); si no, por el año.
-    def self.para(school, anio = nil)
-      PremioMeritoCarrera.activo? ? PremioMeritoCarrera.new(school, anio) : new(school, anio)
-    end
-
-    # Una consulta del premio, con los estados y modalidades tal como los numera cada COES. La usan los dos premios.
+    # Una consulta del premio, con los estados y modalidades tal como los numera cada COES. También la usa
+    # PremioMeritoCarrera.
     def self.consultar(sql, binds)
       binds = binds.merge(
         modalidades: AcademicProcess.modalities.values_at('Semestral', 'Anual'),
@@ -93,14 +92,6 @@ class School
       @school = school
       @anios = cargar_anios
       @anio = @anios.find { |a| a.numero == anio.to_i } || @anios.find { |a| !a.en_curso? } || @anios.first
-    end
-
-    def por_carrera?
-      false
-    end
-
-    def excel
-      PremioMeritoExcel.new(self)
     end
 
     def minimo(nombre)

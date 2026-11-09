@@ -1,7 +1,7 @@
 class School
-  # Premio al Mérito por la CARRERA, para la escuela que tenga PREMIO_MERITO_POR_CARRERA en SI en Configuración
-  # General (ODON; Daniel con la Dra. Sandra, jefa de CE de Odontología, 9-nov-2026). Con NO, el premio es por el
-  # año (PremioMerito), como en FHE y FAU.
+  # Premio al Mérito de ODON, por la CARRERA (Daniel con la Dra. Sandra, jefa de CE de Odontología, 9-nov-2026).
+  # Es solo de ODON y va directo, sin clave en Configuración General: FHE y FAU siguen con el premio por el año
+  # (PremioMerito), del que aquí se usan los años y la consulta.
   #
   # En ODON se cursa el año completo o se retira entero, y cada año tiene otra carga (48, 46, 54, 53 y 14 créditos):
   # los créditos no dicen nada del mérito, y el promedio de un solo año favorece a 5º, que son tres notas. Por eso
@@ -11,9 +11,7 @@ class School
   #   orden    promedio simple de la carrera; si empatan, el ponderado.
   # Una lista General y una por año de la carrera, con los 10 primeros de cada una. Si empatan en el 10º, entran
   # todos (Daniel: es para limpiar la vista, no tan estricto).
-  # FHE es la matriz: se prueba aquí y después se copia igual a COES ODON y FAU.
   class PremioMeritoCarrera
-    CLAVE = 'PREMIO_MERITO_POR_CARRERA'.freeze
     TOP = 10
 
     Candidato = Struct.new(:grade_id, :student_id, :ci, :nombre, :anio_de_carrera, :anual, :primera_carrera,
@@ -44,10 +42,6 @@ class School
       end
     end
 
-    def self.activo?
-      GeneralSetup.find_by(clave: CLAVE)&.valor.to_s.strip.upcase.in?(%w[SI SÍ])
-    end
-
     attr_reader :school
 
     # Los años que se pueden ver y cuál se abre son los mismos del premio por año.
@@ -56,10 +50,6 @@ class School
     def initialize(school, anio = nil)
       @school = school
       @por_anio = PremioMerito.new(school, anio)
-    end
-
-    def por_carrera?
-      true
     end
 
     def excel

@@ -1,11 +1,9 @@
--# Premio al Mérito Académico de la escuela. FHE es la matriz: ODON y FAU la copian cuando Daniel la aprueba.
--# El marco es común; el cuerpo depende de PREMIO_MERITO_POR_CARRERA: por el año (FHE, FAU) o por la carrera (ODON),
--# que cambia de lista sin ir al servidor y recuerda la elegida (`vista`) al cambiar de período.
-- premio = School::PremioMerito.para(@object, params[:anio])
+-# Premio al Mérito Académico de ODON, por la carrera (Daniel, 9-nov-2026; FHE y FAU siguen por el año). Las
+-# pestañas cambian de lista sin ir al servidor y recuerdan la elegida (`vista`) al cambiar de período.
+- premio = School::PremioMeritoCarrera.new(@object, params[:anio])
 - anio = premio.anio
-- enlace_de_periodo = ({ pestanas_target: 'enlace' } if premio.por_carrera?)
 
-= turbo_frame_tag 'premio_merito', data: { turbo_action: 'advance', controller: ('pestanas' if premio.por_carrera?) } do
+= turbo_frame_tag 'premio_merito', data: { turbo_action: 'advance', controller: 'pestanas' } do
   %h5.text-primary.fw-bold.mb-3
     %i.fa-solid.fa-award.me-2
     = "Premio al Mérito Académico · #{@object.name}"
@@ -17,7 +15,7 @@
       %ul.nav.nav-pills
         - premio.anios.each do |a|
           %li.nav-item
-            = link_to rails_admin.premio_merito_path(model_name: 'school', id: @object.id, anio: a.numero, vista: params[:vista]), class: "nav-link #{'active' if a.numero == anio.numero}", data: enlace_de_periodo do
+            = link_to rails_admin.premio_merito_path(model_name: 'school', id: @object.id, anio: a.numero, vista: params[:vista]), class: "nav-link #{'active' if a.numero == anio.numero}", data: { pestanas_target: 'enlace' } do
               = a.numero
               - if a.en_curso?
                 %span.badge.rounded-pill.bg-warning.text-dark.ms-1 en curso
@@ -25,4 +23,4 @@
         %i.fa-solid.fa-file-excel.me-1
         = "Descargar Excel #{anio.numero}"
 
-    = render "rails_admin/main/premio_merito_#{premio.por_carrera? ? 'carrera' : 'anio'}", premio: premio
+    = render 'rails_admin/main/premio_merito_carrera', premio: premio

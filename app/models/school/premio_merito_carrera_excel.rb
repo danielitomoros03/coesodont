@@ -1,6 +1,6 @@
 class School
-  # El Excel del premio por la carrera: una hoja por lista (General, 1º año…), con los estilos, la cabecera y el
-  # cierre del Excel por año. FHE es la matriz: se prueba aquí y después se copia igual a COES ODON y FAU.
+  # El Excel del premio por la carrera (solo ODON): una hoja por lista (General, 1º año…), con los estilos, la
+  # cabecera y el cierre del Excel por año.
   class PremioMeritoCarreraExcel < PremioMeritoExcel
     FILA_ENCABEZADO = 6 # las cinco de arriba son título, escuela y lista, criterios, resumen y una vacía
 
