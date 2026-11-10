@@ -9,14 +9,16 @@ class GradesController < ApplicationController
     @grades = Grade.all
   end
 
+  # Con ?approved=true, el de solo aprobadas (como en FAU).
   def kardex
     school = @grade.school
     user = @grade.user
+    aprobadas = params[:approved] == 'true'
     respond_to do |format|
       format.pdf do
-        title = 'Historia Académica'
+        title = aprobadas ? 'Historia Académica (Aprobadas)' : 'Historia Académica'
         no_browser_cache
-        render pdf: "kardex-#{school.code}-#{user.ci}-#{Time.zone.now.strftime('%d-%m-%Y-%H%M')}", locals: {grade: @grade}, formats: [:html], page_size: 'letter', header: {html: {template: '/grades/kardex_title', formats: [:html], layout: false, locals: {title: title, school: school, user: user}}}, footer: {center: "Página: [page] de [topage]", font_size: '10'}, margin: {top: 30}
+        render pdf: "kardex#{'-aprobadas' if aprobadas}-#{school.code}-#{user.ci}-#{Time.zone.now.strftime('%d-%m-%Y-%H%M')}", locals: {grade: @grade, approved: aprobadas}, formats: [:html], page_size: 'letter', header: {html: {template: '/grades/kardex_title', formats: [:html], layout: false, locals: {title: title, school: school, user: user}}}, footer: {center: "Página: [page] de [topage]", font_size: '10'}, margin: {top: 30}
       end
     end      
   end
