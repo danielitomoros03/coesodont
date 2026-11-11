@@ -7,13 +7,16 @@
         %th.text-center= "Estado Insc #{academic_process.period.name}"
         %th.text-center Sede
         %th Cédula
-        %th.col-4{width: '350px'} Apellidos, Nombres
-        %th.col-4.text-center Desde
-        %th.col-4.text-center Hasta
+        %th.col-name Apellidos, Nombres
+        %th.text-center Desde
+        %th.text-center Hasta
         %th.text-center.align-middle Est. Permanencia
-        %th.text-center{width: '50px'}= "Eficiencia #{academic_process.process_before.period.name}"
-        %th.col-1.text-center= "Promedio #{academic_process.process_before.period.name}" 
-        %th.col-1.text-center= "Ponderado #{academic_process.process_before.period.name}" 
+        -# El período va en una segunda línea: en una sola, cada encabezado de número le quitaba ancho al nombre.
+        - %w[Eficiencia Promedio Ponderado].each do |numero|
+          %th.text-center
+            = numero
+            %br
+            %small.fw-normal= academic_process.process_before.period.name
     %tbody
       - grades.each do |grade, i|
         - student = grade.student
@@ -23,10 +26,11 @@
           %td.text-center= grade.label_status_enroll_academic_process(academic_process.id)
           %td= student.sede 
           %td= student.user_ci
-          %td{title: reverse_name}= link_to reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
+          -# rails_admin corta las celdas a 150 px: con col-name (custom_style) el nombre va completo y, si no cabe, baja de línea.
+          %td.col-name= link_to reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
           %td.text-center= grade.appointment_from 
           %td.text-center= grade.appointment_to
           %td.text-center.align-middle= grade.label_current_permanence_status
-          %td= eap.efficiency
-          %td= eap.simple_average
-          %td= eap.weighted_average
+          %td.text-center= eap.efficiency
+          %td.text-center= eap.simple_average
+          %td.text-center= eap.weighted_average

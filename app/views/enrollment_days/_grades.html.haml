@@ -5,12 +5,12 @@
         %th #
         %th.text-center.align-middle= "Estado Insc #{academic_process.period.name}"
         %th.text-center.align-middle Est. Permanencia
-        %th.w-25 Sede
+        %th Sede
         %th Cédula
-        %th.w-25 Apellidos, Nombres
-        %th Eficiencia
-        %th Promedio
-        %th Ponderado
+        %th.col-name Apellidos, Nombres
+        %th.text-center Eficiencia
+        %th.text-center Promedio
+        %th.text-center Ponderado
     %tbody
       -# anterior_cita = nil
       - grades.each_with_index do |grade, i|
@@ -20,8 +20,9 @@
           %td.text-center.align-middle= grade.label_current_permanence_status
           %td= grade.student.sede
           %td= grade.student.user_ci
-          %td= link_to grade.user.reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
-          %td= grade.efficiency
-          %td= grade.simple_average
-          %td= grade.weighted_average
+          -# rails_admin corta las celdas a 150 px: con col-name (custom_style) el nombre va completo y, si no cabe, baja de línea.
+          %td.col-name= link_to grade.user.reverse_name, "/admin/student/#{grade.student_id}", target: '_black'
+          %td.text-center= grade.efficiency
+          %td.text-center= grade.simple_average
+          %td.text-center= grade.weighted_average
         -# anterior_cita = @cita_horaria
